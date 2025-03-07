@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import firebaseUtils from '../../firebase/firebaseUtils'; // Ajusta la ruta según tu proyecto
+import firebaseUtils from '../../firebase/firebaseUtils';
 import Login from './Login';
 
 const defaultTheme = createTheme();

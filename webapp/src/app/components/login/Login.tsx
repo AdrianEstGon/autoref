@@ -16,7 +16,7 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Toaster, toast } from 'react-hot-toast';
-import userService from '../../services/userService'; // Ajusta la ruta según tu proyecto
+import userService from '../../services/userService';
 import './Login.css';
 
 function Login() {
@@ -103,7 +103,7 @@ function Login() {
           alignItems: 'center',
         }}
       >
-        <img src={logo} alt="Logo de Travelgram" />
+        <img src={logo} alt="Logo de AutoRef" />
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }} />
         <Typography component="h1" variant="h5">
           Iniciar sesión
@@ -162,13 +162,6 @@ function Login() {
           >
             Iniciar sesión
           </Button>
-          <Grid container>
-            <Grid item>
-              <Link href="/travelgram/#/register" variant="body2">
-                ¿No tienes cuenta? Regístrate
-              </Link>
-            </Grid>
-          </Grid>
         </Box>
       </Box >
     </Grid >
