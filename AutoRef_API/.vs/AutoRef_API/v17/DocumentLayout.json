@@ -1,0 +1,172 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\database\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\database\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\models\\usermodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\models\\usermodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\services\\usuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\services\\usuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\services\\rolservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\services\\rolservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\autoref_api.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\autoref_api.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Migrations\\20250307221206_usuarios.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:AutoRef_API\\Migrations\\20250307221206_usuarios.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\database\\partido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\database\\partido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|c:\\users\\adri\u00E1n\\desktop\\cuarto carrera\\tfg\\app\\autoref\\autoref_api\\autoref_api\\database\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8724CCD5-66F3-41E4-B79C-F3D541ED575A}|AutoRef_API\\AutoRef_API.csproj|solutionrelative:autoref_api\\database\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Program.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Program.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Program.cs",
+              "RelativeToolTip": "AutoRef_API\\Program.cs",
+              "ViewState": "AQIAADMAAAAAAAAAAAAiwEQAAABJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:22:42.83Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserModels.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Models\\UserModels.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Models\\UserModels.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Models\\UserModels.cs",
+              "RelativeToolTip": "AutoRef_API\\Models\\UserModels.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABgAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:21:20.005Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RolService.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Services\\RolService.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Services\\RolService.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Services\\RolService.cs",
+              "RelativeToolTip": "AutoRef_API\\Services\\RolService.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:17:22.416Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "UsuarioService.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Services\\UsuarioService.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Services\\UsuarioService.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Services\\UsuarioService.cs",
+              "RelativeToolTip": "AutoRef_API\\Services\\UsuarioService.cs",
+              "ViewState": "AQIAABAAAAAAAAAAAAAiwBsAAAAwAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:16:40.296Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Usuario.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\Usuario.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Database\\Usuario.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\Usuario.cs",
+              "RelativeToolTip": "AutoRef_API\\Database\\Usuario.cs",
+              "ViewState": "AQIAAAoAAAAAAAAAAADgvwwAAAAjAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T19:51:55.971Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DbSeeder.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\DbSeeder.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Database\\DbSeeder.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\DbSeeder.cs",
+              "RelativeToolTip": "AutoRef_API\\Database\\DbSeeder.cs",
+              "ViewState": "AQIAABwAAAAAAAAAAAAgwB0AAAA5AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:28:48.284Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "20250307221206_usuarios.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Migrations\\20250307221206_usuarios.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Migrations\\20250307221206_usuarios.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Migrations\\20250307221206_usuarios.cs",
+              "RelativeToolTip": "AutoRef_API\\Migrations\\20250307221206_usuarios.cs",
+              "ViewState": "AQIAACMAAAAAAAAAAAAAACMAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T22:12:06.363Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AutoRef_API",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\AutoRef_API.csproj",
+              "RelativeDocumentMoniker": "AutoRef_API\\AutoRef_API.csproj",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\AutoRef_API.csproj",
+              "RelativeToolTip": "AutoRef_API\\AutoRef_API.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-03-07T21:09:13.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Partido.cs",
+              "DocumentMoniker": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\Partido.cs",
+              "RelativeDocumentMoniker": "AutoRef_API\\Database\\Partido.cs",
+              "ToolTip": "C:\\Users\\Adri\u00E1n\\Desktop\\Cuarto Carrera\\TFG\\App\\AutoRef\\AutoRef_API\\AutoRef_API\\Database\\Partido.cs",
+              "RelativeToolTip": "AutoRef_API\\Database\\Partido.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAIAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-07T19:59:39.954Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

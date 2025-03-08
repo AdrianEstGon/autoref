@@ -1,23 +1,18 @@
-const userService = null;
+import axios from 'axios';
+import API_URL from '@/config';
 
-const login = async (email, password) => {
-    try {
-        const response = await axios.get(`${baseUrl}/login/${email}/${password}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error en el login:', error);
-        throw error;
-    }
-}
+const login = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, {
+      email,
+      password,
+    });
 
-const checkPassword = async (email, password) => {
-    try {
-        const response = await axios.get(`${baseUrl}/checkPassword/${email}/${password}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error al comprobar la contraseña:', error);
-        throw error;
-    }
-}
+    return response.data;
+  } catch (error) {
+    console.error('Error en la autenticación:', error);
+    throw error;
+  }
+};
 
-export default userService;
+export default { login };

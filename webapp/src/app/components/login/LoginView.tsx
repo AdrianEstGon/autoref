@@ -8,15 +8,7 @@ const defaultTheme = createTheme();
 const numPhotos = 11;
 
 function LoginView() {
-  const [backgroundImage, setBackgroundImage] = useState<string>('');
-
-  useEffect(() => {
-    async function fetchData() {
-      const urlLogo = await firebaseUtils.getPhoto('/app/randomImages/' + (Math.floor(Math.random() * numPhotos) + 1) + '.jpg');
-      setBackgroundImage(urlLogo);
-    }
-    fetchData();
-  }, []);
+  const [backgroundImage, setBackgroundImage] = useState<string>('');;
 
   return (
     <div className="App">

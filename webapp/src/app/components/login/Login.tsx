@@ -29,7 +29,7 @@ function Login() {
   useEffect(() => {
     const userLogged = window.localStorage.getItem('userLogged');
     if (userLogged) {
-      window.location.href = '/travelgram/#/home';
+      window.location.href = '/autoRef/#/home';
     }
 
     async function fetchData() {
@@ -87,7 +87,7 @@ function Login() {
     let isAllOk = await checkEmailOrUsername();
     setIsChecking(false);
     if (isAllOk) {
-      window.location.href = '/travelgram/#/home';
+      window.location.href = '/autoRef/misPartidos';
     }
   };
 

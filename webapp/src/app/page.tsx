@@ -1,64 +1,56 @@
-"use client";
+'use client';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import './page.css';
+import AppRouter from './components/routes/Router';
+import API_URL from '@/config';
 
-import { useState } from "react";
-import { TextField, Button, Card, CardContent, CardHeader, Typography, Grid, Box, Container } from "@mui/material";
+// Definir la estructura de los datos del usuario
+interface UserLogged {
+  userId: string;
+  timestamp: string;
+  user: any; // Aquí puedes definir la estructura completa de tu usuario
+}
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function App() {
+  const [userLogged, setUserLogged] = useState<UserLogged | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Email:", email, "Password:", password);
-  };
+  useEffect(() => {
+    const storedUser = window.localStorage.getItem('userLogged');
+    setUserLogged(storedUser ? JSON.parse(storedUser) : null);
+    
+    if (storedUser) {
+      const infoUser = JSON.parse(storedUser);
+      hasSessionExpired(infoUser);
+    }
+  }, []);
+
+  useEffect(() => {
+    const updateUser = (user: any) => {
+      const infoUser = JSON.parse(window.localStorage.getItem('userLogged')!);
+      infoUser.user = user;
+      window.localStorage.setItem('userLogged', JSON.stringify(infoUser));
+    };
+  }, [userLogged]);
+
+  const hasSessionExpired = (dataUser: UserLogged) => {
+    const currentTime = new Date().getTime();
+    const userTime = new Date(dataUser.timestamp).getTime();
+    const oneHour = 60 * 60 * 1000;
+    if ((currentTime - userTime) >= oneHour) {
+      window.localStorage.removeItem('userLogged');
+      setUserLogged(null);
+      window.location.href = '/';  // Redirige si la sesión ha expirado
+    }
+    return (currentTime - userTime) >= oneHour;
+  }
 
   return (
-    <Container maxWidth="xl" sx={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", px: { xs: 2, sm: 4, md: 8 } }}>
-      <Grid container spacing={4} alignItems="center" justifyContent="space-between" sx={{ width: "100%" }}>
-        {/* Sección del book de imágenes */}
-        <Grid item xs={12} md={6} sx={{ display: "flex", justifyContent: "center" }}>
-          <Box sx={{ width: "100%", maxWidth: 500, height: "60vh", bgcolor: "grey.200", p: { xs: 2, md: 4 }, borderRadius: 2, boxShadow: 3, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Typography variant="h4" align="center" color="textSecondary">
-              Book de Imágenes
-            </Typography>
-            {/* Aquí puedes agregar un carrusel de imágenes */}
-          </Box>
-        </Grid>
-        
-        {/* Sección de Login */}
-        <Grid item xs={12} md={5} sx={{ display: "flex", justifyContent: "center" }}>
-          <Card sx={{ width: "100%", maxWidth: 400, p: { xs: 2, md: 4 }, boxShadow: 3, borderRadius: 2 }}>
-            <CardHeader title={<Typography variant="h5" align="center">Inicia sesión</Typography>} />
-            <CardContent>
-              <form onSubmit={handleSubmit}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  variant="outlined"
-                  margin="normal"
-                />
-                <TextField
-                  fullWidth
-                  label="Contraseña"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  variant="outlined"
-                  margin="normal"
-                />
-                <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                  Iniciar sesión
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+    <div className="App">
+      <AppRouter />
+      {userLogged && hasSessionExpired(userLogged)}
+    </div>
   );
 }
+
+export default App;
