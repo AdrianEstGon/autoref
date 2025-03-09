@@ -33,7 +33,7 @@ function Login() {
     }
 
     async function fetchData() {
-      setLogo("https://firebasestorage.googleapis.com/v0/b/travelgram-db3d8.appspot.com/o/app%2Flogos%2FlogoVerdeOscuro.png?alt=media&token=ca0b3afe-91d2-4cd6-99c2-6b039439b4c0");
+      setLogo('./logo.png');
     }
     fetchData();
   }, []);
@@ -92,6 +92,7 @@ function Login() {
   };
 
   return (
+    
     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
       <div><Toaster /></div>
       <Box
@@ -115,10 +116,10 @@ function Login() {
             fullWidth
             id="login"
             data-testid="login"
-            label="Email o nombre de usuario"
+            label="Email"
             name="email"
             value={email}
-            autoComplete="email/usuario"
+            autoComplete="email"
             onChange={handleEmailChange}
             autoFocus
           />

@@ -9,6 +9,9 @@ const numPhotos = 11;
 
 function LoginView() {
   const [backgroundImage, setBackgroundImage] = useState<string>('');;
+  useEffect(() => {
+    setBackgroundImage('/fondo.jpg'); // Cargar imagen desde public
+  }, []);
 
   return (
     <div className="App">
