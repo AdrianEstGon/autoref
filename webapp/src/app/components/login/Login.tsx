@@ -92,8 +92,23 @@ function Login() {
   };
 
   return (
-    
-    <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+    <Grid 
+      item 
+      xs={12} 
+      sm={8} 
+      md={5} 
+      component={Paper} 
+      elevation={6} 
+      square 
+      sx={{ 
+        padding: 4, 
+        borderRadius: 4, 
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)'
+      }}
+    >
       <div><Toaster /></div>
       <Box
         sx={{
@@ -105,7 +120,7 @@ function Login() {
         }}
       >
         <img src={logo} alt="Logo de AutoRef" />
-        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }} />
+        <Avatar sx={{ m: 1, bgcolor: 'blue' }} />
         <Typography component="h1" variant="h5">
           Iniciar sesión
         </Typography>
@@ -164,8 +179,8 @@ function Login() {
             Iniciar sesión
           </Button>
         </Box>
-      </Box >
-    </Grid >
+      </Box>
+    </Grid>
   );
 }
 
