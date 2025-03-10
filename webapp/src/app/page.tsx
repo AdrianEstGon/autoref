@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import './page.css';
-import AppRouter from './components/routes/Router';
+import AppRouter from './routes/Router';
 import API_URL from '@/config';
 
 // Definir la estructura de los datos del usuario

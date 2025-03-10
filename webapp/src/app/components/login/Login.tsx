@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Avatar from '@mui/material/Avatar';
@@ -29,7 +30,7 @@ function Login() {
   useEffect(() => {
     const userLogged = window.localStorage.getItem('userLogged');
     if (userLogged) {
-      window.location.href = '/autoRef/#/home';
+      window.location.href = '/autoRef/home';
     }
 
     async function fetchData() {
@@ -37,6 +38,8 @@ function Login() {
     }
     fetchData();
   }, []);
+
+  const navigate = useNavigate();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -87,7 +90,8 @@ function Login() {
     let isAllOk = await checkEmailOrUsername();
     setIsChecking(false);
     if (isAllOk) {
-      window.location.href = '/autoRef/misPartidos';
+      // Usar navigate en lugar de window.location.href
+      navigate('/misPartidos/designaciones');
     }
   };
 
@@ -119,7 +123,7 @@ function Login() {
           alignItems: 'center',
         }}
       >
-        <img src={logo} alt="Logo de AutoRef" />
+        {logo && <img src={logo} alt="Logo de AutoRef" />}
         <Avatar sx={{ m: 1, bgcolor: 'blue' }} />
         <Typography component="h1" variant="h5">
           Iniciar sesión
