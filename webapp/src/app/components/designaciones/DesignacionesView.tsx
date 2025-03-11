@@ -52,7 +52,7 @@ const DesignacionesView = () => {
 
       {/* Panel de Notificaciones */}
       <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
-        <Box sx={{ width: 300, padding: 2 }}>
+        <Box sx={{ width: 500, padding: 2 }}>
           <Typography variant="h6" gutterBottom>
             Notificaciones
           </Typography>

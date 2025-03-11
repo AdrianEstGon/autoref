@@ -91,7 +91,7 @@ function Login() {
     setIsChecking(false);
     if (isAllOk) {
       // Usar navigate en lugar de window.location.href
-      navigate('/misPartidos/designaciones');
+      navigate('/misDesignaciones');
     }
   };
 

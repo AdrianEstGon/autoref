@@ -2,18 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Menu, MenuItem, Typography, Box, IconButton, useMediaQuery, Drawer } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';  
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';  
-import MenuIcon from '@mui/icons-material/Menu';  // Icon for mobile menu
+import MenuIcon from '@mui/icons-material/Menu';  
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 const NavigationBar = () => {
   const [anchorElPanel, setAnchorElPanel] = useState<null | HTMLElement>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false); // State to handle mobile drawer
+  const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));  // Check if screen is mobile size
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user role from localStorage
     const role = window.localStorage.getItem('userRole');
     setUserRole(role);
   }, []);
@@ -33,17 +34,21 @@ const NavigationBar = () => {
   };
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen); // Toggle the mobile menu
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    handleClosePanelMenu();
   };
 
   const drawer = (
     <Box sx={{ width: 250 }}>
-      <Button color="inherit" fullWidth>Mi perfil</Button>
-      <Button color="inherit" fullWidth>Mis Designaciones</Button>
+      <Button color="inherit" fullWidth onClick={() => navigate('/miPerfil')}>Mi perfil</Button>
+      <Button color="inherit" fullWidth onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
       <Button color="inherit" fullWidth>Mi Historial</Button>
       <Button color="inherit" fullWidth>Disponibilidad</Button>
       
-      {/* Panel de control visible only for Admin */}
       {userRole === 'Admin' && (
         <>
           <Button color="inherit" fullWidth onClick={handleMenuPanelClick}>Panel de control</Button>
@@ -52,9 +57,9 @@ const NavigationBar = () => {
             open={Boolean(anchorElPanel)}
             onClose={handleClosePanelMenu}
           >
-            <MenuItem onClick={handleClosePanelMenu}>Gestión de usuarios</MenuItem>
-            <MenuItem onClick={handleClosePanelMenu}>Gestión de partidos</MenuItem>
-            <MenuItem onClick={handleClosePanelMenu}>Gestión de designaciones</MenuItem>
+            <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
+            <MenuItem onClick={() => handleNavigate('/gestionPartidos')}>Gestión de partidos</MenuItem>
+            <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
           </Menu>
         </>
       )}
@@ -67,7 +72,6 @@ const NavigationBar = () => {
     <div>
       <AppBar position="sticky">
         <Toolbar>
-          {/* Mobile menu icon */}
           {isMobile && (
             <IconButton
               color="inherit"
@@ -80,20 +84,17 @@ const NavigationBar = () => {
             </IconButton>
           )}
 
-          {/* Mi perfil aligned to the left with icon */}
-          <Button color="inherit" sx={{ marginRight: 'auto', display: 'flex', alignItems: 'center' }}>
+          <Button color="inherit" sx={{ marginRight: 'auto', display: 'flex', alignItems: 'center' }} onClick={() => navigate('/miPerfil')}>
             <AccountCircleIcon sx={{ mr: 1 }} />
             Mi perfil
           </Button>
 
-          {/* Centered menu for larger screens */}
           {!isMobile && (
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 2 }}>
-              <Button color="inherit">Mis Designaciones</Button>
+              <Button color="inherit" onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
               <Button color="inherit">Mi Historial</Button>
               <Button color="inherit">Disponibilidad</Button>
 
-              {/* Menu for Admin */}
               {userRole === 'Admin' && (
                 <>
                   <Button color="inherit" onClick={handleMenuPanelClick}>
@@ -104,16 +105,15 @@ const NavigationBar = () => {
                     open={Boolean(anchorElPanel)}
                     onClose={handleClosePanelMenu}
                   >
-                    <MenuItem onClick={handleClosePanelMenu}>Gestión de usuarios</MenuItem>
-                    <MenuItem onClick={handleClosePanelMenu}>Gestión de partidos</MenuItem>
-                    <MenuItem onClick={handleClosePanelMenu}>Gestión de designaciones</MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/gestionPartidos')}>Gestión de partidos</MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
                   </Menu>
                 </>
               )}
             </Box>
           )}
 
-          {/* Logout button */}
           <Button color="inherit" onClick={handleLogout} sx={{ display: 'flex', alignItems: 'center' }}>
             <ExitToAppIcon sx={{ mr: 1 }} />
             Cerrar sesión
@@ -121,7 +121,6 @@ const NavigationBar = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Mobile Drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
