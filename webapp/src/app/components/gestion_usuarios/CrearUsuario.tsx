@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Importamos useNavigate
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, FormControlLabel, Checkbox } from '@mui/material';
 
 interface CrearUsuarioProps {
   open: boolean;
@@ -9,7 +9,7 @@ interface CrearUsuarioProps {
 }
 
 const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) => {
-  const navigate = useNavigate();  // Hook de navegación
+  const navigate = useNavigate();
 
   const [nuevoUsuario, setNuevoUsuario] = useState({
     nombre: '',
@@ -24,7 +24,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     pais: '',
     region: '',
     ciudad: '',
-    codigoPostal: ''
+    codigoPostal: '',
+    esAdmin: false
   });
 
   const niveles = ['Candidato Territorial I Pista', 'Nivel I Pista', 'Nivel I + Hab. Nivel II Pista', 
@@ -43,13 +44,20 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     }));
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNuevoUsuario(prevState => ({
+      ...prevState,
+      esAdmin: e.target.checked
+    }));
+  };
+
   const handleSave = () => {
     onSave(nuevoUsuario);
-    navigate('/gestionUsuarios/usuariosView');  // Redirige después de guardar
+    navigate('/gestionUsuarios/usuariosView');
   };
 
   const handleCancel = () => {
-    navigate('/gestionUsuarios/usuariosView');  // Redirige después de cancelar
+    navigate('/gestionUsuarios/usuariosView');
   };
 
   return (
@@ -59,8 +67,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         <TextField label="Nombre" fullWidth margin="normal" name="nombre" value={nuevoUsuario.nombre} onChange={handleChange} />
         <TextField label="Primer Apellido" fullWidth margin="normal" name="primerApellido" value={nuevoUsuario.primerApellido} onChange={handleChange} />
         <TextField label="Segundo Apellido" fullWidth margin="normal" name="segundoApellido" value={nuevoUsuario.segundoApellido} onChange={handleChange} />
-
-        {/* Campo de fecha sin dependencias adicionales */}
+        
         <TextField 
           label="Fecha de Nacimiento" 
           type="date" 
@@ -101,6 +108,11 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         <TextField label="Región" fullWidth margin="normal" name="region" value={nuevoUsuario.region} onChange={handleChange} />
         <TextField label="Ciudad" fullWidth margin="normal" name="ciudad" value={nuevoUsuario.ciudad} onChange={handleChange} />
         <TextField label="Código Postal" fullWidth margin="normal" name="codigoPostal" value={nuevoUsuario.codigoPostal} onChange={handleChange} />
+
+        <FormControlLabel
+          control={<Checkbox checked={nuevoUsuario.esAdmin} onChange={handleCheckboxChange} />}
+          label="Asignar rol de Administrador"
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="secondary">Cancelar</Button>
