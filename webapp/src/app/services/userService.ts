@@ -56,4 +56,15 @@ const eliminarUsuario = async (id: number) => {
   }
 };
 
-export default { login, getUsuarios, eliminarUsuario };
+const register = async (usuario: any) => {
+  try {
+    const response = await axios.post(`${API_URL}/Usuarios/register`, usuario, getAuthHeaders());
+    console.log('Usuario registrado correctamente:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error al registrar usuario:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Error al registrar el usuario');
+  }
+};
+
+export default { login, getUsuarios, eliminarUsuario, register };

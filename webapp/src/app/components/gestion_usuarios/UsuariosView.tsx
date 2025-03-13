@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button, Box, Tooltip } from '@mui/material';
+import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button, Box, Tooltip, TablePagination } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -21,26 +21,33 @@ interface Usuario {
 
 const UsuariosView: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuariosPaginados, setUsuariosPaginados] = useState<Usuario[]>([]); // State for paginated users
+  const [page, setPage] = useState(0); // Current page
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Number of rows per page
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const data = await usuarioService.getUsuarios();
-        setUsuarios(data);
+        // Sort the users by the first surname (primerApellido) alphabetically
+        const sortedData = data.sort((a: { primerApellido: string; }, b: { primerApellido: any; }) => a.primerApellido.localeCompare(b.primerApellido));
+        setUsuarios(sortedData);
+        setUsuariosPaginados(sortedData.slice(0, rowsPerPage)); // Get the first 5 users
       } catch (error) {
         console.error('Error al obtener los usuarios:', error);
       }
     };
 
     fetchUsuarios();
-  }, []);
-  const navigate = useNavigate();
+  }, [rowsPerPage]); // Re-fetch when rowsPerPage changes
 
-  const handleModificar = (id: number) => {
+  const handleModify = (id: number) => {
     console.log(`Modificar usuario con ID: ${id}`);
   };
 
-  const handleEliminar = async (id: number) => {
+  const handleDelete = async (id: number) => {
     const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este usuario?');
     if (confirmDelete) {
       try {
@@ -60,8 +67,22 @@ const UsuariosView: React.FC = () => {
     return `${day}-${month}-${year}`;
   };
 
-  const handleAgregar = () => {
+  const handleAdd = () => {
     navigate('/gestionUsuarios/crearUsuario');
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+    const startIndex = newPage * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    setUsuariosPaginados(usuarios.slice(startIndex, endIndex));
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+    setUsuariosPaginados(usuarios.slice(0, newRowsPerPage));
   };
 
   return (
@@ -85,7 +106,7 @@ const UsuariosView: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {usuarios.map((usuario) => (
+              {usuariosPaginados.map((usuario) => (
                 <TableRow key={usuario.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
                   <TableCell>{usuario.nombre}</TableCell>
                   <TableCell>{usuario.primerApellido}</TableCell>
@@ -97,12 +118,12 @@ const UsuariosView: React.FC = () => {
                   <TableCell>{usuario.licencia}</TableCell>
                   <TableCell>
                     <Tooltip title="Modificar usuario" arrow>
-                      <IconButton color="primary" onClick={() => handleModificar(usuario.id)}>
+                      <IconButton color="primary" onClick={() => handleModify(usuario.id)}>
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar usuario" arrow>
-                      <IconButton color="secondary" onClick={() => handleEliminar(usuario.id)}>
+                      <IconButton color="secondary" onClick={() => handleDelete(usuario.id)}>
                         <DeleteIcon />
                       </IconButton>
                     </Tooltip>
@@ -113,10 +134,21 @@ const UsuariosView: React.FC = () => {
           </Table>
         </TableContainer>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAgregar}>
+          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAdd}>
             Agregar Usuario
           </Button>
         </Box>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={usuarios.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Filas por página"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
       </Container>
     </>
   );
