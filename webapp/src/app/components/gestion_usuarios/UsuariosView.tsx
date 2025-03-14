@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Button, Box, Tooltip, TablePagination } from '@mui/material';
+import { 
+  Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  IconButton, Button, Box, Tooltip, TablePagination, Dialog, DialogActions, DialogContent, 
+  DialogContentText, DialogTitle 
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -17,13 +21,17 @@ interface Usuario {
   clubVinculado: string;
   email: string;
   licencia: number;
+  codigoPostal: string;
+  esAdmin: boolean;
 }
 
 const UsuariosView: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [usuariosPaginados, setUsuariosPaginados] = useState<Usuario[]>([]); // State for paginated users
-  const [page, setPage] = useState(0); // Current page
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Number of rows per page
+  const [usuariosPaginados, setUsuariosPaginados] = useState<Usuario[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [usuarioToDelete, setUsuarioToDelete] = useState<number | null>(null);
 
   const navigate = useNavigate();
 
@@ -31,40 +39,60 @@ const UsuariosView: React.FC = () => {
     const fetchUsuarios = async () => {
       try {
         const data = await usuarioService.getUsuarios();
-        // Sort the users by the first surname (primerApellido) alphabetically
-        const sortedData = data.sort((a: { primerApellido: string; }, b: { primerApellido: any; }) => a.primerApellido.localeCompare(b.primerApellido));
+        const sortedData = data.sort((a: { primerApellido: string; }, b: { primerApellido: string }) => 
+          a.primerApellido.localeCompare(b.primerApellido)
+        );
+
+        sortedData.forEach((usuario: any) => {
+          usuario.esAdmin = usuario.roles.includes('Admin');
+        });
+
         setUsuarios(sortedData);
-        setUsuariosPaginados(sortedData.slice(0, rowsPerPage)); // Get the first 5 users
+        setUsuariosPaginados(sortedData.slice(0, rowsPerPage));
       } catch (error) {
         console.error('Error al obtener los usuarios:', error);
       }
     };
 
     fetchUsuarios();
-  }, [rowsPerPage]); // Re-fetch when rowsPerPage changes
+  }, [rowsPerPage]);
 
-  const handleModify = (id: number) => {
-    console.log(`Modificar usuario con ID: ${id}`);
+  const handleModify = (usuario: Usuario) => {
+    navigate('/gestionUsuarios/modificarUsuario', { state: { usuario } });
   };
 
-  const handleDelete = async (id: number) => {
-    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar este usuario?');
-    if (confirmDelete) {
+  const handleDelete = async () => {
+    if (usuarioToDelete !== null) {
       try {
-        await usuarioService.eliminarUsuario(id);
-        setUsuarios(usuarios.filter(user => user.id !== id));
+        await usuarioService.eliminarUsuario(usuarioToDelete);
+        const updatedUsuarios = usuarios.filter(user => user.id !== usuarioToDelete);
+        setUsuarios(updatedUsuarios);
+
+        // Actualizar la paginación
+        const startIndex = page * rowsPerPage;
+        setUsuariosPaginados(updatedUsuarios.slice(startIndex, startIndex + rowsPerPage));
+
+        setOpenConfirmDialog(false);
+        setUsuarioToDelete(null);
       } catch (error) {
         console.error('Error al eliminar usuario:', error);
       }
     }
   };
 
+  const handleOpenDeleteDialog = (id: number) => {
+    setUsuarioToDelete(id);
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenConfirmDialog(false);
+    setUsuarioToDelete(null);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
   };
 
   const handleAdd = () => {
@@ -74,8 +102,7 @@ const UsuariosView: React.FC = () => {
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
     const startIndex = newPage * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    setUsuariosPaginados(usuarios.slice(startIndex, endIndex));
+    setUsuariosPaginados(usuarios.slice(startIndex, startIndex + rowsPerPage));
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +116,7 @@ const UsuariosView: React.FC = () => {
     <>
       <NavBar />
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" textAlign={'center'} gutterBottom>Gestión de Usuarios</Typography>
+        <Typography variant="h4" textAlign="center" gutterBottom>Gestión de Usuarios</Typography>
         <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
           <Table>
             <TableHead>
@@ -118,12 +145,12 @@ const UsuariosView: React.FC = () => {
                   <TableCell>{usuario.licencia}</TableCell>
                   <TableCell>
                     <Tooltip title="Modificar usuario" arrow>
-                      <IconButton color="primary" onClick={() => handleModify(usuario.id)}>
+                      <IconButton color="primary" onClick={() => handleModify(usuario)}>
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar usuario" arrow>
-                      <IconButton color="secondary" onClick={() => handleDelete(usuario.id)}>
+                      <IconButton color="secondary" onClick={() => handleOpenDeleteDialog(usuario.id)}>
                         <DeleteIcon />
                       </IconButton>
                     </Tooltip>
@@ -150,6 +177,18 @@ const UsuariosView: React.FC = () => {
           labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
         />
       </Container>
+
+      {/* Diálogo de confirmación */}
+      <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="secondary">Cancelar</Button>
+          <Button onClick={handleDelete} color="primary">Eliminar</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

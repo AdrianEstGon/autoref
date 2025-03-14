@@ -1,7 +1,6 @@
 import axios from 'axios';
 import API_URL from '@/config';
 
-
 const login = async (email: string, password: string) => {
   try {
     const data = { email, password };
@@ -10,8 +9,12 @@ const login = async (email: string, password: string) => {
     const response = await axios.post(`${API_URL}/Usuarios/login`, data);
     console.log('Respuesta del servidor:', response.data);
 
+    if (response.data.id) {
+      localStorage.setItem('userId', response.data.id.toString());
+    }
+
     if (response.data.role) {
-      // Guardamos el rol en localStorage
+      
       localStorage.setItem('userRole', response.data.role);
       localStorage.setItem('token', response.data.token);
     }
@@ -25,8 +28,9 @@ const login = async (email: string, password: string) => {
     }
   }
 };
+
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token'); // Asegúrate de que el token se guarda en el login
+  const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('No se encontró el token');
   }
@@ -43,6 +47,16 @@ const getUsuarios = async () => {
     return response.data;
   } catch (error) {
     console.error('Error al obtener los usuarios:', error);
+    throw error;
+  }
+};
+
+const getUsuarioById = async (id: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/Usuarios/${id}`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error(`Error al obtener el usuario con ID ${id}:`, error);
     throw error;
   }
 };
@@ -67,4 +81,14 @@ const register = async (usuario: any) => {
   }
 };
 
-export default { login, getUsuarios, eliminarUsuario, register };
+const updateUser = async (usuario: any) => {
+  try {
+    const response = await axios.put(`${API_URL}/Usuarios/${usuario.id}`, usuario, getAuthHeaders());
+    return response.data;
+  } catch (error: any) {
+    console.error('Error al actualizar usuario:', error);
+    throw new Error(error.response?.data?.message || 'No se pudo actualizar el usuario.');
+  }
+};
+
+export default { login, getUsuarios, getUsuarioById, eliminarUsuario, register, updateUser };

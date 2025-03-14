@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import './page.css';
 import AppRouter from './routes/Router';
+import { ToastContainer } from 'react-toastify';
 import API_URL from '@/config';
 
 // Definir la estructura de los datos del usuario
@@ -47,6 +48,7 @@ function App() {
 
   return (
     <div className="App">
+      <ToastContainer />
       <AppRouter />
       {userLogged && hasSessionExpired(userLogged)}
     </div>
