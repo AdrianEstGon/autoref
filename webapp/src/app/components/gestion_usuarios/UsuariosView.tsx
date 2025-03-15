@@ -115,68 +115,76 @@ const UsuariosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" textAlign="center" gutterBottom>Gestión de Usuarios</Typography>
-        <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>Nombre</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Primer apellido</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Segundo apellido</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Nivel</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Nacimiento</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Club Vinculado</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Correo Electrónico</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Número de Licencia</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {usuariosPaginados.map((usuario) => (
-                <TableRow key={usuario.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
-                  <TableCell>{usuario.nombre}</TableCell>
-                  <TableCell>{usuario.primerApellido}</TableCell>
-                  <TableCell>{usuario.segundoApellido}</TableCell>
-                  <TableCell>{usuario.nivel}</TableCell>
-                  <TableCell>{formatDate(usuario.fechaNacimiento)}</TableCell>
-                  <TableCell>{usuario.clubVinculado}</TableCell>
-                  <TableCell>{usuario.email}</TableCell>
-                  <TableCell>{usuario.licencia}</TableCell>
-                  <TableCell>
-                    <Tooltip title="Modificar usuario" arrow>
-                      <IconButton color="primary" onClick={() => handleModify(usuario)}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Eliminar usuario" arrow>
-                      <IconButton color="secondary" onClick={() => handleOpenDeleteDialog(usuario.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
+      {/* Aplicar el fondo amarillo a toda la ventana */}
+      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh' }}>
+        <Container sx={{  backgroundColor: '#F5F5DC', padding: 3, borderRadius: 2 }}>
+          <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
+            <Table>
+              <TableHead>
+                {/* Título como fila en la tabla */}
+                <TableRow>
+                  <TableCell colSpan={9} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
+                    Gestión de Usuarios
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAdd}>
-            Agregar Usuario
-          </Button>
-        </Box>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={usuarios.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Filas por página"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-        />
-      </Container>
+                <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Nombre</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Primer apellido</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Segundo apellido</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Nivel</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Nacimiento</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Club Vinculado</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Correo Electrónico</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Número de Licencia</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {usuariosPaginados.map((usuario) => (
+                  <TableRow key={usuario.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
+                    <TableCell>{usuario.nombre}</TableCell>
+                    <TableCell>{usuario.primerApellido}</TableCell>
+                    <TableCell>{usuario.segundoApellido}</TableCell>
+                    <TableCell>{usuario.nivel}</TableCell>
+                    <TableCell>{formatDate(usuario.fechaNacimiento)}</TableCell>
+                    <TableCell>{usuario.clubVinculado}</TableCell>
+                    <TableCell>{usuario.email}</TableCell>
+                    <TableCell>{usuario.licencia}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Modificar usuario" arrow>
+                        <IconButton color="primary" onClick={() => handleModify(usuario)}>
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Eliminar usuario" arrow>
+                        <IconButton color="secondary" onClick={() => handleOpenDeleteDialog(usuario.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAdd}>
+              Agregar Usuario
+            </Button>
+          </Box>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={usuarios.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          />
+        </Container>
+      </Box>
 
       {/* Diálogo de confirmación */}
       <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
