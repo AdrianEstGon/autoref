@@ -5,6 +5,7 @@ import authService from '../../services/userService';
 import { Password } from '@mui/icons-material';
 import { validarNombre, validarEmail, validarNumeroLicencia, validarCodigoPostal } from '../../utils/Validaciones';
 import { toast } from 'react-toastify'; // Importamos toastify
+import { clubes, niveles } from './UserUtils';
 
 interface CrearUsuarioProps {
   open: boolean;
@@ -21,7 +22,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculado: '', // Leave empty to make it optional
+    clubVinculado: '', 
     licencia: '',
     username: '',
     email: '',
@@ -31,7 +32,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     region: '',
     ciudad: '',
     codigoPostal: '',
-    esAdmin: false // Default to false (unchecked)
+    esAdmin: false 
   });
 
   const [errores, setErrores] = useState({
@@ -40,7 +41,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculado: '', // No validation required
+    clubVinculado: '', 
     licencia: '',
     username: '',
     email: '',
@@ -52,14 +53,6 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     codigoPostal: '',
     esAdmin: ''
   });
-
-  const niveles = ['Candidato Territorial I Pista', 'Nivel I Pista', 'Nivel I + Hab. Nivel II Pista', 
-    'Nivel II Pista', 'Nivel II Pista + Hab. Nacional C Pista', 'Nacional C Pista', 
-    'Nacional B Pista', 'Nacional A Pista', 'Internacional Pista'];
-
-  const clubes = ['Club Voleibol Oviedo', 'CID Jovellanos', 'RGC Covadonga', 'Club Voleibol La Calzada', 
-    'AD Los Campos', 'AD Curtidora', 'AD Playas de Llanes', 'Arriondas', 'Nava', 
-    'CV Siero', 'Noreña', 'CREIMI', 'Colegio San Ignacio'];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }> | SelectChangeEvent<string>) => {
     const { name, value } = e.target;
@@ -130,8 +123,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
       erroresTemp.nivel = '';
     }
 
-    if (!nuevoUsuario.clubVinculado) { // This can remain optional
-      erroresTemp.clubVinculado = ''; // No validation error
+    if (!nuevoUsuario.clubVinculado) { 
+      erroresTemp.clubVinculado = ''; 
     }
 
     if (!nuevoUsuario.fechaNacimiento) {
@@ -180,11 +173,11 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         };
 
         await authService.register(usuarioConContraseña);
-        toast.success('Usuario registrado con éxito'); // Usamos toastify para mostrar el mensaje
+        toast.success('Usuario registrado con éxito'); 
         onClose();
         navigate('/gestionUsuarios/usuariosView');
       } catch (error: any) {
-        toast.error(`Error: ${error.message}`); // Usamos toastify para mostrar el error
+        toast.error(`Error: ${error.message}`); 
       }
     }
   };
@@ -297,10 +290,10 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           <TextField label="Dirección" fullWidth margin="normal" name="direccion" value={nuevoUsuario.direccion} onChange={handleChange} error={!!errores.direccion} helperText={errores.direccion} />
           <TextField label="País" fullWidth margin="normal" name="pais" value={nuevoUsuario.pais} onChange={handleChange} error={!!errores.pais} helperText={errores.pais} />
           <TextField
-            label="Provincia"  // Cambié la etiqueta a "Provincia"
+            label="Provincia"  
             fullWidth
             margin="normal"
-            name="region"  // Usamos "region" en lugar de "provincia" para que esté alineado con el estado
+            name="region"  
             value={nuevoUsuario.region}
             onChange={handleChange}
             error={!!errores.region}
@@ -308,10 +301,10 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           />
 
           <TextField
-            label="Municipio"  // Cambié la etiqueta a "Municipio"
+            label="Municipio" 
             fullWidth
             margin="normal"
-            name="ciudad"  // Usamos "ciudad" en lugar de "municipio" para que esté alineado con el estado
+            name="ciudad"  
             value={nuevoUsuario.ciudad}
             onChange={handleChange}
             error={!!errores.ciudad}

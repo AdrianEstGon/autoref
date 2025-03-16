@@ -4,12 +4,13 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, F
 import authService from '../../services/userService'; 
 import { validarNombre, validarEmail, validarNumeroLicencia, validarCodigoPostal } from '../../utils/Validaciones';
 import { toast } from 'react-toastify';
+import { clubes, niveles } from './UserUtils';
 
 interface ModificarUsuarioProps {
   open: boolean;
   onClose: () => void;
   usuario: any;
-  onUpdate: () => void; // Para actualizar la lista de usuarios tras modificar
+  onUpdate: () => void; 
 }
 
 const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUpdate }) => {
@@ -20,27 +21,31 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   const [usuarioEditado, setUsuarioEditado] = useState({ ...usuario });
   const [errores, setErrores] = useState<{ [key: string]: string }>({});
 
-  const niveles = ['Candidato Territorial I Pista', 'Nivel I Pista', 'Nivel I + Hab. Nivel II Pista', 
-    'Nivel II Pista', 'Nivel II + Hab. Nacional C Pista', 'Nacional C Pista', 
-    'Nacional B Pista', 'Nacional A Pista', 'Internacional Pista'];
-
-  const clubes = ['Club Voleibol Oviedo', 'CID Jovellanos', 'RGC Covadonga', 'Club Voleibol La Calzada', 
-    'AD Los Campos', 'AD Curtidora', 'AD Playas de Llanes', 'Arriondas', 'Nava', 
-    'CV Siero', 'Noreña', 'CREIMI', 'Colegio San Ignacio'];
-
   useEffect(() => {
-    setUsuarioEditado(usuario);
+    if (usuario) {
+      setUsuarioEditado({
+        ...usuario,
+        nivel: niveles.includes(usuario.nivel) ? usuario.nivel : "",
+        clubVinculado: clubes.includes(usuario.clubVinculado) ? usuario.clubVinculado : ""
+      });
+    }
   }, [usuario]);
+  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
+  
+    if (name === "nivel" && !niveles.includes(value)) return;
+    if (name === "clubVinculado" && !clubes.includes(value)) return;
+  
     setUsuarioEditado((prevState: any) => ({
       ...prevState,
       [name]: value
     }));
   };
+  
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsuarioEditado((prevState: any) => ({
@@ -120,12 +125,12 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
       try {
         await authService.updateUser(usuarioEditado);
         onUpdate();
-        toast.success('Usuario actualizado con éxito'); // Usamos toast en lugar de Snackbar
+        toast.success('Usuario actualizado con éxito'); 
         onClose();   
         navigate('/gestionUsuarios/usuariosView');
         
       } catch (error: any) {
-        toast.error(`Error: ${error.message}`); // Usamos toast en lugar de Snackbar
+        toast.error(`Error: ${error.message}`); 
       }
     }
   };
@@ -146,20 +151,32 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
 
           <FormControl fullWidth margin="normal">
             <InputLabel>Nivel</InputLabel>
-            <Select name="nivel" value={usuarioEditado.nivel} onChange={handleChange}>
-              {niveles.map((nivel, index) => <MenuItem key={index} value={nivel}>{nivel}</MenuItem>)}
+            <Select
+              name="nivel"
+              value={niveles.includes(usuarioEditado.nivel) ? usuarioEditado.nivel : ""}
+              onChange={handleChange}
+            >
+              {niveles.map((nivel, index) => (
+                <MenuItem key={index} value={nivel}>
+                  {nivel}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-              <InputLabel>Club Vinculado</InputLabel>
-              <Select name="clubVinculado" value={usuarioEditado.clubVinculado} onChange={(e) => handleChange(e as SelectChangeEvent<string>)} error={!!errores.clubVinculado}>
+            <InputLabel>Club Vinculado</InputLabel>
+            <Select
+              name="clubVinculado"
+              value={clubes.includes(usuarioEditado.clubVinculado) ? usuarioEditado.clubVinculado : ""}
+              onChange={handleChange}
+            >
               {clubes.map((club, index) => (
-                  <MenuItem key={index} value={club}>
+                <MenuItem key={index} value={club}>
                   {club}
-                  </MenuItem>
+                </MenuItem>
               ))}
-              </Select>
+            </Select>
           </FormControl>
 
           <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={usuarioEditado.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />

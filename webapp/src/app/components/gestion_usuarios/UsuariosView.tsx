@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import usuarioService from '../../services/userService';
 import NavBar from '../barra_navegacion/NavBar';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface Usuario {
   id: number;
@@ -74,6 +75,7 @@ const UsuariosView: React.FC = () => {
 
         setOpenConfirmDialog(false);
         setUsuarioToDelete(null);
+        toast.success('Usuario eliminado correctamente');
       } catch (error) {
         console.error('Error al eliminar usuario:', error);
       }

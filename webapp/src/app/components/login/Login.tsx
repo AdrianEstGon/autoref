@@ -19,8 +19,6 @@ import Typography from '@mui/material/Typography';
 import { Toaster, toast } from 'react-hot-toast';
 import userService from '../../services/userService';
 
-import './Login.css';
-
 function Login() {
   const [logo, setLogo] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -68,14 +66,12 @@ function Login() {
         let userLogin = await checkUserAndPassword(email, password);
   
         if (userLogin.success) {
-          // Suponiendo que la respuesta contenga un campo "token"
-          const token = userLogin.token; // Asegúrate de que el token esté siendo devuelto desde tu backend
+      
+          const token = userLogin.token; 
   
           if (token) {
             // Almacenar el token en localStorage para futuras solicitudes
             window.localStorage.setItem('authToken', token);
-  
-            // Almacenar los detalles del usuario, para uso posterior (como el nombre de usuario o ID, si es necesario)
             userLogin.timestamp = new Date();
             window.localStorage.setItem('userLogged', JSON.stringify(userLogin));
           }

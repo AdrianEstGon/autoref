@@ -15,6 +15,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import NavBar from "../barra_navegacion/NavBar";
@@ -44,6 +46,7 @@ const PerfilView = () => {
   const [oldPassword, setOldPassword] = useState(""); // Contraseña actual
   const [newPassword, setNewPassword] = useState(""); // Nueva contraseña
   const [confirmPassword, setConfirmPassword] = useState(""); // Confirmación de nueva contraseña
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false); // Estado para mostrar el progreso de subida de la foto
 
   // Estados para manejar los errores de cada campo
   const [passwordError, setPasswordError] = useState(""); // Error global
@@ -89,18 +92,21 @@ const PerfilView = () => {
 
   const manejarCambioFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      setIsUploadingPhoto(true); // Iniciar animación de carga
       const fotoURL = URL.createObjectURL(e.target.files[0]);
+  
       try {
         const usuarioId = localStorage.getItem("userId");
         if (usuarioId) {
-          // Usar el userService para subir la nueva foto de perfil
-          await userService.uploadProfilePicture(e.target.files[0]);
+          await userService.uploadProfilePicture(e.target.files[0]); // Subir imagen
           setPerfil({ ...perfil, fotoPerfil: fotoURL });
           toast.success("Foto de perfil actualizada con éxito");
         }
       } catch (error) {
         console.error("Error al subir la foto de perfil:", error);
         toast.error("Error al actualizar la foto de perfil");
+      } finally {
+        setIsUploadingPhoto(false); // Finalizar animación de carga
       }
     }
   };
@@ -158,13 +164,13 @@ const PerfilView = () => {
       });
 
       if (response.status === 200) {
-        toast.success("Contraseña actualizada con éxito"); // Usamos toast para éxito
+        toast.success("Contraseña actualizada con éxito");
         setOpenDialog(false); // Cerrar el diálogo después de cambiar la contraseña
       } else {
-        toast.error("Error al cambiar la contraseña"); // Usamos toast para error
+        toast.error("Error al cambiar la contraseña"); 
       }
     } catch (error) {
-      console.error("Error al cambiar la contraseña:", error);
+      toast.error("Error al cambiar la contraseña");
 
       // Verificar el tipo de error y manejarlo
       if (error instanceof Error && error.message.includes("La contraseña actual no es correcta")) {
@@ -190,10 +196,13 @@ const PerfilView = () => {
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
                   <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
-                  <IconButton color="primary" component="label" sx={{ mt: 2 }}>
-                    <input hidden accept="image/*" type="file" onChange={(e) => manejarCambioFoto(e)} />
-                    <PhotoCamera fontSize="large" />
-                  </IconButton>
+                  <Tooltip title="Modificar foto de perfil">
+                    <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
+                      <input hidden accept="image/*" type="file" onChange={(e) => manejarCambioFoto(e)} />
+                      {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
+                    </IconButton>
+                  </Tooltip>
+
                 </Grid>
                 {Object.entries(perfil).map(([key, value]) => (
                   key !== "fotoPerfil" && (
@@ -281,8 +290,6 @@ const PerfilView = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Toast Container para mostrar los mensajes de toast */}
       <div />
     </>
   );
