@@ -7,7 +7,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import usuarioService from '../../services/userService';
+import usuarioService from '../../services/UserService';
 import NavBar from '../barra_navegacion/NavBar';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -159,7 +159,7 @@ const UsuariosView: React.FC = () => {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Eliminar usuario" arrow>
-                        <IconButton color="secondary" onClick={() => handleOpenDeleteDialog(usuario.id)}>
+                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(usuario.id)}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -195,7 +195,7 @@ const UsuariosView: React.FC = () => {
           <DialogContentText>¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="secondary">Cancelar</Button>
+          <Button onClick={handleCloseDeleteDialog} color="error">Cancelar</Button>
           <Button onClick={handleDelete} color="primary">Eliminar</Button>
         </DialogActions>
       </Dialog>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, SelectChangeEvent } from '@mui/material';
-import authService from '../../services/userService'; 
-import { validarNombre, validarEmail, validarNumeroLicencia, validarCodigoPostal } from '../../utils/Validaciones';
+import authService from '../../services/UserService'; 
+import { validaciones } from '../../utils/ValidacionesUsuarios';
 import { toast } from 'react-toastify';
 import { clubes, niveles } from './UserUtils';
 
@@ -19,14 +19,29 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   const usuario = location.state?.usuario || {};
   
   const [usuarioEditado, setUsuarioEditado] = useState({ ...usuario });
-  const [errores, setErrores] = useState<{ [key: string]: string }>({});
+  const [errores, setErrores] = useState({
+      nombre: '',
+      primerApellido: '',
+      segundoApellido: '',
+      fechaNacimiento: '',
+      nivel: '',
+      clubVinculado: '', 
+      licencia: '',
+      username: '',
+      email: '',
+      password: '',
+      direccion: '',
+      pais: '',
+      region: '',
+      ciudad: '',
+      codigoPostal: '',
+      esAdmin: ''
+    });
 
   useEffect(() => {
     if (usuario) {
       setUsuarioEditado({
         ...usuario,
-        nivel: niveles.includes(usuario.nivel) ? usuario.nivel : "",
-        clubVinculado: clubes.includes(usuario.clubVinculado) ? usuario.clubVinculado : ""
       });
     }
   }, [usuario]);
@@ -36,9 +51,6 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
-  
-    if (name === "nivel" && !niveles.includes(value)) return;
-    if (name === "clubVinculado" && !clubes.includes(value)) return;
   
     setUsuarioEditado((prevState: any) => ({
       ...prevState,
@@ -55,69 +67,11 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   };
 
   const handleSave = async () => {
-    let erroresTemp: { [key: string]: string } = {};
+    let erroresTemp = { ...errores};
     let isValid = true;
 
     // Validaciones
-    if (!validarNombre(usuarioEditado.nombre)) {
-      erroresTemp.nombre = 'Nombre no válido.';
-      isValid = false;
-    }
-
-    if (!validarNombre(usuarioEditado.primerApellido)) {
-      erroresTemp.primerApellido = 'Primer apellido no válido.';
-      isValid = false;
-    }
-
-    if (usuarioEditado.segundoApellido && !validarNombre(usuarioEditado.segundoApellido)) {
-      erroresTemp.segundoApellido = 'Segundo apellido no válido.';
-      isValid = false;
-    }
-
-    if (!validarEmail(usuarioEditado.email)) {
-      erroresTemp.email = 'Correo electrónico no válido.';
-      isValid = false;
-    }
-
-    if (!validarNumeroLicencia(usuarioEditado.licencia)) {
-      erroresTemp.licencia = 'Número de licencia no válido.';
-      isValid = false;
-    }
-
-    if (!validarCodigoPostal(usuarioEditado.codigoPostal)) {
-      erroresTemp.codigoPostal = 'Código postal no válido.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.nivel) {
-      erroresTemp.nivel = 'Debe seleccionar un nivel.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.fechaNacimiento) {
-      erroresTemp.fechaNacimiento = 'Debe ingresar una fecha de nacimiento.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.direccion) {
-      erroresTemp.direccion = 'Debe ingresar una dirección.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.pais) {
-      erroresTemp.pais = 'Debe ingresar un país.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.region) {
-      erroresTemp.region = 'Debe ingresar una región.';
-      isValid = false;
-    }
-
-    if (!usuarioEditado.ciudad) {
-      erroresTemp.ciudad = 'Debe ingresar una ciudad.';
-      isValid = false;
-    }
+    isValid = validaciones(usuarioEditado, erroresTemp, isValid);
 
     setErrores(erroresTemp);
 
@@ -153,7 +107,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <InputLabel>Nivel</InputLabel>
             <Select
               name="nivel"
-              value={niveles.includes(usuarioEditado.nivel) ? usuarioEditado.nivel : ""}
+              value={usuarioEditado.nivel}
               onChange={handleChange}
             >
               {niveles.map((nivel, index) => (
@@ -168,7 +122,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <InputLabel>Club Vinculado</InputLabel>
             <Select
               name="clubVinculado"
-              value={clubes.includes(usuarioEditado.clubVinculado) ? usuarioEditado.clubVinculado : ""}
+              value={usuarioEditado.clubVinculado}
               onChange={handleChange}
             >
               {clubes.map((club, index) => (
@@ -190,7 +144,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
           <FormControlLabel control={<Checkbox checked={usuarioEditado.esAdmin} onChange={handleCheckboxChange} />} label="Asignar rol de Administrador" />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="secondary">Cancelar</Button>
+          <Button onClick={handleCancel} color="error">Cancelar</Button>
           <Button onClick={handleSave} color="primary">Guardar</Button>
         </DialogActions>
       </Dialog>
@@ -199,3 +153,4 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
 };
 
 export default ModificarUsuario;
+

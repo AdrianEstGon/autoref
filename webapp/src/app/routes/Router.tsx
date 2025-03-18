@@ -6,6 +6,8 @@ import PerfilView from '../components/perfil/PerfilView';
 import UsuariosView from '../components/gestion_usuarios/UsuariosView';
 import CrearUsuario from '../components/gestion_usuarios/CrearUsuario';
 import ModificarUsuario from '../components/gestion_usuarios/ModificarUsuario';
+import PartidosView from '../components/gestion_partidos/PartidosView';
+import CrearPartido from '../components/gestion_partidos/CrearPartido';
 /*import MisPartidos from '../partidos/MisPartidos';  // Tu componente para la vista de partidos
 import Disponibilidad from '../disponibilidad/Disponibilidad';  // Componente para la vista de disponibilidad
 import PerfilUsuario from '../usuario/PerfilUsuario';  // Componente para el perfil del usuario
@@ -31,6 +33,9 @@ const Router = () => {
                 <Route path="/gestionUsuarios/usuariosView" element={<UsuariosView />} />
                 <Route path="/gestionUsuarios/crearUsuario" element={<CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />} />
                 <Route path="/gestionUsuarios/modificarUsuario" element={<ModificarUsuario open={true} onClose={() => { } } onUpdate={() => { } } usuario={undefined}  />} />
+                <Route path="/gestionPartidos/partidosView" element={<PartidosView />} />
+                <Route path="/gestionPartidos/crearPartido" element={<CrearPartido open={true} onClose={() => {}} onSave={() => {}} />} />
+                <Route path="/gestionPartidos/modificarPartido" element={<ModificarUsuario open={true} onClose={() => { } } onUpdate={() => { } } usuario={undefined}  />} />
                 {/* Rutas privadas */}
 
                 {/* Rutas de las diferentes vistas de usuario */}

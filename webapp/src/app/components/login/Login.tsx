@@ -17,7 +17,7 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Toaster, toast } from 'react-hot-toast';
-import userService from '../../services/userService';
+import userService from '../../services/UserService';
 
 function Login() {
   const [logo, setLogo] = useState<string>('');

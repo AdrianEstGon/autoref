@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, FormControlLabel, Checkbox } from '@mui/material';
-import authService from '../../services/userService'; 
-import { Password } from '@mui/icons-material';
-import { validarNombre, validarEmail, validarNumeroLicencia, validarCodigoPostal } from '../../utils/Validaciones';
-import { toast } from 'react-toastify'; // Importamos toastify
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
+import { Autocomplete } from '@mui/material';
+import { Popper } from '@mui/material'; // Importa Popper
+import authService from '../../services/UserService'; 
+import { toast } from 'react-toastify'; 
 import { clubes, niveles } from './UserUtils';
+import { validaciones } from '../../utils/ValidacionesUsuarios';
 
 interface CrearUsuarioProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface CrearUsuarioProps {
   onSave: (usuario: any) => void;
 }
 
+// Actualizamos el tipo para permitir que 'clubVinculado' sea 'string | null'
 const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) => {
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculado: '', 
+    clubVinculado: '', // Se mantiene como string
     licencia: '',
     username: '',
     email: '',
@@ -54,7 +56,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     esAdmin: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }> | SelectChangeEvent<string>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }> | any) => {
     const { name, value } = e.target;
     setNuevoUsuario(prevState => ({
       ...prevState,
@@ -74,93 +76,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     let isValid = true;
 
     // Validaciones
-    if (!validarNombre(nuevoUsuario.nombre)) {
-      erroresTemp.nombre = 'Nombre no válido. Solo se permiten caracteres alfabéticos y espacios.';
-      isValid = false;
-    } else {
-      erroresTemp.nombre = '';
-    }
-
-    if (!validarNombre(nuevoUsuario.primerApellido)) {
-      erroresTemp.primerApellido = 'Primer apellido no válido. Solo se permiten caracteres alfabéticos y espacios.';
-      isValid = false;
-    } else {
-      erroresTemp.primerApellido = '';
-    }
-
-    if (nuevoUsuario.segundoApellido && !validarNombre(nuevoUsuario.segundoApellido)) {
-      erroresTemp.segundoApellido = 'Segundo apellido no válido. Solo se permiten caracteres alfabéticos y espacios.';
-      isValid = false;
-    } else {
-      erroresTemp.segundoApellido = '';
-    }
-
-    if (!validarEmail(nuevoUsuario.email)) {
-      erroresTemp.email = 'Correo electrónico no válido.';
-      isValid = false;
-    } else {
-      erroresTemp.email = '';
-    }
-
-    if (!validarNumeroLicencia(nuevoUsuario.licencia)) {
-      erroresTemp.licencia = 'Número de licencia no válido. Debe ser un número positivo.';
-      isValid = false;
-    } else {
-      erroresTemp.licencia = '';
-    }
-
-    if (!validarCodigoPostal(nuevoUsuario.codigoPostal)) {
-      erroresTemp.codigoPostal = 'Código postal no válido. Debe tener exactamente 5 dígitos.';
-      isValid = false;
-    } else {
-      erroresTemp.codigoPostal = '';
-    }
-
-    if (!nuevoUsuario.nivel) {
-      erroresTemp.nivel = 'Debe seleccionar un nivel.';
-      isValid = false;
-    } else {
-      erroresTemp.nivel = '';
-    }
-
-    if (!nuevoUsuario.clubVinculado) { 
-      erroresTemp.clubVinculado = ''; 
-    }
-
-    if (!nuevoUsuario.fechaNacimiento) {
-      erroresTemp.fechaNacimiento = 'Debe ingresar una fecha de nacimiento.';
-      isValid = false;
-    } else {
-      erroresTemp.fechaNacimiento = '';
-    }
-
-    if (!nuevoUsuario.direccion) {
-      erroresTemp.direccion = 'Debe ingresar una dirección.';
-      isValid = false;
-    } else {
-      erroresTemp.direccion = '';
-    }
-
-    if (!nuevoUsuario.pais) {
-      erroresTemp.pais = 'Debe ingresar un país.';
-      isValid = false;
-    } else {
-      erroresTemp.pais = '';
-    }
-
-    if (!nuevoUsuario.region) {
-      erroresTemp.region = 'Debe ingresar una región.';
-      isValid = false;
-    } else {
-      erroresTemp.region = '';
-    }
-
-    if (!nuevoUsuario.ciudad) {
-      erroresTemp.ciudad = 'Debe ingresar una ciudad.';
-      isValid = false;
-    } else {
-      erroresTemp.ciudad = '';
-    }
+    isValid = validaciones(nuevoUsuario, erroresTemp, isValid);
 
     setErrores(erroresTemp);
 
@@ -235,26 +151,51 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
             InputLabelProps={{ shrink: true }}
           />
 
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Nivel</InputLabel>
-            <Select name="nivel" value={nuevoUsuario.nivel} onChange={(e) => handleChange(e as SelectChangeEvent<string>)} error={!!errores.nivel}> 
-              {niveles.map((nivel, index) => (
-                <MenuItem key={index} value={nivel}>
-                  {nivel}
-                </MenuItem>
-              ))}
-            </Select>
+          {/* Nivel Select as Autocomplete */}
+          <FormControl fullWidth margin="normal" error={!!errores.nivel}>
+            <Autocomplete
+              options={niveles}
+              value={nuevoUsuario.nivel}
+              onChange={(_, newValue) => {
+                setNuevoUsuario(prevState => ({ ...prevState, nivel: newValue ?? '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Nivel"
+                  error={!!errores.nivel}
+                  helperText={errores.nivel}
+                />
+              )}
+              disablePortal
+              PopperComponent={(props) => {
+                return <Popper {...props} placement="bottom-start" />;
+              }}
+            />
           </FormControl>
 
+          {/* Club Vinculado Select as Autocomplete */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Club Vinculado</InputLabel>
-            <Select name="clubVinculado" value={nuevoUsuario.clubVinculado} onChange={(e) => handleChange(e as SelectChangeEvent<string>)} error={!!errores.clubVinculado}>
-              {clubes.map((club, index) => (
-                <MenuItem key={index} value={club}>
-                  {club}
-                </MenuItem>
-              ))}
-            </Select>
+            <Autocomplete
+              options={clubes}
+              value={nuevoUsuario.clubVinculado}
+              onChange={(_, newValue) => {
+                // Si 'newValue' es nulo, establecemos un valor vacío en lugar de null
+                setNuevoUsuario(prevState => ({ ...prevState, clubVinculado: newValue ?? '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Club Vinculado"
+                  error={!!errores.clubVinculado}
+                  helperText={errores.clubVinculado}
+                />
+              )}
+              disablePortal
+              PopperComponent={(props) => {
+                return <Popper {...props} placement="bottom-start" />;
+              }}
+            />
           </FormControl>
 
           <TextField
@@ -317,7 +258,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="secondary">Cancelar</Button>
+          <Button onClick={handleCancel} color="error">Cancelar</Button>
           <Button onClick={handleSave} color="primary">Guardar</Button>
         </DialogActions>
       </Dialog>

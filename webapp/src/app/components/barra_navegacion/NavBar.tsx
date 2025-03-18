@@ -58,7 +58,7 @@ const NavigationBar = () => {
             onClose={handleClosePanelMenu}
           >
             <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
-            <MenuItem onClick={() => handleNavigate('/gestionPartidos')}>Gestión de partidos</MenuItem>
+            <MenuItem onClick={() => handleNavigate('/gestionPartidos/partidosView')}>Gestión de partidos</MenuItem>
             <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
           </Menu>
         </>
@@ -106,7 +106,7 @@ const NavigationBar = () => {
                     onClose={handleClosePanelMenu}
                   >
                     <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
-                    <MenuItem onClick={() => handleNavigate('/gestionPartidos')}>Gestión de partidos</MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/gestionPartidos/partidosView')}>Gestión de partidos</MenuItem>
                     <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
                   </Menu>
                 </>

@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import NavBar from "../barra_navegacion/NavBar";
-import userService from "../../services/userService";
+import userService from "../../services/UserService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -282,7 +282,7 @@ const PerfilView = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">
+          <Button onClick={() => setOpenDialog(false)} color="error">
             Cancelar
           </Button>
           <Button onClick={handlePasswordChange} color="primary">
