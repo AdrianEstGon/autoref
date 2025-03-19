@@ -8,6 +8,7 @@ import CrearUsuario from '../components/gestion_usuarios/CrearUsuario';
 import ModificarUsuario from '../components/gestion_usuarios/ModificarUsuario';
 import PartidosView from '../components/gestion_partidos/PartidosView';
 import CrearPartido from '../components/gestion_partidos/CrearPartido';
+import ModificarPartido from '../components/gestion_partidos/ModificarPartido';
 /*import MisPartidos from '../partidos/MisPartidos';  // Tu componente para la vista de partidos
 import Disponibilidad from '../disponibilidad/Disponibilidad';  // Componente para la vista de disponibilidad
 import PerfilUsuario from '../usuario/PerfilUsuario';  // Componente para el perfil del usuario
@@ -35,7 +36,7 @@ const Router = () => {
                 <Route path="/gestionUsuarios/modificarUsuario" element={<ModificarUsuario open={true} onClose={() => { } } onUpdate={() => { } } usuario={undefined}  />} />
                 <Route path="/gestionPartidos/partidosView" element={<PartidosView />} />
                 <Route path="/gestionPartidos/crearPartido" element={<CrearPartido open={true} onClose={() => {}} onSave={() => {}} />} />
-                <Route path="/gestionPartidos/modificarPartido" element={<ModificarUsuario open={true} onClose={() => { } } onUpdate={() => { } } usuario={undefined}  />} />
+                <Route path="/gestionPartidos/modificarPartido" element={<ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />} />
                 {/* Rutas privadas */}
 
                 {/* Rutas de las diferentes vistas de usuario */}

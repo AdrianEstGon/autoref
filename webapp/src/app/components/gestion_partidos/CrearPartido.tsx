@@ -7,6 +7,7 @@ import partidosService from '../../services/PartidoService';
 import polideportivosService from '../../services/PolideportivoService'; 
 import { toast } from 'react-toastify';
 import { validarPartido } from '../../utils/ValidacionesPartidos';
+import { NaturePeople } from '@mui/icons-material';
 
 interface CrearPartidoProps {
   open: boolean;
@@ -24,7 +25,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     hora: '',
     lugarId: '', // Debemos almacenar el ID del polideportivo aquí
     categoria: '',
-    competicion: '',
+    jornada: '',
+    nPartido: '',
   });
 
   const [errores, setErrores] = useState({
@@ -34,7 +36,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     hora: '',
     lugarId: '', // Error para el lugarId
     categoria: '',
-    competicion: '',
+    jornada: '',
+    nPartido: '',
   });
 
   const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]); // Lista de polideportivos
@@ -172,14 +175,24 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
           helperText={errores.categoria}
         />
         <TextField
-          label="Competición"
+          label="Jornada"
           fullWidth
           margin="normal"
-          name="competicion"
-          value={nuevoPartido.competicion}
+          name="jornada"
+          value={nuevoPartido.jornada}
           onChange={handleChange}
-          error={!!errores.competicion}
-          helperText={errores.competicion}
+          error={!!errores.jornada}
+          helperText={errores.jornada}
+        />
+        <TextField
+          label="Número de Partido"
+          fullWidth
+          margin="normal"
+          name="nPartido"
+          value={nuevoPartido.nPartido}
+          onChange={handleChange}
+          error={!!errores.nPartido}
+          helperText={errores.nPartido}
         />
       </DialogContent>
       <DialogActions>

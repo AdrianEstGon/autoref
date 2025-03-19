@@ -6,7 +6,8 @@ export function validarPartido(
       hora: string;
       lugarId: string;
       categoria: string;
-      competicion: string;
+      jornada: string;
+      nPartido: string;
     },
     erroresTemp: {
       equipoLocal: string;
@@ -15,7 +16,8 @@ export function validarPartido(
       hora: string;
       lugarId: string;
       categoria: string;
-      competicion: string;
+      jornada: string;
+      nPartido: string;
     },
     isValid: boolean
   ): boolean {
@@ -61,11 +63,18 @@ export function validarPartido(
       erroresTemp.categoria = '';
     }
   
-    if (!validarTexto(partido.competicion)) {
-      erroresTemp.competicion = 'La competición no es válida.';
+    if (!validarNumeroPositivo(partido.jornada)) {
+      erroresTemp.jornada = 'El número de jornada debe ser positivo.';
       isValid = false;
     } else {
-      erroresTemp.competicion = '';
+      erroresTemp.jornada = '';
+    }
+
+    if (!validarNumeroPositivo(partido.nPartido)) {
+      erroresTemp.nPartido = 'El número de partido debe ser positivo.';
+      isValid = false;
+    } else {
+      erroresTemp.nPartido = '';
     }
   
     return isValid;
@@ -75,5 +84,10 @@ export function validarPartido(
   const validarTexto = (texto: string): boolean => {
     const regex = /^[a-zA-ZáéíóúÁÉÍÓÚ\s]+$/;
     return regex.test(texto.trim());
+  };
+
+  const validarNumeroPositivo = (n: string): boolean => {
+    const numero = parseInt(n, 10);
+    return !isNaN(numero) && numero > 0;
   };
   
