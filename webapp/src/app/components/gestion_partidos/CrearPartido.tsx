@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormHelperText } from '@mui/material';
 import { Autocomplete } from '@mui/material';
 import { Popper } from '@mui/material'; // Importa Popper
-import partidosService from '../../services/PartidoService'; 
-import polideportivosService from '../../services/PolideportivoService'; 
+import partidosService from '../../services/PartidoService';
+import polideportivosService from '../../services/PolideportivoService';
+import equiposService from '../../services/EquipoService'; // Agregado para obtener equipos
+import categoriasService from '../../services/CategoriaService'; // Agregado para obtener categorías
 import { toast } from 'react-toastify';
 import { validarPartido } from '../../utils/ValidacionesPartidos';
-import { NaturePeople } from '@mui/icons-material';
 
 interface CrearPartidoProps {
   open: boolean;
@@ -23,8 +24,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     equipoVisitante: '',
     fecha: '',
     hora: '',
-    lugarId: '', // Debemos almacenar el ID del polideportivo aquí
-    categoria: '',
+    lugarId: '', // ID del polideportivo
+    categoria: '', // Categoria seleccionada
     jornada: '',
     nPartido: '',
   });
@@ -34,28 +35,61 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     equipoVisitante: '',
     fecha: '',
     hora: '',
-    lugarId: '', // Error para el lugarId
+    lugarId: '',
     categoria: '',
     jornada: '',
     nPartido: '',
   });
 
   const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]); // Lista de polideportivos
+  const [equipos, setEquipos] = useState<{ id: string; nombre: string }[]>([]); // Lista de equipos
+  const [categorias, setCategorias] = useState<{ id: string; nombre: string }[]>([]); // Lista de categorías
+  const [equiposFiltrados, setEquiposFiltrados] = useState<{ id: string; nombre: string }[]>([]); // Equipos filtrados por categoría
 
   useEffect(() => {
-    const fetchPolideportivos = async () => {
+    const fetchData = async () => {
       try {
-        const data = await polideportivosService.getPolideportivos();
-        setPolideportivos(data);
+        const polideportivosData = await polideportivosService.getPolideportivos();
+        setPolideportivos(polideportivosData);
+
+        const categoriasData = await categoriasService.getCategorias();
+        setCategorias(categoriasData);
       } catch (error) {
-        toast.error('Error cargando los polideportivos');
+        toast.error('Error cargando los datos');
       }
     };
 
     if (open) {
-      fetchPolideportivos();
+      fetchData();
     }
   }, [open]);
+
+  // Cuando se selecciona una categoría, filtramos los equipos
+  useEffect(() => {
+    if (nuevoPartido.categoria) {
+      const fetchEquipos = async () => {
+        try {
+          const equiposData = await equiposService.getEquiposPorCategoria(nuevoPartido.categoria); // Asumimos que tienes un endpoint que filtra los equipos por categoría
+          setEquiposFiltrados(equiposData);
+
+          // Si no hay equipos para la categoría seleccionada, mostramos un toast informativo
+          if (equiposData.length === 0) {
+            toast.info('No hay equipos disponibles para esta categoría.');
+            // Limpiamos los equipos locales y visitantes ya que no hay equipos disponibles
+            setNuevoPartido(prevState => ({
+              ...prevState,
+              equipoLocal: '',
+              equipoVisitante: '',
+            }));
+          }
+        } catch (error) {
+          toast.error('Error obteniendo los equipos');
+        }
+      };
+
+      fetchEquipos();
+    }
+  }, [nuevoPartido.categoria]);
 
   const handleChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = e.target;
@@ -74,7 +108,6 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
 
     if (isValid) {
       try {
-        // Aquí le pasas el ID del polideportivo
         await partidosService.crearPartido(nuevoPartido);
         toast.success('Partido registrado con éxito');
         onClose();
@@ -90,29 +123,86 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
   };
 
   return (
-    <Dialog open={open} onClose={handleCancel}>
+    <Dialog
+      open={open}
+      onClose={handleCancel}
+      fullWidth
+      maxWidth="lg"
+    >
       <DialogTitle>Agregar Nuevo Partido</DialogTitle>
-      <DialogContent>
-        <TextField
-          label="Equipo Local"
-          fullWidth
-          margin="normal"
-          name="equipoLocal"
-          value={nuevoPartido.equipoLocal}
-          onChange={handleChange}
-          error={!!errores.equipoLocal}
-          helperText={errores.equipoLocal}
-        />
-        <TextField
-          label="Equipo Visitante"
-          fullWidth
-          margin="normal"
-          name="equipoVisitante"
-          value={nuevoPartido.equipoVisitante}
-          onChange={handleChange}
-          error={!!errores.equipoVisitante}
-          helperText={errores.equipoVisitante}
-        />
+      <DialogContent sx={{ overflowY: 'auto' }}>
+        {/* Paso 1: Selección de categoría */}
+        <FormControl fullWidth margin="normal" error={!!errores.categoria}>
+          <Autocomplete
+            options={categorias}
+            getOptionLabel={(option) => option.nombre}
+            value={categorias.find(categoria => categoria.id === nuevoPartido.categoria) || null}
+            onChange={(_, newValue) => setNuevoPartido(prevState => ({
+              ...prevState,
+              categoria: newValue ? newValue.id : '',
+            }))}
+            disablePortal
+            PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Categoría"
+                error={!!errores.categoria}
+                helperText={errores.categoria}
+                variant="outlined"
+              />
+            )}
+          />
+        </FormControl>
+
+        {/* Resto del formulario con equipos filtrados por categoría */}
+        <FormControl fullWidth margin="normal" error={!!errores.equipoLocal}>
+          <Autocomplete
+            options={equiposFiltrados}
+            getOptionLabel={(option) => option.nombre}
+            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoLocal) || null}
+            onChange={(_, newValue) => setNuevoPartido(prevState => ({
+              ...prevState,
+              equipoLocal: newValue ? newValue.id : '',
+            }))}
+            disablePortal
+            PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Equipo Local"
+                error={!!errores.equipoLocal}
+                helperText={errores.equipoLocal}
+                disabled={equiposFiltrados.length === 0} // Deshabilitado si no hay equipos disponibles
+              />
+            )}
+          />
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" error={!!errores.equipoVisitante}>
+          <Autocomplete
+            options={equiposFiltrados}
+            getOptionLabel={(option) => option.nombre}
+            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoVisitante) || null}
+            onChange={(_, newValue) => setNuevoPartido(prevState => ({
+              ...prevState,
+              equipoVisitante: newValue ? newValue.id : '',
+            }))}
+            disablePortal
+            PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Equipo Visitante"
+                error={!!errores.equipoVisitante}
+                helperText={errores.equipoVisitante}
+                disabled={equiposFiltrados.length === 0} // Deshabilitado si no hay equipos disponibles
+              />
+            )}
+          />
+        </FormControl>
+
+        {/* Campos adicionales */}
         <TextField
           label="Fecha"
           type="date"
@@ -147,11 +237,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
               ...prevState,
               lugarId: newValue ? newValue.id : '',
             }))}
-            disablePortal  // Desactiva el portal para que las opciones no se desplieguen fuera del contenedor
-            PopperComponent={(props) => {
-              // Este es el componente Popper personalizado para asegurar que las opciones se muestren hacia abajo
-              return <Popper {...props} placement="bottom-start" />;
-            }}
+            disablePortal
+            PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -161,19 +248,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
               />
             )}
           />
-          {errores.lugarId && <FormHelperText>{errores.lugarId}</FormHelperText>}
         </FormControl>
 
-        <TextField
-          label="Categoría"
-          fullWidth
-          margin="normal"
-          name="categoria"
-          value={nuevoPartido.categoria}
-          onChange={handleChange}
-          error={!!errores.categoria}
-          helperText={errores.categoria}
-        />
         <TextField
           label="Jornada"
           fullWidth

@@ -38,35 +38,24 @@ const PartidosView: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const navigate = useNavigate();
-
+  const fetchPartidos = async () => {
+    try {
+      const data = await partidosService.getPartidos();
+      const sortedPartidos = data.sort((a: { fecha: string; hora: string; }, b: { fecha: string; hora: string; }) => new Date(a.fecha + 'T' + a.hora).getTime() - new Date(b.fecha + 'T' + b.hora).getTime());
+      setPartidos(sortedPartidos);
+    } catch (error) {
+      console.error('Error al obtener los partidos:', error);
+    }
+  };
   useEffect(() => {
-    const fetchPartidos = async () => {
-      try {
-        const data = await partidosService.getPartidos();
-        
-        // Ordenar los partidos por fecha y hora
-        const sortedPartidos = data.sort((a: { fecha: string; hora: string; }, b: { fecha: string; hora: string; }) => {
-          const dateA = new Date(a.fecha + 'T' + a.hora);
-          const dateB = new Date(b.fecha + 'T' + b.hora);
-          return dateA.getTime() - dateB.getTime(); // Ordenar de menor a mayor
-        });
-  
-        setPartidos(sortedPartidos);
-  
-        // Lógica para mostrar solo los primeros partidos según la página y las filas por página
-        const startIndex = page * rowsPerPage;  // Asegurarse de usar 'page' para la paginación correcta
-        const endIndex = startIndex + rowsPerPage;
-        setPartidosPaginados(sortedPartidos.slice(startIndex, endIndex));
-  
-      } catch (error) {
-        console.error('Error al obtener los partidos:', error);
-      }
-    };
-  
     fetchPartidos();
-  }, [partidos, rowsPerPage, page]); // Dependencias: partidos, rowsPerPage y page
+  }, [rowsPerPage, page]); // ✅ Ahora solo se ejecuta cuando cambian estos valores
   
-  
+  useEffect(() => {
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    setPartidosPaginados(partidos.slice(startIndex, endIndex));
+  }, [partidos, page, rowsPerPage]);
 
   const handleModify = (partido: Partido) => {
     navigate('/gestionPartidos/modificarPartido', { state: { partido } });
@@ -141,7 +130,6 @@ const PartidosView: React.FC = () => {
     // Actualiza los partidos paginados con el número nuevo de filas por página
     setPartidosPaginados(partidos.slice(0, newRowsPerPage));
   };
-  
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -205,8 +193,14 @@ const PartidosView: React.FC = () => {
 
           toast.success('Partidos cargados correctamente');
 
-          setPartidos((prevPartidos) => [...prevPartidos, ...partidosCreados]);
+          setPartidos((prevPartidos) => {
+            const nuevosPartidos = [...prevPartidos, ...partidosCreados];
+            setPartidosPaginados(nuevosPartidos.slice(0, rowsPerPage)); 
+            return nuevosPartidos;
+          });
+
           setPartidosPaginados((prevPartidos) => [...prevPartidos, ...partidosCreados].slice(0, rowsPerPage));
+          fetchPartidos();
 
         } catch (error) {
           console.error('Error al cargar los partidos:', error);
@@ -231,70 +225,121 @@ const PartidosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh' }}>
+      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh', paddingBottom: '80px' }}>
         <Container sx={{ backgroundColor: '#F5F5DC', padding: 3, borderRadius: 2, minWidth: '70%' }}>
-        <TableContainer 
-          component={Paper} 
-          sx={{ 
-            boxShadow: 3, 
-            borderRadius: 2, 
-            backgroundColor: '#fafafa', 
-            width: '100%', // Asegurarse de que el contenedor de la tabla ocupe todo el ancho
-            overflowX: 'hidden' // Eliminar el scroll horizontal
-          }}
-        >
-          <Table sx={{ width: '100%' }}> {/* Asegurarse de que la tabla ocupe el 100% del contenedor */}
-            <TableHead>
-              <TableRow>
-                <TableCell colSpan={9} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
-                  Gestión de Partidos
-                </TableCell>
-              </TableRow>
-              <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
-                {/* Ajustar la columna de Fecha con medidas relativas */}
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '4vw' }}>Fecha</TableCell>
-
-                {/* Ajustar la columna de Hora */}
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '4vw' }}>Hora</TableCell>
-
-                {/* Ajustar la columna de Lugar con medidas relativas */}
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '10vw' }}>Lugar</TableCell>
-
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '10vw' }}>Equipo Local</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '10vw' }}>Equipo Visitante</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '10vw' }}>Categoría</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '2vw' }}>Jornada</TableCell>
-
-                {/* Columna de acciones, con un ancho fijo para evitar problemas */}
-                <TableCell sx={{ fontWeight: 'bold', minWidth: '2vw' }}>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {partidosPaginados.map((partido) => (
-                <TableRow key={partido.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
-                  <TableCell>{formatDate(partido.fecha)}</TableCell>
-                  <TableCell>{formatTime(partido.hora)}</TableCell>
-                  <TableCell>{partido.lugar ? partido.lugar : '-'}</TableCell>
-                  <TableCell>{partido.equipoLocal}</TableCell>
-                  <TableCell>{partido.equipoVisitante}</TableCell>
-                  <TableCell>{partido.categoria}</TableCell>
-                  <TableCell>{partido.jornada}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleModify(partido)} color="primary">
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenDeleteDialog(partido.id)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell colSpan={8} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
+                    Gestión de Partidos
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: '120px' }}>Fecha</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', minWidth: '100px' }}>Hora</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', minWidth: '150px', maxWidth: '250px', whiteSpace: 'nowrap' }}>Lugar</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Equipo Local</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Equipo Visitante</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Categoría</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Jornada</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {partidosPaginados.map((partido, index) => (
+                  <TableRow key={partido.id || index} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
+                    <TableCell>{formatDate(partido.fecha)}</TableCell>
+                    <TableCell>{formatTime(partido.hora)}</TableCell>
+                    <TableCell sx={{ whiteSpace: 'normal', wordWrap: 'break-word', maxWidth: '250px' }}>
+                      {partido.lugar ? partido.lugar : '-'}
+                    </TableCell>
+                    <TableCell>{partido.equipoLocal}</TableCell>
+                    <TableCell>{partido.equipoVisitante}</TableCell>
+                    <TableCell>{partido.categoria}</TableCell>
+                    <TableCell>{partido.jornada}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleModify(partido)} color="primary">
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton onClick={() => handleOpenDeleteDialog(partido.id)} color="error">
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-
+          {/* Sección fija para los botones y paginación */}
+          <Box
+            sx={{
+              position: 'fixed',
+              bottom: 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAdd}
+              sx={{ marginRight: 1 }}
+              startIcon={<AddIcon />}
+            >
+              Agregar Partido
+            </Button>
+            <Button
+              variant="contained"
+              component="label" // Usamos 'component="label"' para que el botón actúe como un label para el input
+              sx={{
+                marginLeft: 1,
+                backgroundColor: '#4CAF50', // Fondo cuando el botón está activo
+                color: 'white', // Color del ícono y texto
+                '&:hover': {
+                  backgroundColor: '#45a049', // Fondo cuando el mouse pasa por encima
+                },
+                '&:disabled': {
+                  backgroundColor: '#e0e0e0', // Fondo cuando el botón está deshabilitado
+                  color: '#a0a0a0', // Color del texto y ícono cuando está deshabilitado
+                }
+              }}
+            >
+              <UploadFileIcon sx={{ marginRight: 1 }} /> {/* Espacio entre icono y texto */}
+              Importar partidos desde fichero Excel
+              <input
+                type="file"
+                id="upload-file"
+                accept=".xlsx, .xls"
+                onChange={handleFileUpload}
+                hidden // Hace que el input esté oculto pero funcional
+              />
+            </Button>
+            {/* Mostrar el nombre del archivo importado si existe */}
+            {selectedFile && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginLeft: 2,
+                  padding: 1,
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: 2,
+                  minWidth: '200px',
+                }}
+              >
+                <Typography sx={{ marginRight: 1 }}>{selectedFile.name}</Typography>
+                <IconButton onClick={handleRemoveFile} color="error" size="small">
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
+          
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -305,62 +350,25 @@ const PartidosView: React.FC = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              startIcon={<AddIcon />} 
-              onClick={handleAdd}
-            >
-              Crear Partido
-            </Button>
-
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {selectedFile && (
-                <>
-                  <MuiTypography sx={{ marginRight: 2 }}>
-                    {selectedFile.name}
-                  </MuiTypography>
-                  <IconButton onClick={handleRemoveFile}>
-                    <DeleteIcon />
-                  </IconButton>
-                </>
-              )}
-              <Tooltip title="Cargar archivo">
-                <label htmlFor="upload-file">
-                <Button
-                  variant="contained"
-                  component="span"
-                  startIcon={<UploadFileIcon />}
-                  disabled={selectedFile !== null} // Deshabilita el botón si hay un archivo cargado
-                >
-                  Importar partidos desde archivo Excel
-                </Button>
-
-                </label>
-              </Tooltip>
-              <input 
-                id="upload-file" 
-                type="file" 
-                accept=".xlsx, .xls" 
-                style={{ display: 'none' }} 
-                onChange={handleFileUpload} 
-              />
-            </Box>
-          </Box>
+          {/* Dialogo para confirmación de eliminación */}
+          <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
+            <DialogTitle>Eliminar Partido</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                ¿Estás seguro de que deseas eliminar este partido?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDeleteDialog} color="primary">
+                Cancelar
+              </Button>
+              <Button onClick={handleDelete} color="secondary">
+                Eliminar
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Container>
       </Box>
-
-      <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
-              <DialogTitle>Confirmar Eliminación</DialogTitle>
-              <DialogContent>
-                <DialogContentText>¿Seguro que deseas eliminar este partido? Esta acción no se puede deshacer.</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseDeleteDialog} color="error">Cancelar</Button>
-                <Button onClick={handleDelete} color="primary">Eliminar</Button>
-              </DialogActions>
-            </Dialog>
     </>
   );
 };

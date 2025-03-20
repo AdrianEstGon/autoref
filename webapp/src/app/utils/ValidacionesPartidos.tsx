@@ -21,14 +21,14 @@ export function validarPartido(
     },
     isValid: boolean
   ): boolean {
-    if (!validarTexto(partido.equipoLocal)) {
+    if (!(partido.equipoLocal)) {
       erroresTemp.equipoLocal = 'Debe seleccionarse un equipo local.';
       isValid = false;
     } else {
       erroresTemp.equipoLocal = '';
     }
   
-    if (!validarTexto(partido.equipoVisitante)) {
+    if (!(partido.equipoVisitante)) {
       erroresTemp.equipoVisitante = 'Debe seleccionarse un equipo visitante.';
       isValid = false;
     } else {
@@ -56,7 +56,7 @@ export function validarPartido(
       erroresTemp.lugarId = '';
     }
   
-    if (!validarTexto(partido.categoria)) {
+    if (!(partido.categoria)) {
       erroresTemp.categoria = 'La categoría no es válida.';
       isValid = false;
     } else {

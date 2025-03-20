@@ -80,7 +80,7 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
   };
 
   const handleCancel = () => {
-    onClose();
+    navigate('/gestionPartidos/partidosView');
   };
 
   if (!partidoModificado) return null; // No renderizar si no hay partido seleccionado
