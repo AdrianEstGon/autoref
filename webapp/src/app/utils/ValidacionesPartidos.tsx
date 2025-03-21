@@ -1,38 +1,38 @@
 export function validarPartido(
     partido: {
-      equipoLocal: string;
-      equipoVisitante: string;
+      equipoLocalId: string;
+      equipoVisitanteId: string;
       fecha: string;
       hora: string;
       lugarId: string;
-      categoria: string;
+      categoriaId: string;
       jornada: string;
-      nPartido: string;
+      numeroPartido: string;
     },
     erroresTemp: {
-      equipoLocal: string;
-      equipoVisitante: string;
+      equipoLocalId: string;
+      equipoVisitanteId: string;
       fecha: string;
       hora: string;
       lugarId: string;
-      categoria: string;
+      categoriaId: string;
       jornada: string;
-      nPartido: string;
+      numeroPartido: string;
     },
     isValid: boolean
   ): boolean {
-    if (!(partido.equipoLocal)) {
-      erroresTemp.equipoLocal = 'Debe seleccionarse un equipo local.';
+    if (!(partido.equipoLocalId)) {
+      erroresTemp.equipoLocalId = 'Debe seleccionarse un equipo local.';
       isValid = false;
     } else {
-      erroresTemp.equipoLocal = '';
+      erroresTemp.equipoLocalId = '';
     }
   
-    if (!(partido.equipoVisitante)) {
-      erroresTemp.equipoVisitante = 'Debe seleccionarse un equipo visitante.';
+    if (!(partido.equipoVisitanteId)) {
+      erroresTemp.equipoVisitanteId = 'Debe seleccionarse un equipo visitante.';
       isValid = false;
     } else {
-      erroresTemp.equipoVisitante = '';
+      erroresTemp.equipoVisitanteId = '';
     }
   
     if (!partido.fecha) {
@@ -56,11 +56,11 @@ export function validarPartido(
       erroresTemp.lugarId = '';
     }
   
-    if (!(partido.categoria)) {
-      erroresTemp.categoria = 'La categoría no es válida.';
+    if (!(partido.categoriaId)) {
+      erroresTemp.categoriaId = 'La categoría no es válida.';
       isValid = false;
     } else {
-      erroresTemp.categoria = '';
+      erroresTemp.categoriaId = '';
     }
   
     if (!validarNumeroPositivo(partido.jornada)) {
@@ -70,11 +70,11 @@ export function validarPartido(
       erroresTemp.jornada = '';
     }
 
-    if (!validarNumeroPositivo(partido.nPartido)) {
-      erroresTemp.nPartido = 'El número de partido debe ser positivo.';
+    if (!validarNumeroPositivo(partido.numeroPartido)) {
+      erroresTemp.numeroPartido = 'El número de partido debe ser positivo.';
       isValid = false;
     } else {
-      erroresTemp.nPartido = '';
+      erroresTemp.numeroPartido = '';
     }
   
     return isValid;

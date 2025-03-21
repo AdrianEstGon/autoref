@@ -20,25 +20,25 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
   const navigate = useNavigate();
 
   const [nuevoPartido, setNuevoPartido] = useState({
-    equipoLocal: '',
-    equipoVisitante: '',
+    equipoLocalId: '',
+    equipoVisitanteId: '',
     fecha: '',
     hora: '',
     lugarId: '', // ID del polideportivo
-    categoria: '', // Categoria seleccionada
+    categoriaId: '', // Categoria seleccionada
     jornada: '',
-    nPartido: '',
+    numeroPartido: '',
   });
 
   const [errores, setErrores] = useState({
-    equipoLocal: '',
-    equipoVisitante: '',
+    equipoLocalId: '',
+    equipoVisitanteId: '',
     fecha: '',
     hora: '',
     lugarId: '',
-    categoria: '',
+    categoriaId: '',
     jornada: '',
-    nPartido: '',
+    numeroPartido: '',
   });
 
   const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]); // Lista de polideportivos
@@ -66,10 +66,10 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
 
   // Cuando se selecciona una categoría, filtramos los equipos
   useEffect(() => {
-    if (nuevoPartido.categoria) {
+    if (nuevoPartido.categoriaId) {
       const fetchEquipos = async () => {
         try {
-          const equiposData = await equiposService.getEquiposPorCategoria(nuevoPartido.categoria); // Asumimos que tienes un endpoint que filtra los equipos por categoría
+          const equiposData = await equiposService.getEquiposPorCategoria(nuevoPartido.categoriaId); // Asumimos que tienes un endpoint que filtra los equipos por categoría
           setEquiposFiltrados(equiposData);
 
           // Si no hay equipos para la categoría seleccionada, mostramos un toast informativo
@@ -89,7 +89,7 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
 
       fetchEquipos();
     }
-  }, [nuevoPartido.categoria]);
+  }, [nuevoPartido.categoriaId]);
 
   const handleChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = e.target;
@@ -132,14 +132,14 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
       <DialogTitle>Agregar Nuevo Partido</DialogTitle>
       <DialogContent sx={{ overflowY: 'auto' }}>
         {/* Paso 1: Selección de categoría */}
-        <FormControl fullWidth margin="normal" error={!!errores.categoria}>
+        <FormControl fullWidth margin="normal" error={!!errores.categoriaId}>
           <Autocomplete
             options={categorias}
             getOptionLabel={(option) => option.nombre}
-            value={categorias.find(categoria => categoria.id === nuevoPartido.categoria) || null}
+            value={categorias.find(categoria => categoria.id === nuevoPartido.categoriaId) || null}
             onChange={(_, newValue) => setNuevoPartido(prevState => ({
               ...prevState,
-              categoria: newValue ? newValue.id : '',
+              categoriaId: newValue ? newValue.id : '',
             }))}
             disablePortal
             PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
@@ -147,8 +147,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
               <TextField
                 {...params}
                 label="Categoría"
-                error={!!errores.categoria}
-                helperText={errores.categoria}
+                error={!!errores.categoriaId}
+                helperText={errores.categoriaId}
                 variant="outlined"
               />
             )}
@@ -156,14 +156,14 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
         </FormControl>
 
         {/* Resto del formulario con equipos filtrados por categoría */}
-        <FormControl fullWidth margin="normal" error={!!errores.equipoLocal}>
+        <FormControl fullWidth margin="normal" error={!!errores.equipoLocalId}>
           <Autocomplete
             options={equiposFiltrados}
             getOptionLabel={(option) => option.nombre}
-            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoLocal) || null}
+            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoLocalId) || null}
             onChange={(_, newValue) => setNuevoPartido(prevState => ({
               ...prevState,
-              equipoLocal: newValue ? newValue.id : '',
+              equipoLocalId: newValue ? newValue.id : '',
             }))}
             disablePortal
             PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
@@ -171,22 +171,22 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
               <TextField
                 {...params}
                 label="Equipo Local"
-                error={!!errores.equipoLocal}
-                helperText={errores.equipoLocal}
+                error={!!errores.equipoLocalId}
+                helperText={errores.equipoLocalId}
                 disabled={equiposFiltrados.length === 0} // Deshabilitado si no hay equipos disponibles
               />
             )}
           />
         </FormControl>
 
-        <FormControl fullWidth margin="normal" error={!!errores.equipoVisitante}>
+        <FormControl fullWidth margin="normal" error={!!errores.equipoVisitanteId}>
           <Autocomplete
             options={equiposFiltrados}
             getOptionLabel={(option) => option.nombre}
-            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoVisitante) || null}
+            value={equiposFiltrados.find(equipo => equipo.id === nuevoPartido.equipoVisitanteId) || null}
             onChange={(_, newValue) => setNuevoPartido(prevState => ({
               ...prevState,
-              equipoVisitante: newValue ? newValue.id : '',
+              equipoVisitanteId: newValue ? newValue.id : '',
             }))}
             disablePortal
             PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
@@ -194,8 +194,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
               <TextField
                 {...params}
                 label="Equipo Visitante"
-                error={!!errores.equipoVisitante}
-                helperText={errores.equipoVisitante}
+                error={!!errores.equipoVisitanteId}
+                helperText={errores.equipoVisitanteId}
                 disabled={equiposFiltrados.length === 0} // Deshabilitado si no hay equipos disponibles
               />
             )}
@@ -264,11 +264,11 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
           label="Número de Partido"
           fullWidth
           margin="normal"
-          name="nPartido"
-          value={nuevoPartido.nPartido}
+          name="numeroPartido"
+          value={nuevoPartido.numeroPartido}
           onChange={handleChange}
-          error={!!errores.nPartido}
-          helperText={errores.nPartido}
+          error={!!errores.numeroPartido}
+          helperText={errores.numeroPartido}
         />
       </DialogContent>
       <DialogActions>

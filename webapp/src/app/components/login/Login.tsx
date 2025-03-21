@@ -18,6 +18,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Toaster, toast } from 'react-hot-toast';
 import userService from '../../services/UserService';
+import rolesService from '../../services/RolService'; // Add this line
 
 function Login() {
   const [logo, setLogo] = useState<string>('');
@@ -28,9 +29,6 @@ function Login() {
 
   useEffect(() => {
     const userLogged = window.localStorage.getItem('userLogged');
-    if (userLogged) {
-      window.location.href = '/autoRef/home';
-    }
 
     async function fetchData() {
       setLogo('./logo.png');
@@ -65,7 +63,7 @@ function Login() {
         // Llamada al servicio para verificar el usuario y la contraseña
         let userLogin = await checkUserAndPassword(email, password);
   
-        if (userLogin.success) {
+        if (userLogin.message === 'Inicio de sesión exitoso') {
       
           const token = userLogin.token; 
   
@@ -75,6 +73,12 @@ function Login() {
             userLogin.timestamp = new Date();
             window.localStorage.setItem('userLogged', JSON.stringify(userLogin));
           }
+  
+          // Obtener roles del usuario
+          /*const roles = await rolesService.getRolesByUserId(userLogin.id);
+          if (roles.some((role: { name: string; }) => role.name === 'Admin')) {
+            window.localStorage.setItem('userRole', 'Admin');
+          } */
   
           toast.success('Inicio de sesión exitoso', { duration: 1500 });
         }
@@ -88,7 +92,7 @@ function Login() {
       toast.error('Falta completar algún campo', { duration: 1500 });
       return false; // El login falló debido a campos vacíos
     }
-  };
+};
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
