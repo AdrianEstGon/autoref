@@ -43,7 +43,8 @@ const PartidosView: React.FC = () => {
   const fetchPartidos = async () => {
     try {
       const data = await partidosService.getPartidos();
-      const sortedPartidos = data.sort((a: { fecha: string; hora: string; }, b: { fecha: string; hora: string; }) => new Date(a.fecha + 'T' + a.hora).getTime() - new Date(b.fecha + 'T' + b.hora).getTime());
+
+      const sortedPartidos = data.sort((a: any, b: any) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
       setPartidos(sortedPartidos);
     } catch (error) {
       console.error('Error al obtener los partidos:', error);
@@ -51,7 +52,7 @@ const PartidosView: React.FC = () => {
   };
   useEffect(() => {
     fetchPartidos();
-  }, [rowsPerPage, page]); 
+  }, []); 
   
   useEffect(() => {
     const startIndex = page * rowsPerPage;
@@ -81,16 +82,6 @@ const PartidosView: React.FC = () => {
         toast.error('Hubo un error al eliminar el partido');
       }
     }
-  };
-
-  const handleOpenDeleteDialog = (id: number) => {
-    setPartidoToDelete(id);
-    setOpenConfirmDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenConfirmDialog(false);
-    setPartidoToDelete(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -178,7 +169,7 @@ const PartidosView: React.FC = () => {
             }
   
             if (item.EquipoLocal) {
-              const equipoLocalData = await equiposService.getEquipoByName(item.EquipoLocal);
+              const equipoLocalData = await equiposService.getEquipoByNameAndCategory(item.EquipoLocal, item.Categoria);
               if (equipoLocalData) {
                 equipoLocalId = equipoLocalData.id;
                 equipoLocal = equipoLocalData.nombre;
@@ -272,7 +263,7 @@ const PartidosView: React.FC = () => {
               </TableHead>
               <TableBody>
                 {partidos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(partido => (
-                  <TableRow key={partido.id}>
+                  <TableRow key={partido.id ?? `temp-${Math.random()}`}>
                     <TableCell>{formatDate(partido.fecha)}</TableCell>
                     <TableCell>{formatTime(partido.hora)}</TableCell>
                     <TableCell>{partido.lugar || '-'}</TableCell>
