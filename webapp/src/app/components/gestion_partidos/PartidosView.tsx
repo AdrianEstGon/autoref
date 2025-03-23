@@ -177,7 +177,7 @@ const PartidosView: React.FC = () => {
             }
   
             if (item.EquipoVisitante) {
-              const equipoVisitanteData = await equiposService.getEquipoByName(item.EquipoVisitante);
+              const equipoVisitanteData = await equiposService.getEquipoByNameAndCategory(item.EquipoVisitante, item.Categoria);
               if (equipoVisitanteData) {
                 equipoVisitanteId = equipoVisitanteData.id;
                 equipoVisitante = equipoVisitanteData.nombre;
