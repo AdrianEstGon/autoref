@@ -1,0 +1,8 @@
+.rbc-day-hover {
+    transition: background-color 0.3s ease;
+  }
+  
+  .rbc-day-hover:hover {
+    background-color: #e0e0e0; /* Puedes cambiar este color al que prefieras */
+  }
+  

@@ -47,7 +47,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App" background-color="#F5F5DC">
       <ToastContainer />
       <AppRouter />
       {userLogged && hasSessionExpired(userLogged)}

@@ -93,7 +93,7 @@ const NavigationBar = () => {
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 2 }}>
               <Button color="inherit" onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
               <Button color="inherit">Mi Historial</Button>
-              <Button color="inherit">Disponibilidad</Button>
+              <Button color="inherit" onClick={() => navigate('/miDisponibilidad')}>Disponibilidad</Button>
 
               {userRole === 'Admin' && (
                 <>
