@@ -72,6 +72,7 @@ function Login() {
             window.localStorage.setItem('authToken', token);
             userLogin.timestamp = new Date();
             window.localStorage.setItem('userLogged', JSON.stringify(userLogin));
+            window.localStorage.setItem('userId', userLogin.id);
           }
   
           // Obtener roles del usuario
