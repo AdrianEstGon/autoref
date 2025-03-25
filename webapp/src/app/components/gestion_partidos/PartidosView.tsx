@@ -301,6 +301,8 @@ const PartidosView: React.FC = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
           />
 
           <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
