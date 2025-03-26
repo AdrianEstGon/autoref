@@ -312,7 +312,7 @@ const PartidosView: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-              <Button onClick={handleDelete} color="secondary">Eliminar</Button>
+              <Button onClick={handleDelete} color="error">Eliminar</Button>
             </DialogActions>
           </Dialog>
         </Container>

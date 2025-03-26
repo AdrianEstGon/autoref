@@ -21,6 +21,7 @@ import {
 import { PhotoCamera } from "@mui/icons-material";
 import NavBar from "../barra_navegacion/NavBar";
 import userService from "../../services/UserService";
+import clubService from "../../services/ClubService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -56,6 +57,7 @@ const PerfilView = () => {
 
   // Estado para manejar el Dialog de cambiar contraseña
   const [openDialog, setOpenDialog] = useState(false);
+  const [clubNombre, setClubNombre] = useState("");
 
   useEffect(() => {
     const obtenerPerfil = async () => {
@@ -77,10 +79,15 @@ const PerfilView = () => {
             ciudad: datosUsuario.ciudad || "",
             codigoPostal: datosUsuario.codigoPostal || "",
             nivel: datosUsuario.nivel || "",
-            clubVinculado: datosUsuario.clubVinculado || "",
+            clubVinculado: datosUsuario.clubVinculadoId || "",
             email: datosUsuario.email || "",
             licencia: datosUsuario.licencia || "",
           });
+
+          // Obtener el nombre del club vinculado
+          if (datosUsuario.clubVinculadoId) {
+            obtenerClubNombre(datosUsuario.clubVinculadoId);
+          }
         }
       } catch (error) {
         console.error("Error al obtener los datos del usuario:", error);
@@ -89,6 +96,17 @@ const PerfilView = () => {
 
     obtenerPerfil();
   }, []);
+
+    // Función para obtener el nombre del club
+    const obtenerClubNombre = async (clubId: string) => {
+      try {
+        const club = await clubService.getClubById(clubId);
+        setClubNombre(club.nombre || "Club no encontrado");
+      } catch (error) {
+        console.error("Error al obtener el nombre del club:", error);
+        setClubNombre("Club no encontrado");
+      }
+    };
 
   const manejarCambioFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -205,7 +223,7 @@ const PerfilView = () => {
 
                 </Grid>
                 {Object.entries(perfil).map(([key, value]) => (
-                  key !== "fotoPerfil" && (
+                  key !== "fotoPerfil" && key !== "clubVinculado" && (
                     <Grid item xs={12} md={6} key={key}>
                       <TextField
                         fullWidth
@@ -227,6 +245,22 @@ const PerfilView = () => {
                     </Grid>
                   )
                 ))}
+                 {/* Campo del nombre del club */}
+                 <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Club Vinculado"
+                    value={clubNombre} // Se muestra el nombre del club en lugar del ID
+                    InputProps={{ readOnly: true }}
+                    variant="filled"
+                    sx={{
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: 1,
+                      '& .MuiInputBase-root': { border: 'none' },
+                      '& .MuiInputLabel-root': { color: '#666' },
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <Button
                     variant="outlined"

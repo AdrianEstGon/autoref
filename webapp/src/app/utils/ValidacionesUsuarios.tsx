@@ -1,5 +1,12 @@
 // validaciones.ts
-export function validaciones(nuevoUsuario: { nombre: string; primerApellido: string; segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculado: string; licencia: string; username: string; email: string; password: string; direccion: string; pais: string; region: string; ciudad: string; codigoPostal: string; esAdmin: boolean; }, erroresTemp: { nombre: string; primerApellido: string; segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculado: string; licencia: string; username: string; email: string; password: string; direccion: string; pais: string; region: string; ciudad: string; codigoPostal: string; esAdmin: string; }, isValid: boolean) {
+export function validaciones(nuevoUsuario: { nombre: string; primerApellido: string; 
+  segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculadoId: string; 
+  licencia: string; username: string; email: string; password: string; direccion: string; pais: string; 
+  region: string; ciudad: string; codigoPostal: string; esAdmin: boolean; }, 
+  erroresTemp: { nombre: string; primerApellido: string; segundoApellido: string; fechaNacimiento: string; 
+    nivel: string; clubVinculadoId: string; licencia: string; username: string; email: string; password: string; 
+    direccion: string; pais: string; region: string; ciudad: string; codigoPostal: string; esAdmin: string; }, isValid: boolean) {
+      
   if (!validarNombre(nuevoUsuario.nombre)) {
     erroresTemp.nombre = 'Nombre no válido. Solo se permiten caracteres alfabéticos y espacios.';
     isValid = false;
@@ -14,7 +21,7 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.primerApellido = '';
   }
 
-  if (nuevoUsuario.segundoApellido && !validarNombre(nuevoUsuario.segundoApellido)) {
+  if (validarNombre(nuevoUsuario.segundoApellido)) {
     erroresTemp.segundoApellido = 'Segundo apellido no válido. Solo se permiten caracteres alfabéticos y espacios.';
     isValid = false;
   } else {
@@ -49,8 +56,8 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.nivel = '';
   }
 
-  if (!nuevoUsuario.clubVinculado) {
-    erroresTemp.clubVinculado = '';
+  if (!nuevoUsuario.clubVinculadoId) {
+    erroresTemp.clubVinculadoId = '';
   }
 
   if (!nuevoUsuario.fechaNacimiento) {

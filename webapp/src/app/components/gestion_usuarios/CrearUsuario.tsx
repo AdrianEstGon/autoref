@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
-import { Autocomplete } from '@mui/material';
-import { Popper } from '@mui/material'; // Importa Popper
-import authService from '../../services/UserService'; 
-import { toast } from 'react-toastify'; 
-import { clubes, niveles } from './UserUtils';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormControlLabel, Checkbox, Autocomplete, Popper } from '@mui/material';
+import authService from '../../services/UserService';
+import clubsService from '../../services/ClubService'; // Importamos el servicio de clubes
+import { toast } from 'react-toastify';
+import { niveles } from './UserUtils';
 import { validaciones } from '../../utils/ValidacionesUsuarios';
 
 interface CrearUsuarioProps {
@@ -14,7 +13,6 @@ interface CrearUsuarioProps {
   onSave: (usuario: any) => void;
 }
 
-// Actualizamos el tipo para permitir que 'clubVinculado' sea 'string | null'
 const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) => {
   const navigate = useNavigate();
 
@@ -24,7 +22,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculado: '', // Se mantiene como string
+    clubVinculadoId: '', // Se mantiene como string
     licencia: '',
     username: '',
     email: '',
@@ -43,7 +41,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculado: '', 
+    clubVinculadoId: '', 
     licencia: '',
     username: '',
     email: '',
@@ -56,11 +54,27 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     esAdmin: ''
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }> | any) => {
+  const [clubes, setClubes] = useState<any[]>([]); // Estado para almacenar los clubes
+
+  // Llamada a la API para obtener los clubes
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const clubesData = await clubsService.getClubs(); // Obtener los clubes desde el servicio
+        setClubes(clubesData); // Guardar los clubes en el estado
+      } catch (error) {
+        toast.error("Error al cargar los clubes");
+      }
+    };
+
+    fetchClubs(); // Obtener los clubes cuando el componente se monta
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNuevoUsuario(prevState => ({
       ...prevState,
-      [name as string]: value
+      [name]: value
     }));
   };
 
@@ -103,166 +117,66 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
   };
 
   return (
-    <>
-      <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>Agregar Nuevo Usuario</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Nombre"
-            fullWidth
-            margin="normal"
-            name="nombre"
-            value={nuevoUsuario.nombre}
-            onChange={handleChange}
-            error={!!errores.nombre}
-            helperText={errores.nombre}
-          />
-          <TextField
-            label="Primer Apellido"
-            fullWidth
-            margin="normal"
-            name="primerApellido"
-            value={nuevoUsuario.primerApellido}
-            onChange={handleChange}
-            error={!!errores.primerApellido}
-            helperText={errores.primerApellido}
-          />
-          <TextField
-            label="Segundo Apellido"
-            fullWidth
-            margin="normal"
-            name="segundoApellido"
-            value={nuevoUsuario.segundoApellido}
-            onChange={handleChange}
-            error={!!errores.segundoApellido}
-            helperText={errores.segundoApellido}
-          />
-          
-          <TextField 
-            label="Fecha de Nacimiento" 
-            type="date" 
-            fullWidth 
-            margin="normal" 
-            name="fechaNacimiento"
-            value={nuevoUsuario.fechaNacimiento}
-            onChange={handleChange}
-            error={!!errores.fechaNacimiento}
-            helperText={errores.fechaNacimiento}
-            InputLabelProps={{ shrink: true }}
-          />
+    <Dialog open={open} onClose={handleCancel}>
+      <DialogTitle>Agregar Nuevo Usuario</DialogTitle>
+      <DialogContent>
+        {/* Campos del formulario */}
+        <TextField label="Nombre" fullWidth margin="normal" name="nombre" value={nuevoUsuario.nombre} onChange={handleChange} error={!!errores.nombre} helperText={errores.nombre} />
+        <TextField label="Primer Apellido" fullWidth margin="normal" name="primerApellido" value={nuevoUsuario.primerApellido} onChange={handleChange} error={!!errores.primerApellido} helperText={errores.primerApellido} />
+        <TextField label="Segundo Apellido" fullWidth margin="normal" name="segundoApellido" value={nuevoUsuario.segundoApellido} onChange={handleChange} error={!!errores.segundoApellido} helperText={errores.segundoApellido} />
+        <TextField label="Fecha de Nacimiento" type="date" fullWidth margin="normal" name="fechaNacimiento" value={nuevoUsuario.fechaNacimiento} onChange={handleChange} error={!!errores.fechaNacimiento} helperText={errores.fechaNacimiento} InputLabelProps={{ shrink: true }} />
 
-          {/* Nivel Select as Autocomplete */}
-          <FormControl fullWidth margin="normal" error={!!errores.nivel}>
-            <Autocomplete
-              options={niveles}
-              value={nuevoUsuario.nivel}
-              onChange={(_, newValue) => {
-                setNuevoUsuario(prevState => ({ ...prevState, nivel: newValue ?? '' }));
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Nivel"
-                  error={!!errores.nivel}
-                  helperText={errores.nivel}
-                />
-              )}
-              disablePortal
-              PopperComponent={(props) => {
-                return <Popper {...props} placement="bottom-start" />;
-              }}
-            />
-          </FormControl>
+        {/* Nivel Select as Autocomplete */}
+        <FormControl fullWidth margin="normal" error={!!errores.nivel}>
+          <Autocomplete
+            options={niveles}
+            value={nuevoUsuario.nivel}
+            onChange={(_, newValue) => {
+              setNuevoUsuario(prevState => ({ ...prevState, nivel: newValue ?? '' }));
+            }}
+            renderInput={(params) => (
+              <TextField {...params} label="Nivel" error={!!errores.nivel} helperText={errores.nivel} />
+            )}
+            disablePortal
+            PopperComponent={(props) => {
+              return <Popper {...props} placement="bottom-start" />;
+            }}
+          />
+        </FormControl>
 
-          {/* Club Vinculado Select as Autocomplete */}
-          <FormControl fullWidth margin="normal">
-            <Autocomplete
-              options={clubes}
-              value={nuevoUsuario.clubVinculado}
-              onChange={(_, newValue) => {
-                // Si 'newValue' es nulo, establecemos un valor vacío en lugar de null
-                setNuevoUsuario(prevState => ({ ...prevState, clubVinculado: newValue ?? '' }));
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Club Vinculado"
-                  error={!!errores.clubVinculado}
-                  helperText={errores.clubVinculado}
-                />
-              )}
-              disablePortal
-              PopperComponent={(props) => {
-                return <Popper {...props} placement="bottom-start" />;
-              }}
-            />
-          </FormControl>
+        {/* Club Vinculado Select as Autocomplete */}
+        <FormControl fullWidth margin="normal">
+        <Autocomplete
+          options={clubes}
+          getOptionLabel={(option) => option?.nombre || ""}
+          value={clubes.find(club => club.id === nuevoUsuario.clubVinculadoId) || null}
+          onChange={(_, newValue) => {
+            setNuevoUsuario(prevState => ({ ...prevState, clubVinculadoId: newValue?.id || '' }));
+          }}
+          renderInput={(params) => (
+            <TextField {...params} label="Club Vinculado" error={!!errores.clubVinculadoId} helperText={errores.clubVinculadoId} />
+          )}
+          disablePortal
+          PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
+        />
+        </FormControl>
 
-          <TextField
-            label="Correo Electrónico"
-            fullWidth
-            margin="normal"
-            name="email"
-            value={nuevoUsuario.email}
-            onChange={handleChange}
-            error={!!errores.email}
-            helperText={errores.email}
-          />
-          <TextField
-            label="Licencia"
-            fullWidth
-            margin="normal"
-            name="licencia"
-            value={nuevoUsuario.licencia}
-            onChange={handleChange}
-            error={!!errores.licencia}
-            helperText={errores.licencia}
-          />
-          <TextField
-            label="Código Postal"
-            fullWidth
-            margin="normal"
-            name="codigoPostal"
-            value={nuevoUsuario.codigoPostal}
-            onChange={handleChange}
-            error={!!errores.codigoPostal}
-            helperText={errores.codigoPostal}
-          />
-          <TextField label="Dirección" fullWidth margin="normal" name="direccion" value={nuevoUsuario.direccion} onChange={handleChange} error={!!errores.direccion} helperText={errores.direccion} />
-          <TextField label="País" fullWidth margin="normal" name="pais" value={nuevoUsuario.pais} onChange={handleChange} error={!!errores.pais} helperText={errores.pais} />
-          <TextField
-            label="Provincia"  
-            fullWidth
-            margin="normal"
-            name="region"  
-            value={nuevoUsuario.region}
-            onChange={handleChange}
-            error={!!errores.region}
-            helperText={errores.region}
-          />
+        {/* Resto de campos */}
+        <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={nuevoUsuario.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
+        <TextField label="Licencia" fullWidth margin="normal" name="licencia" value={nuevoUsuario.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
+        <TextField label="Código Postal" fullWidth margin="normal" name="codigoPostal" value={nuevoUsuario.codigoPostal} onChange={handleChange} error={!!errores.codigoPostal} helperText={errores.codigoPostal} />
+        <TextField label="Dirección" fullWidth margin="normal" name="direccion" value={nuevoUsuario.direccion} onChange={handleChange} error={!!errores.direccion} helperText={errores.direccion} />
+        <TextField label="País" fullWidth margin="normal" name="pais" value={nuevoUsuario.pais} onChange={handleChange} error={!!errores.pais} helperText={errores.pais} />
+        <TextField label="Provincia" fullWidth margin="normal" name="region" value={nuevoUsuario.region} onChange={handleChange} error={!!errores.region} helperText={errores.region} />
+        <TextField label="Municipio" fullWidth margin="normal" name="ciudad" value={nuevoUsuario.ciudad} onChange={handleChange} error={!!errores.ciudad} helperText={errores.ciudad} />
 
-          <TextField
-            label="Municipio" 
-            fullWidth
-            margin="normal"
-            name="ciudad"  
-            value={nuevoUsuario.ciudad}
-            onChange={handleChange}
-            error={!!errores.ciudad}
-            helperText={errores.ciudad}
-          />
-
-          <FormControlLabel
-            control={<Checkbox checked={nuevoUsuario.esAdmin} onChange={handleCheckboxChange} />}
-            label="Asignar rol de Administrador"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancel} color="error">Cancelar</Button>
-          <Button onClick={handleSave} color="primary">Guardar</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        <FormControlLabel control={<Checkbox checked={nuevoUsuario.esAdmin} onChange={handleCheckboxChange} />} label="Asignar rol de Administrador" />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancel} color="error">Cancelar</Button>
+        <Button onClick={handleSave} color="primary">Guardar</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

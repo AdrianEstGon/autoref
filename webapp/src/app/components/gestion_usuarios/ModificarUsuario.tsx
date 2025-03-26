@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, SelectChangeEvent } from '@mui/material';
 import authService from '../../services/UserService'; 
+import clubsService from '../../services/ClubService'; // Importa el servicio de clubes
 import { validaciones } from '../../utils/ValidacionesUsuarios';
 import { toast } from 'react-toastify';
-import { clubes, niveles } from './UserUtils';
+import { niveles } from './UserUtils';
 
 interface ModificarUsuarioProps {
   open: boolean;
@@ -20,45 +21,71 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   
   const [usuarioEditado, setUsuarioEditado] = useState({ ...usuario });
   const [errores, setErrores] = useState({
-      nombre: '',
-      primerApellido: '',
-      segundoApellido: '',
-      fechaNacimiento: '',
-      nivel: '',
-      clubVinculado: '', 
-      licencia: '',
-      username: '',
-      email: '',
-      password: '',
-      direccion: '',
-      pais: '',
-      region: '',
-      ciudad: '',
-      codigoPostal: '',
-      esAdmin: ''
-    });
-
+    nombre: '',
+    primerApellido: '',
+    segundoApellido: '',
+    fechaNacimiento: '',
+    nivel: '',
+    clubVinculadoId: '', 
+    licencia: '',
+    username: '',
+    email: '',
+    password: '',
+    direccion: '',
+    pais: '',
+    region: '',
+    ciudad: '',
+    codigoPostal: '',
+    esAdmin: ''
+  });
+  const [clubes, setClubes] = useState<any[]>([]); // Estado para almacenar los clubes
+  
   useEffect(() => {
     if (usuario) {
       setUsuarioEditado({
         ...usuario,
       });
     }
+
+    // Obtener los clubes cuando el componente se monta
+    const fetchClubs = async () => {
+      try {
+        const clubesData = await clubsService.getClubs(); // Obtener los clubes desde el servicio
+        setClubes(clubesData); // Guardar los clubes en el estado
+      } catch (error) {
+        toast.error("Error al cargar los clubes");
+      }
+    };
+
+    fetchClubs();
   }, [usuario]);
-  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
   
-    setUsuarioEditado((prevState: any) => ({
-      ...prevState,
-      [name]: value
-    }));
+    if (name === 'clubVinculado') {
+      // Encontramos el club por su ID
+      const selectedClub = clubes.find(club => club.id === value);
+      
+      // Si encontramos el club, actualizamos tanto el ID como el nombre
+      if (selectedClub) {
+        setUsuarioEditado((prevState: any) => ({
+          ...prevState,
+          clubVinculadoId: selectedClub.id,  // ID del club
+          clubVinculado: selectedClub.nombre  // Nombre del club
+        }));
+      }
+    } else {
+      // Para otros campos, solo actualizamos el valor correspondiente
+      setUsuarioEditado((prevState: any) => ({
+        ...prevState,
+        [name]: value
+      }));
+    }
   };
   
-
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsuarioEditado((prevState: any) => ({
       ...prevState,
@@ -67,7 +94,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   };
 
   const handleSave = async () => {
-    let erroresTemp = { ...errores};
+    let erroresTemp = { ...errores };
     let isValid = true;
 
     // Validaciones
@@ -122,12 +149,12 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <InputLabel>Club Vinculado</InputLabel>
             <Select
               name="clubVinculado"
-              value={usuarioEditado.clubVinculado}
+              value={usuarioEditado.clubVinculadoId} // Aquí enviamos el ID del club
               onChange={handleChange}
             >
               {clubes.map((club, index) => (
-                <MenuItem key={index} value={club}>
-                  {club}
+                <MenuItem key={index} value={club.id}> {/* Usamos el ID como valor */}
+                  {club.nombre} {/* Mostramos el nombre del club */}
                 </MenuItem>
               ))}
             </Select>
@@ -153,4 +180,3 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
 };
 
 export default ModificarUsuario;
-

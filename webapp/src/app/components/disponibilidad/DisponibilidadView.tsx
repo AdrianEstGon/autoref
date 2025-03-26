@@ -408,7 +408,7 @@ const DisponibilidadView = () => {
               />
             </DialogContent>
             <DialogActions sx={{ backgroundColor: '#F0F4F8' }}>
-              <Button onClick={handleCloseDialog} color="secondary">Cancelar</Button>
+              <Button onClick={handleCloseDialog} color="error">Cancelar</Button>
               <Button onClick={handleSave} color="primary" variant="contained">Guardar</Button>
             </DialogActions>
           </Dialog>

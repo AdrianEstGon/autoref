@@ -59,7 +59,7 @@ const NavigationBar = () => {
           >
             <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
             <MenuItem onClick={() => handleNavigate('/gestionPartidos/partidosView')}>Gestión de partidos</MenuItem>
-            <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
+            <MenuItem onClick={() => handleNavigate('/gestionDesignaciones/panelDesignaciones')}>Gestión de designaciones</MenuItem>
           </Menu>
         </>
       )}
@@ -107,7 +107,7 @@ const NavigationBar = () => {
                   >
                     <MenuItem onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>Gestión de usuarios</MenuItem>
                     <MenuItem onClick={() => handleNavigate('/gestionPartidos/partidosView')}>Gestión de partidos</MenuItem>
-                    <MenuItem onClick={() => handleNavigate('/gestionDesignaciones')}>Gestión de designaciones</MenuItem>
+                    <MenuItem onClick={() => handleNavigate('/gestionDesignaciones/panelDesignaciones')}>Gestión de designaciones</MenuItem>
                   </Menu>
                 </>
               )}

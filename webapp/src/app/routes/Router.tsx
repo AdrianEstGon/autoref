@@ -10,6 +10,7 @@ import PartidosView from '../components/gestion_partidos/PartidosView';
 import CrearPartido from '../components/gestion_partidos/CrearPartido';
 import ModificarPartido from '../components/gestion_partidos/ModificarPartido';
 import DisponibilidadView from '../components/disponibilidad/DisponibilidadView';
+import PanelDesignacionesView from '../components/gestion_designaciones/PanelDesignacionesView';
 /*import MisPartidos from '../partidos/MisPartidos';  // Tu componente para la vista de partidos
 import Disponibilidad from '../disponibilidad/Disponibilidad';  // Componente para la vista de disponibilidad
 import PerfilUsuario from '../usuario/PerfilUsuario';  // Componente para el perfil del usuario
@@ -39,6 +40,7 @@ const Router = () => {
                 <Route path="/gestionPartidos/partidosView" element={<PartidosView />} />
                 <Route path="/gestionPartidos/crearPartido" element={<CrearPartido open={true} onClose={() => {}} onSave={() => {}} />} />
                 <Route path="/gestionPartidos/modificarPartido" element={<ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />} />
+                <Route path="/gestionDesignaciones/panelDesignaciones" element={<PanelDesignacionesView />} />
                 {/* Rutas privadas */}
 
                 {/* Rutas de las diferentes vistas de usuario */}
