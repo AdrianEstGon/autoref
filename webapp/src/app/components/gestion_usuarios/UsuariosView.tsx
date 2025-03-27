@@ -117,13 +117,11 @@ const UsuariosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      {/* Aplicar el fondo amarillo a toda la ventana */}
-      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh' }}>
-        <Container sx={{  backgroundColor: '#F5F5DC', padding: 3, borderRadius: 2 }}>
+      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh', pt: 3, pb: 3 }}>
+        <Container sx={{ backgroundColor: '#F5F5DC', borderRadius: 2, minWidth: '90%' }}>
           <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
             <Table>
               <TableHead>
-                {/* Título como fila en la tabla */}
                 <TableRow>
                   <TableCell colSpan={9} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
                     Gestión de Usuarios
@@ -187,7 +185,7 @@ const UsuariosView: React.FC = () => {
           />
         </Container>
       </Box>
-
+  
       {/* Diálogo de confirmación */}
       <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
@@ -201,6 +199,6 @@ const UsuariosView: React.FC = () => {
       </Dialog>
     </>
   );
-};
-
-export default UsuariosView;
+}
+  
+  export default UsuariosView;
