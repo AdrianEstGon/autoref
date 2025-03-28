@@ -23,12 +23,22 @@ const getPartidos = async () => {
   }
 };
 
-const getPartidoById = async (id: number) => {
+const getPartidoById = async (id: any) => {
   try {
     const response = await axios.get(`${API_URL}/Partidos/${id}`, getAuthHeaders());
     return response.data;
   } catch (error) {
     console.error(`Error al obtener el partido con ID ${id}:`, error);
+    throw error;
+  }
+};
+
+const getPartidosByUserId = async (userId: any) => {
+  try {
+    const response = await axios.get(`${API_URL}/Partidos/Usuario/${userId}`, getAuthHeaders());
+    return response.data; // Retorna la lista de partidos del usuario
+  } catch (error) {
+    console.error(`Error al obtener los partidos del usuario con ID ${userId}:`, error);
     throw error;
   }
 };
@@ -63,4 +73,4 @@ const eliminarPartido = async (id: number) => {
   }
 };
 
-export default { getPartidos, getPartidoById, crearPartido, actualizarPartido, eliminarPartido };
+export default { getPartidos, getPartidoById, crearPartido, actualizarPartido, eliminarPartido, getPartidosByUserId };

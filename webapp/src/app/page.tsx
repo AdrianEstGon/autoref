@@ -5,6 +5,7 @@ import './page.css';
 import AppRouter from './routes/Router';
 import { ToastContainer } from 'react-toastify';
 import API_URL from '@/config';
+import GoogleMapsWrapper from './utils/GoogleMapsAPI';
 
 // Definir la estructura de los datos del usuario
 interface UserLogged {
@@ -47,11 +48,13 @@ function App() {
   }
 
   return (
-    <div className="App" background-color="#F5F5DC">
-      <ToastContainer />
-      <AppRouter />
-      {userLogged && hasSessionExpired(userLogged)}
-    </div>
+    <GoogleMapsWrapper>
+      <div className="App" background-color="#F5F5DC">
+        <ToastContainer />
+        <AppRouter />
+        {userLogged && hasSessionExpired(userLogged)}
+      </div>
+    </GoogleMapsWrapper>
   );
 }
 
