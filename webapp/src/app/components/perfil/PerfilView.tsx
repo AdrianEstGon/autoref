@@ -204,128 +204,93 @@ const PerfilView = () => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        backgroundImage: "url('/fondo4.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <NavBar />
-      <Box sx={{ background: "#F5F5DC", minHeight: "100vh", py: 5 }}>
-        <Container maxWidth="md">
-          <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#fff" }}>
-            <CardHeader title={<Typography variant="h5" fontWeight={600}>Perfil</Typography>} sx={{ textAlign: "center", pb: 0 }} />
-            <CardContent>
-              <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
-                  <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
-                  <Tooltip title="Modificar foto de perfil">
-                    <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
-                      <input hidden accept="image/*" type="file" onChange={(e) => manejarCambioFoto(e)} />
-                      {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
-                    </IconButton>
-                  </Tooltip>
-
-                </Grid>
-                {Object.entries(perfil).map(([key, value]) => (
-                  key !== "fotoPerfil" && key !== "clubVinculado" && (
-                    <Grid item xs={12} md={6} key={key}>
-                      <TextField
-                        fullWidth
-                        label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                        value={value}
-                        InputProps={{ readOnly: true }}
-                        variant="filled"
-                        sx={{
-                          backgroundColor: "#f5f5f5",
-                          borderRadius: 1,
-                          '& .MuiInputBase-root': {
-                            border: 'none',
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: '#666',
-                          }
-                        }}
-                      />
-                    </Grid>
-                  )
-                ))}
-                 {/* Campo del nombre del club */}
-                 <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Club Vinculado"
-                    value={clubNombre} // Se muestra el nombre del club en lugar del ID
-                    InputProps={{ readOnly: true }}
-                    variant="filled"
-                    sx={{
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 1,
-                      '& .MuiInputBase-root': { border: 'none' },
-                      '& .MuiInputLabel-root': { color: '#666' },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => setOpenDialog(true)} // Abre el diálogo de cambiar contraseña
-                    sx={{ mt: 3 }}
-                  >
-                    Modificar Contraseña
-                  </Button>
-                </Grid>
+      <Container
+        maxWidth="md"
+        sx={{
+          minHeight: "calc(100vh - 64px)", // Ajuste para la altura menos la navbar
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 5,
+        }}
+      >
+        <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#fff", width: "100%" }}>
+          <CardHeader
+            title={<Typography variant="h4" fontWeight={600}>Perfil</Typography>}
+            sx={{ textAlign: "center", pb: 0 }}
+          />
+          <CardContent>
+            <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+                <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
+                <Tooltip title="Modificar foto de perfil">
+                  <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
+                    <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
+                    {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
+                  </IconButton>
+                </Tooltip>
               </Grid>
-            </CardContent>
-          </Card>
-        </Container>
-      </Box>
-
-      {/* Diálogo de cambio de contraseña */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Cambiar Contraseña</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Contraseña Actual"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            sx={{ mb: 2, mt: 2 }}
-            error={!!oldPasswordError}
-            helperText={oldPasswordError}
-          />
-          <TextField
-            label="Nueva Contraseña"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            sx={{ mb: 2 }}
-            error={!!newPasswordError}
-            helperText={newPasswordError}
-          />
-          <TextField
-            label="Confirmar Nueva Contraseña"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            sx={{ mb: 2 }}
-            error={!!confirmPasswordError}
-            helperText={confirmPasswordError}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="error">
-            Cancelar
-          </Button>
-          <Button onClick={handlePasswordChange} color="primary">
-            Cambiar Contraseña
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <div />
-    </>
+              {Object.entries(perfil).map(([key, value]) =>
+                key !== "fotoPerfil" && key !== "clubVinculado" ? (
+                  <Grid item xs={12} md={6} key={key}>
+                    <TextField
+                      fullWidth
+                      label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      value={value}
+                      InputProps={{ readOnly: true }}
+                      variant="filled"
+                      sx={{
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: 1,
+                        '& .MuiInputBase-root': { border: 'none' },
+                        '& .MuiInputLabel-root': { color: '#666' },
+                      }}
+                    />
+                  </Grid>
+                ) : null
+              )}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Club Vinculado"
+                  value={clubNombre}
+                  InputProps={{ readOnly: true }}
+                  variant="filled"
+                  sx={{
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: 1,
+                    '& .MuiInputBase-root': { border: 'none' },
+                    '& .MuiInputLabel-root': { color: '#666' },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setOpenDialog(true)}
+                  sx={{ mt: 3 }}
+                >
+                  Modificar Contraseña
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 };
 

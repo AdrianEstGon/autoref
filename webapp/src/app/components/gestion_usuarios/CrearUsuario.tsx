@@ -61,7 +61,11 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     const fetchClubs = async () => {
       try {
         const clubesData = await clubsService.getClubs(); // Obtener los clubes desde el servicio
-        setClubes(clubesData); // Guardar los clubes en el estado
+        const sortedClubs = clubesData.sort((a: any, b: any) => {
+          // Ordenar los clubes alfabéticamente por el nombre
+          return a.nombre.localeCompare(b.nombre);
+        });
+        setClubes(sortedClubs); // Guardar los clubes ordenados en el estado
       } catch (error) {
         toast.error("Error al cargar los clubes");
       }

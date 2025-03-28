@@ -38,13 +38,13 @@ function App() {
   const hasSessionExpired = (dataUser: UserLogged) => {
     const currentTime = new Date().getTime();
     const userTime = new Date(dataUser.timestamp).getTime();
-    const oneHour = 60 * 60 * 1000;
-    if ((currentTime - userTime) >= oneHour) {
+    const twoHour = 60 * 60 * 1000 * 2;
+    if ((currentTime - userTime) >= twoHour) {
       window.localStorage.removeItem('userLogged');
       setUserLogged(null);
       window.location.href = '/';  // Redirige si la sesión ha expirado
     }
-    return (currentTime - userTime) >= oneHour;
+    return (currentTime - userTime) >= twoHour;
   }
 
   return (

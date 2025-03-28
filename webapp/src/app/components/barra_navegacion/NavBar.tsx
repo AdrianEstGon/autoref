@@ -46,8 +46,8 @@ const NavigationBar = () => {
     <Box sx={{ width: 250 }}>
       <Button color="inherit" fullWidth onClick={() => navigate('/miPerfil')}>Mi perfil</Button>
       <Button color="inherit" fullWidth onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
-      <Button color="inherit" fullWidth>Mi Historial</Button>
-      <Button color="inherit" fullWidth>Disponibilidad</Button>
+      <Button color="inherit" onClick={() => navigate('/miHistorial')} fullWidth>Mi Historial</Button>
+      <Button color="inherit" onClick={() => navigate('/miDisponibilidad')} fullWidth>Disponibilidad</Button>
       
       {userRole === 'Admin' && (
         <>
@@ -92,7 +92,7 @@ const NavigationBar = () => {
           {!isMobile && (
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', gap: 2 }}>
               <Button color="inherit" onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
-              <Button color="inherit">Mi Historial</Button>
+              <Button color="inherit" onClick={() => navigate('/miHistorial')}>Mi Historial</Button>
               <Button color="inherit" onClick={() => navigate('/miDisponibilidad')}>Disponibilidad</Button>
 
               {userRole === 'Admin' && (

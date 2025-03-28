@@ -23,7 +23,7 @@ import moment from "moment";
 import partidosService from "../../services/PartidoService";
 import { Link } from "react-router-dom";
 
-const DesignacionesView = () => {
+const HistorialDesignacionesView = () => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [partidos, setPartidos] = useState<any[]>([]);
   const [notificaciones, setNotificaciones] = useState([
@@ -42,15 +42,14 @@ const DesignacionesView = () => {
         // Verificar que la respuesta sea un array antes de aplicar filter
         if (Array.isArray(partidosDesignados)) {
           const partidosPasados = partidosDesignados.filter((partido) =>
-            moment(partido.fecha).isAfter(moment())
+            moment(partido.fecha).isBefore(moment())
           );
-          
           // Ordenar los partidos por fecha y hora (de antes a después)
-          const partidosOrdenados = partidosPasados.sort((a, b) => 
-            moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1
-          );
+            const partidosOrdenados = partidosPasados.sort((a, b) => 
+                moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1
+            );
 
-          setPartidos(partidosOrdenados);
+            setPartidos(partidosOrdenados);
         } else {
           setPartidos([]); // Evitar errores estableciendo un array vacío
         }
@@ -112,87 +111,87 @@ const DesignacionesView = () => {
               fontWeight="bold"
               sx={{ textAlign: "left", paddingBottom: 1 }}
             >
-              Mis Designaciones
+              Historial
             </Typography>
             <Box sx={{ width: "100%", borderBottom: "3px solid black" }} /> {/* Línea separadora */}
           </Box>
           <Grid container spacing={2}>
-            {partidos.length > 0 ? (
-              partidos.map((partido) => (
-                <Grid item xs={12} key={partido.id}>
-                  <Link to={`/detallesPartido/${partido.id}`} style={{ textDecoration: "none" }}>
-                    <Card
-                      sx={{
-                        backgroundColor: "#F0F4F8",
-                        borderRadius: "12px",
-                        width: "100%",
-                        cursor: "pointer",
-                        "&:hover": {
-                          boxShadow: 6,
-                          transform: "scale(1.05)",
-                          transition: "all 0.3s ease",
-                        },
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      <CardContent>
-                        <Typography variant="h6" color="primary">
-                          {partido.equipoLocal} - {partido.equipoVisitante}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Lugar: {partido.lugar}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Categoría: {partido.categoria}
-                        </Typography>
-  
-                        <Grid container spacing={2} mt={2}>
-                        <Grid item xs={12} sm={4}>
-                          {partido.arbitro1 && (
-                            <Typography variant="body2">
-                              Árbitro 1: {partido.arbitro1}
-                            </Typography>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                          {partido.arbitro2 && (
-                            <Typography variant="body2">
-                              Árbitro 2: {partido.arbitro2}
-                            </Typography>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                          {partido.anotador && (
-                            <Typography variant="body2">
-                              Anotador: {partido.anotador}
-                            </Typography>
-                          )}
-                        </Grid>
-                      </Grid>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </Grid>
-              ))
-            ) : (
-              <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
-                      padding: 4,
-                    }}
-                  >
-                    <Typography variant="h6" color="black" fontWeight="bold">
-                      No tienes partidos designados.
+  {partidos.length > 0 ? (
+    partidos.map((partido) => (
+      <Grid item xs={12} key={partido.id}>
+        <Link to={`/detallesPartido/${partido.id}`} style={{ textDecoration: "none" }}>
+          <Card
+            sx={{
+              backgroundColor: "#F0F4F8",
+              borderRadius: "12px",
+              width: "100%",
+              cursor: "pointer",
+              "&:hover": {
+                boxShadow: 6,
+                transform: "scale(1.05)",
+                transition: "all 0.3s ease",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <CardContent>
+              <Typography variant="h6" color="primary">
+                {partido.equipoLocal} - {partido.equipoVisitante}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Lugar: {partido.lugar}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Categoría: {partido.categoria}
+              </Typography>
+
+              <Grid container spacing={2} mt={2}>
+                <Grid item xs={12} sm={4}>
+                  {partido.arbitro1 && (
+                    <Typography variant="body2">
+                      Árbitro 1: {partido.arbitro1}
                     </Typography>
-                  </Box>
-            )}
-          </Grid>
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  {partido.arbitro2 && (
+                    <Typography variant="body2">
+                      Árbitro 2: {partido.arbitro2}
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  {partido.anotador && (
+                    <Typography variant="body2">
+                      Anotador: {partido.anotador}
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Link>
+      </Grid>
+    ))
+  ) : (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        padding: 4,
+      }}
+    >
+      <Typography variant="h6" color="black" fontWeight="bold">
+        No tienes partidos arbitrados.
+      </Typography>
+    </Box>
+  )}
+</Grid>
         </Paper>
       </Container>
   
@@ -224,4 +223,4 @@ const DesignacionesView = () => {
   );
 }  
 
-export default DesignacionesView;
+export default HistorialDesignacionesView;

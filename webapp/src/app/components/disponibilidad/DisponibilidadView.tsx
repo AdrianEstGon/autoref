@@ -280,12 +280,17 @@ const DisponibilidadView = () => {
   }, [currentDate]);
 
   return (
-    <div style={{ 
-      backgroundColor: '#F5F5DC', 
-      minHeight: '100vh', // Cambiamos de height a minHeight para permitir scroll
-      display: 'flex', 
-      flexDirection: 'column' 
-    }}>
+    <Box
+      sx={{
+        backgroundImage: "url('/fondo4.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <NavigationBar />
       <Container 
       sx={{ 
@@ -313,7 +318,7 @@ const DisponibilidadView = () => {
               marginTop: '2rem',
             }}
           >
-          <Typography variant="h6" textAlign="center" color="#333">
+          <Typography variant="h4" textAlign="center" color="#333">
             Mi Disponibilidad
           </Typography>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -415,7 +420,7 @@ const DisponibilidadView = () => {
 
         </Paper>
       </Container>
-    </div>
+      </Box>
     
   );
 };

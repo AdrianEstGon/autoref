@@ -61,8 +61,8 @@ const DesignacionesView = () => {
   
         setPartidos(partidosLista);
         setUsuarios(usuariosLista);
-        setCategorias(categoriasLista);
-        setLugares(lugaresLista);
+        setCategorias(categoriasLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar categorías alfabéticamente
+        setLugares(lugaresLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar polideportivos alfabéticamente
         setDisponibilidades(disponibilidadesLista);
   
         // Crear un mapa de disponibilidades para rápido acceso
@@ -146,7 +146,10 @@ const DesignacionesView = () => {
           const fechaPartido = moment(partido.fecha);
           return fechaPartido.isBetween(fechaInicio, fechaFin, "day", "[]");
         });
-  
+
+        // Ordenar los partidos por fecha
+        partidosFiltradosIniciales.sort((a: { fecha: moment.MomentInput; }, b: { fecha: moment.MomentInput; }) => moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1);
+
         setPartidosFiltrados(partidosFiltradosIniciales);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
@@ -155,7 +158,9 @@ const DesignacionesView = () => {
     };
   
     cargarDatos();
-  }, []);
+  }, [fechaInicio, fechaFin]);  // Asegúrate de que se recarguen los partidos cuando cambien las fechas
+
+
   
   const aplicarFiltro = () => {
     let filtrados = partidos.filter((partido) => {
@@ -207,7 +212,13 @@ const DesignacionesView = () => {
           </>
         )
       };
+    }).sort((a, b) => {
+      // Ordenar los árbitros alfabéticamente por su nombre completo
+      const nombreA = `${a.nombre} ${a.primerApellido} ${a.segundoApellido}`;
+      const nombreB = `${b.nombre} ${b.primerApellido} ${b.segundoApellido}`;
+      return nombreA.localeCompare(nombreB); // Orden alfabético
     });
+    ;
   };
   
 

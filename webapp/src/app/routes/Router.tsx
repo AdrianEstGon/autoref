@@ -12,6 +12,7 @@ import ModificarPartido from '../components/gestion_partidos/ModificarPartido';
 import DisponibilidadView from '../components/disponibilidad/DisponibilidadView';
 import PanelDesignacionesView from '../components/gestion_designaciones/PanelDesignacionesView';
 import DetallePartido from "../components/gestion_partidos/DetallesPartidoView";
+import HistorialDesignacionesView from '../components/designaciones/HistorialDesignacionesView';
 /*import MisPartidos from '../partidos/MisPartidos';  // Tu componente para la vista de partidos
 import Disponibilidad from '../disponibilidad/Disponibilidad';  // Componente para la vista de disponibilidad
 import PerfilUsuario from '../usuario/PerfilUsuario';  // Componente para el perfil del usuario
@@ -35,6 +36,7 @@ const Router = () => {
                 <Route path="/misDesignaciones" element={<DesignacionesView />} />
                 <Route path="/miPerfil" element={<PerfilView />} /> 
                 <Route path="/miDisponibilidad" element={<DisponibilidadView />} />
+                <Route path="/miHistorial" element={<HistorialDesignacionesView />} />
                 <Route path="/gestionUsuarios/usuariosView" element={<UsuariosView />} />
                 <Route path="/gestionUsuarios/crearUsuario" element={<CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />} />
                 <Route path="/gestionUsuarios/modificarUsuario" element={<ModificarUsuario open={true} onClose={() => { } } onUpdate={() => { } } usuario={undefined}  />} />
@@ -43,6 +45,7 @@ const Router = () => {
                 <Route path="/gestionPartidos/modificarPartido" element={<ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />} />
                 <Route path="/detallesPartido/:id" element={<DetallePartido />} />
                 <Route path="/gestionDesignaciones/panelDesignaciones" element={<PanelDesignacionesView />} />
+
                 {/* Rutas privadas */}
 
                 {/* Rutas de las diferentes vistas de usuario */}

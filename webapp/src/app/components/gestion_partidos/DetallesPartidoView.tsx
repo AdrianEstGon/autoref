@@ -78,7 +78,17 @@ const DetallesPartidoView = () => {
   }
 
   return (
-    <div style={{ backgroundColor: "#F5F5DC", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        backgroundImage: "url('/fondo4.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        height: "100% ",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <NavigationBar />
       <Container sx={{ marginTop: 4 }}>
         <Paper elevation={3} sx={{ padding: 4, backgroundColor: "#e3f2fd", borderRadius: 2 }}>
@@ -103,42 +113,51 @@ const DetallesPartidoView = () => {
           </Card>
 
           <Grid container spacing={2} mt={2}>
+          {/* Árbitro 1 */}
+          {partido.arbitro1 && (
             <Grid item xs={12} sm={12}>
               <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Árbitro 1
                   </Typography>
-                  <Typography><strong>Nombre:</strong> {partido.arbitro1 ? `${partido.arbitro1}` : "Por asignar"}</Typography>
+                  <Typography><strong>Nombre:</strong> {partido.arbitro1 ? `${partido.arbitro1}` : "-"}</Typography>
                   <Typography><strong>Licencia:</strong> {partido.arbitro1Licencia || "N/A"} </Typography>
                 </CardContent>
               </Card>
             </Grid>
+          )}
 
+          {/* Árbitro 2 */}
+          {partido.arbitro2 && (
             <Grid item xs={12} sm={12}>
               <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Árbitro 2
                   </Typography>
-                  <Typography><strong>Nombre:</strong> {partido.arbitro2 ? `${partido.arbitro2} ` : "Por asignar"}</Typography>
+                  <Typography><strong>Nombre:</strong> {partido.arbitro2 ? `${partido.arbitro2}` : "-"}</Typography>
                   <Typography><strong>Licencia:</strong> {partido.arbitro2Licencia || "N/A"} </Typography>
                 </CardContent>
               </Card>
             </Grid>
+          )}
 
+          {/* Anotador */}
+          {partido.anotador && (
             <Grid item xs={12} sm={12}>
               <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Anotador
                   </Typography>
-                  <Typography><strong>Nombre:</strong> {partido.anotador ? `${partido.anotador} ` : "Por asignar"}</Typography>
+                  <Typography><strong>Nombre:</strong> {partido.anotador ? `${partido.anotador}` : "-"}</Typography>
                   <Typography><strong>Licencia:</strong> {partido.anotadorLicencia || "N/A"} </Typography>
                 </CardContent>
               </Card>
             </Grid>
-          </Grid>
+          )}
+        </Grid>
 
           {partido.lugar && (
             <Box mt={3}>
@@ -173,7 +192,7 @@ const DetallesPartidoView = () => {
           </Box>
         </Paper>
       </Container>
-    </div>
+    </Box>
   );
 };
 
