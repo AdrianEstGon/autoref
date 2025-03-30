@@ -210,6 +210,7 @@ const PerfilView = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",

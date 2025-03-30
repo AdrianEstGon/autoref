@@ -84,6 +84,7 @@ const DetallesPartidoView = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
         height: "100% ",
         display: "flex",
         flexDirection: "column",
