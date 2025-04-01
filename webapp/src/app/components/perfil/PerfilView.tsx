@@ -43,19 +43,16 @@ const PerfilView = () => {
     licencia: "",
   });
 
-  // Estado para la gestión de contraseñas
-  const [oldPassword, setOldPassword] = useState(""); // Contraseña actual
-  const [newPassword, setNewPassword] = useState(""); // Nueva contraseña
-  const [confirmPassword, setConfirmPassword] = useState(""); // Confirmación de nueva contraseña
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false); // Estado para mostrar el progreso de subida de la foto
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
-  // Estados para manejar los errores de cada campo
-  const [passwordError, setPasswordError] = useState(""); // Error global
-  const [oldPasswordError, setOldPasswordError] = useState(""); // Error para la contraseña actual
-  const [newPasswordError, setNewPasswordError] = useState(""); // Error para la nueva contraseña
-  const [confirmPasswordError, setConfirmPasswordError] = useState(""); // Error para confirmación de contraseña
+  const [passwordError, setPasswordError] = useState("");
+  const [oldPasswordError, setOldPasswordError] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
-  // Estado para manejar el Dialog de cambiar contraseña
   const [openDialog, setOpenDialog] = useState(false);
   const [clubNombre, setClubNombre] = useState("");
 
@@ -71,15 +68,18 @@ const PerfilView = () => {
             primerApellido: datosUsuario.primerApellido || "",
             segundoApellido: datosUsuario.segundoApellido || "",
             fechaNacimiento: datosUsuario.fechaNacimiento
-              ? new Date(datosUsuario.fechaNacimiento).toLocaleDateString("en-CA")
-              : "",
+            ? new Date(datosUsuario.fechaNacimiento)
+                .toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+                .replace(/\//g, "-") // Reemplaza "/" por "-"
+            : "",
+          
             direccion: datosUsuario.direccion || "",
             pais: datosUsuario.pais || "",
             region: datosUsuario.region || "",
             ciudad: datosUsuario.ciudad || "",
             codigoPostal: datosUsuario.codigoPostal || "",
             nivel: datosUsuario.nivel || "",
-            clubVinculado: datosUsuario.clubVinculadoId || "",
+            clubVinculado: datosUsuario.clubVinculadoId || "No tiene club vinculado",
             email: datosUsuario.email || "",
             licencia: datosUsuario.licencia || "",
           });
@@ -97,26 +97,25 @@ const PerfilView = () => {
     obtenerPerfil();
   }, []);
 
-    // Función para obtener el nombre del club
-    const obtenerClubNombre = async (clubId: string) => {
-      try {
-        const club = await clubService.getClubById(clubId);
-        setClubNombre(club.nombre || "Club no encontrado");
-      } catch (error) {
-        console.error("Error al obtener el nombre del club:", error);
-        setClubNombre("Club no encontrado");
-      }
-    };
+  const obtenerClubNombre = async (clubId: string) => {
+    try {
+      const club = await clubService.getClubById(clubId);
+      setClubNombre(club.nombre || "Club no encontrado");
+    } catch (error) {
+      console.error("Error al obtener el nombre del club:", error);
+      setClubNombre("Club no encontrado");
+    }
+  };
 
   const manejarCambioFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setIsUploadingPhoto(true); // Iniciar animación de carga
+      setIsUploadingPhoto(true);
       const fotoURL = URL.createObjectURL(e.target.files[0]);
-  
+
       try {
         const usuarioId = localStorage.getItem("userId");
         if (usuarioId) {
-          await userService.uploadProfilePicture(e.target.files[0]); // Subir imagen
+          await userService.uploadProfilePicture(e.target.files[0]);
           setPerfil({ ...perfil, fotoPerfil: fotoURL });
           toast.success("Foto de perfil actualizada con éxito");
         }
@@ -124,18 +123,17 @@ const PerfilView = () => {
         console.error("Error al subir la foto de perfil:", error);
         toast.error("Error al actualizar la foto de perfil");
       } finally {
-        setIsUploadingPhoto(false); // Finalizar animación de carga
+        setIsUploadingPhoto(false);
       }
     }
   };
 
-  // Función de validación de la nueva contraseña
   const validarContraseñaSegura = (password: string) => {
-    const longitudMinima = /.{8,}/; // Al menos 8 caracteres
-    const tieneMayuscula = /[A-Z]/; // Al menos una letra mayúscula
-    const tieneMinuscula = /[a-z]/; // Al menos una letra minúscula
-    const tieneNumero = /\d/; // Al menos un número
-    const tieneCaracterEspecial = /[!@#$%^&*(),.?":{}|<>]/; // Al menos un carácter especial
+    const longitudMinima = /.{8,}/;
+    const tieneMayuscula = /[A-Z]/;
+    const tieneMinuscula = /[a-z]/;
+    const tieneNumero = /\d/;
+    const tieneCaracterEspecial = /[!@#$%^&*(),.?":{}|<>]/;
 
     if (!longitudMinima.test(password)) {
       return "La contraseña debe tener al menos 8 caracteres.";
@@ -153,11 +151,10 @@ const PerfilView = () => {
       return "La contraseña debe contener al menos un carácter especial.";
     }
 
-    return ""; // Contraseña válida
+    return "";
   };
 
   const handlePasswordChange = async () => {
-    // Limpiar errores anteriores
     setOldPasswordError("");
     setNewPasswordError("");
     setConfirmPasswordError("");
@@ -168,7 +165,6 @@ const PerfilView = () => {
       return;
     }
 
-    // Validar la nueva contraseña
     const errorContraseña = validarContraseñaSegura(newPassword);
     if (errorContraseña) {
       setNewPasswordError(errorContraseña);
@@ -183,18 +179,17 @@ const PerfilView = () => {
 
       if (response.status === 200) {
         toast.success("Contraseña actualizada con éxito");
-        setOpenDialog(false); // Cerrar el diálogo después de cambiar la contraseña
+        setOpenDialog(false);
       } else {
-        toast.error("Error al cambiar la contraseña"); 
+        toast.error("Error al cambiar la contraseña");
       }
     } catch (error) {
       toast.error("Error al cambiar la contraseña");
 
-      // Verificar el tipo de error y manejarlo
       if (error instanceof Error && error.message.includes("La contraseña actual no es correcta")) {
         setOldPasswordError("La contraseña actual es incorrecta");
       } else {
-        toast.error("Error al cambiar la contraseña"); // Usamos toast para error general
+        toast.error("Error al cambiar la contraseña");
       }
     } finally {
       setOldPassword("");
@@ -214,83 +209,232 @@ const PerfilView = () => {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
+        paddingBottom: "80px", // Ajuste para evitar el scroll en dispositivos pequeños
       }}
     >
       <NavBar />
       <Container
-        maxWidth="md"
-        sx={{
-          minHeight: "calc(100vh - 64px)", // Ajuste para la altura menos la navbar
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 5,
-        }}
-      >
-        <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#fff", width: "100%" }}>
-          <CardHeader
-            title={<Typography variant="h4" fontWeight={600}>Perfil</Typography>}
-            sx={{ textAlign: "center", pb: 0 }}
+  maxWidth="lg" // Cambiado para un ancho más grande
+  sx={{
+    minHeight: "calc(100vh - 64px)", 
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    py: 5,
+    overflow: "hidden", // Esto ayuda a evitar el scroll
+  }}
+>
+  <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#fff", width: "100%" }}>
+    <CardHeader
+      title={<Typography variant="h4" fontWeight={600}>Perfil</Typography>}
+      sx={{ textAlign: "center", pb: 0 }}
+    />
+    <CardContent>
+      <Grid container spacing={3} justifyContent="center">
+        <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+          <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
+          <Tooltip title="Modificar foto de perfil">
+            <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
+              <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
+              {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
+            </IconButton>
+          </Tooltip>
+        </Grid>
+        
+        {/* Los campos del perfil */}
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Nombre"
+            value={perfil.nombre}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
           />
-          <CardContent>
-            <Grid container spacing={3} justifyContent="center">
-              <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
-                <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
-                <Tooltip title="Modificar foto de perfil">
-                  <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
-                    <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
-                    {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-              {Object.entries(perfil).map(([key, value]) =>
-                key !== "fotoPerfil" && key !== "clubVinculado" ? (
-                  <Grid item xs={12} md={6} key={key}>
-                    <TextField
-                      fullWidth
-                      label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                      value={value}
-                      InputProps={{ readOnly: true }}
-                      variant="filled"
-                      sx={{
-                        backgroundColor: "#f5f5f5",
-                        borderRadius: 1,
-                        '& .MuiInputBase-root': { border: 'none' },
-                        '& .MuiInputLabel-root': { color: '#666' },
-                      }}
-                    />
-                  </Grid>
-                ) : null
-              )}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Club Vinculado"
-                  value={clubNombre}
-                  InputProps={{ readOnly: true }}
-                  variant="filled"
-                  sx={{
-                    backgroundColor: "#f5f5f5",
-                    borderRadius: 1,
-                    '& .MuiInputBase-root': { border: 'none' },
-                    '& .MuiInputLabel-root': { color: '#666' },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setOpenDialog(true)}
-                  sx={{ mt: 3 }}
-                >
-                  Modificar Contraseña
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Container>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Primer Apellido"
+            value={perfil.primerApellido}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Segundo Apellido"
+            value={perfil.segundoApellido}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Fecha de Nacimiento"
+            value={perfil.fechaNacimiento}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Dirección"
+            value={perfil.direccion}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="País"
+            value={perfil.pais}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Región"
+            value={perfil.region}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Ciudad"
+            value={perfil.ciudad}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Código Postal"
+            value={perfil.codigoPostal}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Nivel"
+            value={perfil.nivel}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Club Vinculado"
+            value={clubNombre}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Correo Electrónico"
+            value={perfil.email}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Licencia"
+            value={perfil.licencia}
+            InputProps={{ readOnly: true }}
+            variant="filled"
+            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          />
+        </Grid>
+
+        {/* Botón de Modificar Contraseña junto a los últimos campos */}
+        <Grid item xs={12} md={6}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => setOpenDialog(true)}
+            sx={{ mt: 3, width: "100%" }} // Ocupa todo el ancho disponible
+          >
+            Modificar Contraseña
+          </Button>
+        </Grid>
+      </Grid>
+    </CardContent>
+  </Card>
+</Container>
+
+      {/* Diálogo de cambiar contraseña */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Modificar Contraseña</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Contraseña Actual"
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            error={Boolean(oldPasswordError)}
+            helperText={oldPasswordError}
+            variant="outlined"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Nueva Contraseña"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            error={Boolean(newPasswordError)}
+            helperText={newPasswordError}
+            variant="outlined"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Confirmar Nueva Contraseña"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={Boolean(confirmPasswordError)}
+            helperText={confirmPasswordError}
+            variant="outlined"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="error">
+            Cancelar
+          </Button>
+          <Button onClick={handlePasswordChange} color="primary">
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

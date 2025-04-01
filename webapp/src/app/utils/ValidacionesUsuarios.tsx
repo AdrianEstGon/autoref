@@ -21,7 +21,7 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.primerApellido = '';
   }
 
-  if (validarNombre(nuevoUsuario.segundoApellido)) {
+  if (!validarNombre(nuevoUsuario.segundoApellido)) {
     erroresTemp.segundoApellido = 'Segundo apellido no válido. Solo se permiten caracteres alfabéticos y espacios.';
     isValid = false;
   } else {

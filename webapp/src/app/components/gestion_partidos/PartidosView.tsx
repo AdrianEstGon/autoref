@@ -133,9 +133,14 @@ const PartidosView: React.FC = () => {
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(sheet);
   
-        const formatDateFromExcel = (dateString: string) => {
-          if (dateString && typeof dateString === 'string') {
-            const parts = dateString.split('/');
+        const formatDateFromExcel = (excelValue: string | number) => {
+          if (typeof excelValue === 'number') {
+            // Convertir el número de serie de Excel a fecha
+            const excelEpoch = new Date(1900, 0, 1);
+            const convertedDate = new Date(excelEpoch.getTime() + (excelValue - 1) * 86400000);
+            return `${convertedDate.getFullYear()}-${String(convertedDate.getMonth() + 1).padStart(2, '0')}-${String(convertedDate.getDate()).padStart(2, '0')}`;
+          } else if (typeof excelValue === 'string') {
+            const parts = excelValue.split('/');
             if (parts.length === 3) {
               return `${parts[2]}-${parts[1]}-${parts[0]}`;
             }

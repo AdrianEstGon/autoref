@@ -17,7 +17,7 @@ function LoginView() {
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center',
-          backgroundImage: 'url(/background.jpg)',
+          backgroundImage: 'url(/fondo4.jpeg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}

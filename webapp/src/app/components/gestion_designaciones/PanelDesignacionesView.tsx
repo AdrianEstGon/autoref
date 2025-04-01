@@ -21,6 +21,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { toast } from "react-toastify";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import { Pagination } from "@mui/material";
 
 moment.locale("es");
 
@@ -30,12 +31,16 @@ const DesignacionesView = () => {
   const [categorias, setCategorias] = useState<any[]>([]);
   const [lugares, setLugares] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<number, Designacion>>({});
+  const [paginaActual, setPaginaActual] = useState(1);
+  const partidosPorPagina = 5; // Número de partidos por página
+
+
 
   const [disponibilidades, setDisponibilidades] = useState<any[]>([]);
 
   // Estados de filtros
-  const [fechaInicio, setFechaInicio] = useState<Moment | null>(moment().startOf("month"));
-  const [fechaFin, setFechaFin] = useState<Moment | null>(moment().endOf("month"));
+  const [fechaInicio, setFechaInicio] = useState<Moment | null>(moment()); // Hoy
+  const [fechaFin, setFechaFin] = useState<Moment | null>(moment().add(7, "days")); // +7 días
   const [categoriaFiltro, setCategoriaFiltro] = useState<any | null>(null);
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
@@ -43,6 +48,11 @@ const DesignacionesView = () => {
   // Estado para el diálogo de confirmación
   const [openDialog, setOpenDialog] = useState(false);
   const [confirmarAccion, setConfirmarAccion] = useState(false);
+
+  // Calcular los partidos de la página actual
+  const indexUltimoPartido = paginaActual * partidosPorPagina;
+  const indexPrimerPartido = indexUltimoPartido - partidosPorPagina;
+  const partidosEnPagina = partidosFiltrados.slice(indexPrimerPartido, indexUltimoPartido);
 
   type Designacion = {
     arbitro1?: { nombre: string; icono: JSX.Element };
@@ -144,8 +154,8 @@ const DesignacionesView = () => {
         // Filtrar automáticamente con las fechas establecidas
         const partidosFiltradosIniciales = partidosLista.filter((partido: { fecha: moment.MomentInput; }) => {
           const fechaPartido = moment(partido.fecha);
-          return fechaPartido.isBetween(fechaInicio, fechaFin, "day", "[]");
-        });
+          return fechaPartido.isBetween(moment(), moment().add(7, "days"), "day", "[]");
+        }).sort((a: { fecha: moment.MomentInput; }, b: { fecha: moment.MomentInput; }) => moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1);
 
         // Ordenar los partidos por fecha
         partidosFiltradosIniciales.sort((a: { fecha: moment.MomentInput; }, b: { fecha: moment.MomentInput; }) => moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1);
@@ -246,6 +256,7 @@ const DesignacionesView = () => {
             [arbitro]: newValue,
           }
         })}
+        noOptionsText="No hay árbitros disponibles"
         renderOption={(props, option) => {
           const { key, ...restProps } = props;
           return (
@@ -323,6 +334,11 @@ const DesignacionesView = () => {
   const handleCancelar = () => {
     setOpenDialog(false); // Cerrar el diálogo sin hacer nada
   };
+
+  // Manejar cambio de página
+  const handlePaginaCambio = (event: React.ChangeEvent<unknown>, nuevaPagina: number) => {
+    setPaginaActual(nuevaPagina);
+  };
   
 
   return (
@@ -383,7 +399,7 @@ const DesignacionesView = () => {
                   </Grid>
                   {/* Botón Aplicar Filtro */}
                     <Grid item xs={12} sm={6} md={2} textAlign="right">
-                    <Button variant="contained" color="primary" fullWidth sx={{ height: "56px" }} onClick={aplicarFiltro}>
+                    <Button variant="outlined" color="primary" fullWidth sx={{ height: "56px" }} onClick={aplicarFiltro}>
                         Aplicar Filtro
                     </Button>
                     </Grid>
