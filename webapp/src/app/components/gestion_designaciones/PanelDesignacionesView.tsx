@@ -4,7 +4,9 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogActions
+  DialogActions,
+  Checkbox,
+  FormControlLabel
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -22,6 +24,8 @@ import { toast } from "react-toastify";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import { Pagination } from "@mui/material";
+import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros"; // Adjust the path as needed
+import { AutoFixHigh } from "@mui/icons-material";
 
 moment.locale("es");
 
@@ -44,6 +48,8 @@ const DesignacionesView = () => {
   const [categoriaFiltro, setCategoriaFiltro] = useState<any | null>(null);
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
+  const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<number>>(new Set());
+
 
   // Estado para el diálogo de confirmación
   const [openDialog, setOpenDialog] = useState(false);
@@ -339,11 +345,51 @@ const DesignacionesView = () => {
   const handlePaginaCambio = (event: React.ChangeEvent<unknown>, nuevaPagina: number) => {
     setPaginaActual(nuevaPagina);
   };
+
+  const handleCheckboxChange = (partidoId: number) => {
+    const newSelection = new Set(partidosSeleccionados);
+    if (newSelection.has(partidoId)) {
+      newSelection.delete(partidoId);
+    } else {
+      newSelection.add(partidoId);
+    }
+    setPartidosSeleccionados(newSelection);
+  };
+
+   // Función para manejar la selección de todos los partidos
+   const handleSeleccionarTodos = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.checked;
+    if (selected) {
+      // Seleccionar todos los partidos de la página actual
+      const partidosIds = new Set(partidosEnPagina.map((partido) => partido.id));
+      setPartidosSeleccionados(partidosIds);
+    } else {
+      // Desmarcar todos
+      setPartidosSeleccionados(new Set());
+    }
+  };
+
+
+  const asignarArbitrosAutomaticamente = () => {
+    // Filtrar solo los partidos seleccionados
+    const partidosAAsignar = partidosFiltrados.filter(partido => partidosSeleccionados.has(partido.id));
+  
+    // Si no hay partidos seleccionados, mostrar un mensaje
+    if (partidosAAsignar.length === 0) {
+      toast.warn("No se ha seleccionado ningún partido para asignar.");
+      return;
+    }
+  
+    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designaciones, partidosAAsignar, categorias, lugares);
+    asignador.asignarArbitros(partidosAAsignar); // Asignar árbitros solo a los partidos seleccionados
+    setDesignaciones({ ...designaciones }); // Actualizamos el estado con las nuevas designaciones
+  };
+  
   
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
-      <div style={{ backgroundColor: "#F5F5DC", minHeight: "100vh" }}>
+      <div style={{ backgroundColor: '#eafaff', minHeight: "100vh" }}>
         <NavigationBar />
         <Container maxWidth="lg" sx={{ padding: "2rem" }}>
           <Typography variant="h4" textAlign="center" mb={3} color="#333">
@@ -408,12 +454,36 @@ const DesignacionesView = () => {
             </CardContent>
           </Card>
            {/* Botón para publicar designaciones */}
-          <Grid container spacing={2} direction="column">
-            <Grid item xs={12} textAlign="center" mb={3}>
+           <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
+            <Grid item xs={12} sm="auto" md={6} textAlign={'right'}>
               <Button variant="contained" color="primary" onClick={publicarDesignaciones}>
                 Publicar Designaciones
               </Button>
             </Grid>
+
+            <Grid item xs={12} sm="auto" md={6}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={asignarArbitrosAutomaticamente}
+              startIcon={<AutoFixHigh />}  // Añade el ícono al inicio del botón
+            >
+              Designar Automáticamente
+            </Button>
+            </Grid>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={partidosSeleccionados.size === partidosEnPagina.length}
+                  onChange={handleSeleccionarTodos}
+                  color="primary"
+                />
+              }
+              label="Seleccionar todos los partidos"
+              style={{ margin: 10 }}
+            />
+
             {/* LISTADO DE PARTIDOS */}
             {partidosFiltrados.length > 0 ? (
               partidosFiltrados.map((partido) => {
@@ -421,19 +491,29 @@ const DesignacionesView = () => {
                   <Grid item xs={12} key={partido.id}>
                     <Card sx={{ backgroundColor: "#F0F4F8", borderRadius: "12px", width: "100%" }}>
                       <CardContent>
-                        <Typography variant="h6" color="primary">
-                          {partido.equipoLocal} - {partido.equipoVisitante}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Lugar: {partido.lugar}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Categoría: {partido.categoria}
-                        </Typography>
-
+                        <Grid container spacing={2} alignItems="center">
+                          <Grid item>
+                            <Checkbox
+                              checked={partidosSeleccionados.has(partido.id)}
+                              onChange={() => handleCheckboxChange(partido.id)}
+                              color="primary"
+                            />
+                          </Grid>
+                          <Grid item xs={10}>
+                            <Typography variant="h6" color="primary">
+                              {partido.equipoLocal} - {partido.equipoVisitante}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              Lugar: {partido.lugar}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              Categoría: {partido.categoria}
+                            </Typography>
+                          </Grid>
+                        </Grid>
                         <Grid container spacing={2} mt={2}>
                           <Grid item xs={12} sm={4}>
                             {renderAutocomplete(partido, "Árbitro 1", "arbitro1")}

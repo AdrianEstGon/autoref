@@ -65,11 +65,7 @@ const HistorialDesignacionesView = () => {
   return (
     <Box
       sx={{
-        backgroundImage: "url('/fondo4.jpeg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundColor: '#eafaff',
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -100,21 +96,21 @@ const HistorialDesignacionesView = () => {
           sx={{
             padding: 2,
             marginBottom: 3,
-            backgroundColor: "rgb(202, 199, 199)", // Fondo semi-transparente
+            minHeight: "80vh",
+            backgroundColor: "#f9f9f9", // Fondo semi-transparente
             borderRadius: "12px",
           }}
         >
-          {/* Contenedor del Título con Línea Separadora */}
-          <Box sx={{ width: "100%", marginBottom: 2, }}>
-            <Typography
-              variant="h4"
-              color="black"
-              fontWeight="bold"
-              sx={{ textAlign: "left", paddingBottom: 1 }}
+            <Box
+              sx={{
+                backgroundColor: "#f9f9f9",
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
+            <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: 'bold', marginBottom:2 }}>
               Historial
             </Typography>
-            <Box sx={{ width: "100%", borderBottom: "3px solid black" }} /> {/* Línea separadora */}
           </Box>
           <Grid container spacing={2}>
   {partidos.length > 0 ? (
@@ -183,11 +179,12 @@ const HistorialDesignacionesView = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        marginTop: '20%',
         width: "100%",
         padding: 4,
       }}
     >
-      <Typography variant="h6" color="black" fontWeight="bold">
+      <Typography color="black">
         No tienes partidos arbitrados.
       </Typography>
     </Box>

@@ -3,6 +3,16 @@
   }
   
   .rbc-day-hover:hover {
-    background-color: #e0e0e0; /* Puedes cambiar este color al que prefieras */
+    background-color: #e0e0e0; 
+  }
+
+  .rbc-month-row {
+    display: flex;
+    flex: 0 0 auto;
+    min-height: 200px; 
+  }
+  
+  .rbc-calendar {
+    min-height: 1000px; 
   }
   

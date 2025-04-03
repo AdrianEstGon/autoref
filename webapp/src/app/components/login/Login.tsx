@@ -73,6 +73,11 @@ function Login() {
             userLogin.timestamp = new Date();
             window.localStorage.setItem('userLogged', JSON.stringify(userLogin));
             window.localStorage.setItem('userId', userLogin.id);
+
+            // Si el usuario tiene una foto de perfil, guardarla en localStorage
+            if (userLogin.fotoPerfil) {
+              window.localStorage.setItem('fotoPerfil', userLogin.fotoPerfil);
+            }
           }
   
           // Obtener roles del usuario

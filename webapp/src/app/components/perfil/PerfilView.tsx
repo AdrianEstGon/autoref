@@ -117,7 +117,9 @@ const PerfilView = () => {
         if (usuarioId) {
           await userService.uploadProfilePicture(e.target.files[0]);
           setPerfil({ ...perfil, fotoPerfil: fotoURL });
+          localStorage.setItem("fotoPerfil", fotoURL);
           toast.success("Foto de perfil actualizada con éxito");
+          window.dispatchEvent(new Event("storage")); // Notificar cambios
         }
       } catch (error) {
         console.error("Error al subir la foto de perfil:", error);
@@ -201,11 +203,7 @@ const PerfilView = () => {
   return (
     <Box
       sx={{
-        backgroundImage: "url('/fondo4.jpeg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundColor: '#eafaff',
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -224,7 +222,7 @@ const PerfilView = () => {
     overflow: "hidden", // Esto ayuda a evitar el scroll
   }}
 >
-  <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#fff", width: "100%" }}>
+  <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#f9f9f9", width: "100%" }}>
     <CardHeader
       title={<Typography variant="h4" fontWeight={600}>Perfil</Typography>}
       sx={{ textAlign: "center", pb: 0 }}

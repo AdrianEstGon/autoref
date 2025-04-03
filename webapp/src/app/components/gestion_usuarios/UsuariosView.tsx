@@ -117,8 +117,8 @@ const UsuariosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh', pt: 3, pb: 3 }}>
-        <Container sx={{ backgroundColor: '#F5F5DC', borderRadius: 2, minWidth: '90%' }}>
+      <Box sx={{ backgroundColor: '#eafaff', minHeight: '100vh', pt: 3, pb: 3 }}>
+        <Container sx={{ backgroundColor: '#eafaff', borderRadius: 2, minWidth: '90%' }}>
           <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
             <Table>
               <TableHead>
@@ -167,7 +167,7 @@ const UsuariosView: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'left', mt: 2 }}>
             <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAdd}>
               Agregar Usuario
             </Button>

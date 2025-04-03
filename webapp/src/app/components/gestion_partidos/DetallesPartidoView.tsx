@@ -80,11 +80,7 @@ const DetallesPartidoView = () => {
   return (
     <Box
       sx={{
-        backgroundImage: "url('/fondo4.jpeg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundColor: '#eafaff',
         height: "100% ",
         display: "flex",
         flexDirection: "column",
@@ -92,12 +88,12 @@ const DetallesPartidoView = () => {
     >
       <NavigationBar />
       <Container sx={{ marginTop: 4 }}>
-        <Paper elevation={3} sx={{ padding: 4, backgroundColor: "#e3f2fd", borderRadius: 2 }}>
-          <Typography variant="h4" textAlign="center" mb={3} color="#333" fontWeight={600}>
+        <Paper elevation={3} sx={{ padding: 4, backgroundColor: "#f9f9f9", borderRadius: 2 }}>
+          <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: 'bold', marginBottom:2 }}>
             Detalles del Partido: {partido.equipoLocal} - {partido.equipoVisitante}
           </Typography>
           
-          <Card sx={{ marginBottom: 2, boxShadow: 3 }}>
+          <Card sx={{ marginBottom: 2, boxShadow: 3, backgroundColor: '#F0F4F8' }}>
             <CardContent>
               <Typography variant="h6" color="primary" gutterBottom>
                 <Event sx={{ verticalAlign: "middle" }} /> Información del Partido
@@ -117,7 +113,7 @@ const DetallesPartidoView = () => {
           {/* Árbitro 1 */}
           {partido.arbitro1 && (
             <Grid item xs={12} sm={12}>
-              <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+              <Card sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#F0F4F8' }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Árbitro 1
@@ -132,7 +128,7 @@ const DetallesPartidoView = () => {
           {/* Árbitro 2 */}
           {partido.arbitro2 && (
             <Grid item xs={12} sm={12}>
-              <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+              <Card sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#F0F4F8' }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Árbitro 2
@@ -147,7 +143,7 @@ const DetallesPartidoView = () => {
           {/* Anotador */}
           {partido.anotador && (
             <Grid item xs={12} sm={12}>
-              <Card sx={{ boxShadow: 3, borderRadius: 2 }}>
+              <Card sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#F0F4F8' }}>
                 <CardContent>
                   <Typography variant="h6" color="primary" gutterBottom>
                     <Person sx={{ verticalAlign: "middle" }} /> Anotador
@@ -176,7 +172,7 @@ const DetallesPartidoView = () => {
             </Box>
           )}
 
-          <Box textAlign="center" mt={3}>
+          <Box textAlign="right" mt={3}>
             <Button
               variant="contained"
               color="primary"
@@ -188,7 +184,7 @@ const DetallesPartidoView = () => {
                 "&:hover": { backgroundColor: "#1565C0", boxShadow: 6 },
               }}
             >
-              Volver a Mis Designaciones
+              Volver
             </Button>
           </Box>
         </Paper>

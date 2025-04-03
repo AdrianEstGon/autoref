@@ -245,8 +245,8 @@ const PartidosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ backgroundColor: '#F5F5DC', minHeight: '100vh', pt: 3, pb: 3 }}>
-        <Container sx={{ backgroundColor: '#F5F5DC', borderRadius: 2, minWidth: '90%' }}>
+      <Box sx={{ backgroundColor: '#eafaff', minHeight: '100vh', pt: 3, pb: 3 }}>
+        <Container sx={{ backgroundColor: '#eafaff', borderRadius: 2, minWidth: '90%' }}>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -290,9 +290,16 @@ const PartidosView: React.FC = () => {
             </Table>
           </TableContainer>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2, mt: 3 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'left', gap: 2, mt: 3 }}>
             <Button variant="contained" color="primary" onClick={handleAdd} startIcon={<AddIcon />}>Agregar Partido</Button>
-            <Button variant="contained" component="label" sx={{ backgroundColor: '#4CAF50', color: 'white' }}>
+            <Button variant="outlined" component="label" sx={{
+                color: 'green',  // Cambia el color del texto
+                borderColor: 'green',  // Cambia el color del borde
+                '&:hover': {
+                  borderColor: 'green',  // Cambia el color del borde al pasar el mouse
+                  backgroundColor: 'rgba(0, 128, 0, 0.1)'  // Opción para agregar un fondo verde claro al hacer hover (opcional)
+                }
+              }}>
               <UploadFileIcon /> Importar partidos desde Excel
               <input type="file" id="upload-file" accept=".xlsx, .xls" onChange={handleFileUpload} hidden />
             </Button>

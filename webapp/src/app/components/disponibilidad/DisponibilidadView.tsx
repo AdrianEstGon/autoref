@@ -83,47 +83,55 @@ const DisponibilidadView = () => {
       toast.error("Error: Usuario no identificado");
       return;
     }
-
+  
     const startOfMonth = moment(month).startOf("month");
     const endOfMonth = moment(month).endOf("month");
     const events: CustomEvent[] = [];
-
+  
     try {
       for (let day = startOfMonth; day.isSameOrBefore(endOfMonth, "day"); day.add(1, "days")) {
         const formattedDate = day.format("YYYY-MM-DD");
         const disponibilidad = await disponibilidadService.getDisponibilidadByUserAndDate(usuarioId, formattedDate);
         const date = day.toDate();
-
-        const dayEvents: CustomEvent[] = ["Franja1", "Franja2", "Franja3", "Franja4"].map((franja, index) => ({
-          title: ["09:00 - 12:00", "12:00 - 15:00", "15:00 - 18:00", "18:00 - 22:00"][index],
-          start: moment(date).hour(9 + index * 3).minute(0).toDate(),
-          end: moment(date).hour(12 + index * 3).minute(0).toDate(),
-          resource: franja,
-          availability: disponibilidad?.[franja.toLowerCase()] || 0,
-        }));
-
+  
+        const dayEvents: CustomEvent[] = ["Franja1", "Franja2", "Franja3", "Franja4"].map((franja, index) => {
+          const availability = disponibilidad?.[franja.toLowerCase()] || 0;
+          if (availability === 0) {
+            return null; // No agregar eventos sin disponibilidad
+          }
+  
+          return {
+            title: ["09:00 - 12:00", "12:00 - 15:00", "15:00 - 18:00", "18:00 - 22:00"][index],
+            start: moment(date).hour(9 + index * 3).minute(0).toDate(),
+            end: moment(date).hour(12 + index * 3).minute(0).toDate(),
+            resource: franja,
+            availability,
+          };
+        }).filter(event => event !== null); // Eliminar eventos nulos
+  
         dayEvents.forEach(event => {
           if (event.availability === 1) {
             event.color = "blue";
-            event.icon = <DirectionsCarIcon />;
+            event.icon = <DirectionsCarIcon style={{ color: 'blue' }} />;
           } else if (event.availability === 2) {
             event.color = "green";
-            event.icon = <DirectionsWalkIcon />;
+            event.icon = <DirectionsWalkIcon style={{ color: 'green' }} />;
           } else if (event.availability === 3) {
             event.color = "red";
-            event.icon = <DoNotDisturbIcon />;
+            event.icon = <DoNotDisturbIcon style={{ color: 'red' }} />;
           }
         });
-
+  
         events.push(...dayEvents);
       }
-
+  
       setEvents(events);
     } catch (error) {
       console.error("Error al cargar disponibilidad:", error);
       toast.error("Ocurrió un error al cargar la disponibilidad");
     }
   };
+  
 
   
   const handleSave = async () => {
@@ -184,24 +192,25 @@ const DisponibilidadView = () => {
   const eventStyleGetter = (event: CustomEvent) => {
     let backgroundColor = 'white';
     if (event.availability === 1) {
-      backgroundColor = 'blue';
+      backgroundColor = '#c6eefe';
     } else if (event.availability === 2) {
-      backgroundColor = 'green';
+      backgroundColor = '#d8ffcd';
     } else if (event.availability === 3) {
-      backgroundColor = 'red';
+      backgroundColor = '#ffc8c1';
     }
-  
+
     return {
       style: {
         backgroundColor,
-        borderRadius: '4px',
-        color: 'white',
+        borderRadius: '8px', // Aumentamos el borde redondeado
+        color: 'black',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '25px', // Reducimos la altura para que entren todos
-        fontSize: '12px', // Reducimos tamaño de fuente
-        padding: '2px',
+        height: '40px', // Aumentamos la altura de los eventos
+        fontSize: '14px', // Aumentamos el tamaño de la fuente
+        fontFamily: 'Arial, sans-serif', // Cambiamos la fuente a Arial
+        padding: '5px', // Aumentamos el padding
         overflow: 'hidden',
       },
     };
@@ -210,12 +219,14 @@ const DisponibilidadView = () => {
   const dayPropGetter = (date: Date) => {
     return {
       style: {
-        height: '120px', // Aumentamos la altura de cada celda del día
-        minHeight: '120px',
-        overflow: 'visible', // Asegura que los eventos se vean correctamente
+        height: isMobile ? '250px' : '300px', // Aumentamos la altura de cada celda del día
+        minHeight: isMobile ? '250px' : '300px', // Aseguramos una altura mínima para el día
+        overflow: 'hidden', // Evita que los eventos se salgan de la celda
       },
     };
   };
+  
+
 
   const renderEventContent = ({ event }: { event: CustomEvent }) => (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -282,11 +293,7 @@ const DisponibilidadView = () => {
   return (
     <Box
       sx={{
-        backgroundImage: "url('/fondo4.jpeg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundColor: '#eafaff',
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -307,7 +314,7 @@ const DisponibilidadView = () => {
             elevation={3} 
             sx={{ 
               padding: 3, 
-              backgroundColor: '#F0F4F8', 
+              backgroundColor: "#f9f9f9", 
               color: '#333', 
               borderRadius: '12px', 
               width: '100%', 
@@ -319,7 +326,7 @@ const DisponibilidadView = () => {
               marginTop: '2rem',
             }}
           >
-          <Typography variant="h4" textAlign="center" color="#333">
+          <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: 'bold' }}>
             Mi Disponibilidad
           </Typography>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -332,7 +339,7 @@ const DisponibilidadView = () => {
             </IconButton>
           </Box>
           {renderLegend()}
-          <div style={{ minHeight: isMobile ? "500px" : "700px", width: "100%" }}>
+          <div style={{ minHeight: isMobile ? "500px" : "700px", width: "100%", cursor:'pointer' }}>
           <Calendar
             localizer={localizer}
             events={events}
@@ -350,14 +357,14 @@ const DisponibilidadView = () => {
               event: renderEventContent,
               toolbar: () => null, // Esto elimina completamente la barra de herramientas
             }}
-            style={{ height: '800px' }} // Aumentamos la altura del calendario
+            style={{ minHeight: '1000px' }} // Aumentamos la altura del calendario
           />
           </div>
           {/* Leyenda de Disponibilidad */}
           
           {/* Dialog for editing availability */}
           <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-            <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333' }}>
+            <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333' }} >
               Seleccionar Disponibilidad - {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}
             </DialogTitle>
             <DialogContent sx={{ backgroundColor: '#FFFFFF', color: '#333' }}>
