@@ -34,7 +34,7 @@ const DesignacionesView = () => {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<any[]>([]);
   const [lugares, setLugares] = useState<any[]>([]);
-  const [designaciones, setDesignaciones] = useState<Record<number, Designacion>>({});
+  const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
   const [paginaActual, setPaginaActual] = useState(1);
   const partidosPorPagina = 5; // Número de partidos por página
 
@@ -48,7 +48,7 @@ const DesignacionesView = () => {
   const [categoriaFiltro, setCategoriaFiltro] = useState<any | null>(null);
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
-  const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<number>>(new Set());
+  const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<string>>(new Set());
 
 
   // Estado para el diálogo de confirmación
@@ -348,10 +348,10 @@ const DesignacionesView = () => {
 
   const handleCheckboxChange = (partidoId: number) => {
     const newSelection = new Set(partidosSeleccionados);
-    if (newSelection.has(partidoId)) {
-      newSelection.delete(partidoId);
+    if (newSelection.has(partidoId.toString())) {
+      newSelection.delete(partidoId.toString());
     } else {
-      newSelection.add(partidoId);
+      newSelection.add(partidoId.toString());
     }
     setPartidosSeleccionados(newSelection);
   };
@@ -380,9 +380,30 @@ const DesignacionesView = () => {
       return;
     }
   
-    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designaciones, partidosAAsignar, categorias, lugares);
-    asignador.asignarArbitros(partidosAAsignar); // Asignar árbitros solo a los partidos seleccionados
-    setDesignaciones({ ...designaciones }); // Actualizamos el estado con las nuevas designaciones
+    const designacionesFiltradas = Object.fromEntries(
+      Object.entries(designaciones).filter(([partidoId]) =>
+        partidosSeleccionados.has(partidoId.toString()) // Comparación directa como string
+      )
+    );
+
+    // Verificar si alguna designación ya tiene árbitros asignados
+    const tieneArbitrosAsignados = Object.values(designacionesFiltradas).some(designacion =>
+      designacion.arbitro1 || designacion.arbitro2 || designacion.anotador
+    );
+
+    if (tieneArbitrosAsignados) {
+      toast.warn("No se pueden asignar árbitros a partidos que ya tienen designaciones.");
+      return;
+    }
+    
+    
+    
+    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designacionesFiltradas, partidosAAsignar, categorias, lugares);
+    const nuevasDesignaciones = asignador.asignarArbitros(); // Asignar árbitros solo a los partidos seleccionados
+  
+    if (nuevasDesignaciones) {
+      setDesignaciones({ ...designaciones, ...nuevasDesignaciones }); // Actualizamos solo las designaciones necesarias
+    }
   };
   
   
@@ -494,7 +515,7 @@ const DesignacionesView = () => {
                         <Grid container spacing={2} alignItems="center">
                           <Grid item>
                             <Checkbox
-                              checked={partidosSeleccionados.has(partido.id)}
+                              checked={partidosSeleccionados.has(partido.id.toString())}
                               onChange={() => handleCheckboxChange(partido.id)}
                               color="primary"
                             />
