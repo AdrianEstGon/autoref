@@ -5,7 +5,7 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { JSX } from 'react';
 
 type Arbitro = {
-  id: number;
+  id: string;
   nombre: string;
   nivel: string;
   latitud: number;
@@ -14,7 +14,7 @@ type Arbitro = {
 };
 
 type Partido = {
-  id: number;
+  id: string;
   categoriaId: number;
   fecha: string;
   lugar: string;
@@ -35,7 +35,7 @@ type Lugar = {
 };
 
 type Estado = {
-  asignaciones: Record<number, { arbitro1?: Arbitro; arbitro2?: Arbitro; anotador?: Arbitro }>;
+  asignaciones: Record<string, { arbitro1?: Arbitro; arbitro2?: Arbitro; anotador?: Arbitro }>;
   costo: number;
 };
 
@@ -51,9 +51,9 @@ export class AsignadorArbitros {
   partidos: Partido[];
   categorias: Categoria[];
   lugares: Lugar[];
-  designaciones: Record<number, Designacion>;
+  designaciones: Record<string, Designacion>;
 
-  constructor(usuarios: Arbitro[], disponibilidades: any[], designaciones: Record<number, Designacion>, partidos: Partido[], categorias: Categoria[], lugares: Lugar[]) {
+  constructor(usuarios: Arbitro[], disponibilidades: any[], designaciones: Record<string, Designacion>, partidos: Partido[], categorias: Categoria[], lugares: Lugar[]) {
     this.usuarios = usuarios;
     this.disponibilidades = disponibilidades;
     this.designaciones = designaciones;
@@ -62,7 +62,7 @@ export class AsignadorArbitros {
     this.lugares = lugares;
   }
 
-  asignarArbitros(): Record<number, Designacion> | null {
+  asignarArbitros(): Record<string, Designacion> | null {
     const estadoInicial: Estado = { asignaciones: {}, costo: 0 };
     const abiertos = new PriorityQueue({ comparator: (a: Estado, b: Estado) => a.costo - b.costo });
     abiertos.queue(estadoInicial);
@@ -90,38 +90,112 @@ export class AsignadorArbitros {
   private expandirEstado(estado: Estado): Estado[] {
     const partidoSinAsignar = this.partidos.find(p => !estado.asignaciones[p.id]);
     if (!partidoSinAsignar) return [];
-
-    const categoria = this.categorias.find(c => c.id === partidoSinAsignar.categoriaId);
-    if (!categoria) return [];
-
+  
+    const categoriaOriginal = this.categorias.find(c => c.id === partidoSinAsignar.categoriaId);
+    if (!categoriaOriginal) return [];
+  
+    const categoria = { ...categoriaOriginal }; // Clonamos para no modificar la original
+  
+    categoria.primerArbitro = categoria.primerArbitro === "NO" ? null : categoria.primerArbitro;
+    categoria.segundoArbitro = categoria.segundoArbitro === "NO" ? null : categoria.segundoArbitro;
+    categoria.anotador = categoria.anotador === "NO" ? null : categoria.anotador;
+  
     const arbitrosDisponibles = this.obtenerArbitrosDisponibles(partidoSinAsignar);
-    const nuevosEstados: Estado[] = [];
-
-    // Generar todas las combinaciones de árbitros disponibles según los requisitos de la categoría
-    for (let arbitro1 of arbitrosDisponibles) {
-      if (categoria.primerArbitro && this.nivelIndex(arbitro1.nivel) < this.nivelIndex(categoria.primerArbitro)) continue;
-
-      for (let arbitro2 of arbitrosDisponibles) {
-        if (categoria.segundoArbitro && this.nivelIndex(arbitro2.nivel) < this.nivelIndex(categoria.segundoArbitro)) continue;
-        if (arbitro1.id === arbitro2.id) continue; // Evitar repetir el mismo árbitro
-
-        for (let anotador of arbitrosDisponibles) {
-          if (categoria.anotador && this.nivelIndex(anotador.nivel) < this.nivelIndex(categoria.anotador)) continue;
-          if (arbitro1.id === anotador.id || arbitro2.id === anotador.id) continue; // Evitar repetir árbitros en diferentes roles
-
-          const nuevoEstado: Estado = JSON.parse(JSON.stringify(estado));
-          nuevoEstado.asignaciones[partidoSinAsignar.id] = { arbitro1, arbitro2, anotador };
-          nuevoEstado.costo += this.calcularCosto(estado, arbitro1, partidoSinAsignar);
-          nuevoEstado.costo += this.calcularCosto(estado, arbitro2, partidoSinAsignar);
-          nuevoEstado.costo += this.calcularCosto(estado, anotador, partidoSinAsignar);
-          nuevosEstados.push(nuevoEstado);
-        }
+    const combinaciones: [Arbitro | null, Arbitro | null, Arbitro | null][] = [];
+  
+    // Crear combinaciones posibles para arbitro1, arbitro2 y anotador
+    if (categoria.primerArbitro) {
+      const opcionesArbitro1 = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.primerArbitro || ""));
+      for (let arbitro1 of opcionesArbitro1) {
+        combinaciones.push([arbitro1, null, null]);
+      }
+    } else {
+      combinaciones.push([null, null, null]);
+    }
+  
+    if (categoria.segundoArbitro) {
+      const opcionesArbitro2 = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.segundoArbitro || ""));
+      for (let arbitro2 of opcionesArbitro2) {
+        combinaciones.forEach(combinacion => {
+          // Aseguramos que no se repita el mismo arbitro
+          if (!combinacion[0] || combinacion[0].id !== arbitro2.id) {
+            combinacion[1] = arbitro2;
+          }
+        });
       }
     }
-
+  
+    if (categoria.anotador) {
+      const opcionesAnotador = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.anotador ||""));
+      for (let anotador of opcionesAnotador) {
+        combinaciones.forEach(combinacion => {
+          // Aseguramos que no se repita el mismo arbitro
+          if (!combinacion[0] || combinacion[0].id !== anotador.id) {
+            if (!combinacion[1] || combinacion[1].id !== anotador.id) {
+              combinacion[2] = anotador;
+            }
+          }
+        });
+      }
+    }
+  
+    // Filtrar combinaciones que no cumplen con los criterios
+    const combinacionesValidas = combinaciones.filter(combinacion => {
+      // Filtramos los trios que pueden asistir al partido
+      return this.puedenAsistir(partidoSinAsignar, combinacion.filter(a => a !== null) as Arbitro[]);
+    });
+  
+    // Calcular el costo para cada combinación válida
+    const combinacionesConCosto = combinacionesValidas.map(combinacion => {
+      const costoTotal = combinacion.reduce(
+        (acc, arbitro) => acc + (arbitro ? this.calcularCosto(estado, arbitro, partidoSinAsignar) : 0),
+        0
+      );
+      return { combinacion, costoTotal };
+    });
+  
+    // Ordenar las combinaciones por costo
+    combinacionesConCosto.sort((a, b) => a.costoTotal - b.costoTotal);
+  
+    // Crear nuevos estados con la mejor combinación
+    const nuevosEstados: Estado[] = [];
+    if (combinacionesConCosto.length > 0) {
+      const mejor = combinacionesConCosto[0];
+      const nuevoEstado: Estado = JSON.parse(JSON.stringify(estado)); // Clonamos el estado
+      nuevoEstado.asignaciones[partidoSinAsignar.id] = {
+        arbitro1: mejor.combinacion[0] || undefined,
+        arbitro2: mejor.combinacion[1] || undefined,
+        anotador: mejor.combinacion[2] || undefined
+      };
+      nuevoEstado.costo += mejor.costoTotal;
+      nuevosEstados.push(nuevoEstado);
+    }
+  
     return nuevosEstados;
   }
+  
+  
 
+  private puedenAsistir(partido: Partido, arbitros: Arbitro[]): boolean {
+    const lugarPartido = this.lugares.find(l => l.nombre === partido.lugar);
+    if (!lugarPartido) return false;
+    const { latitud: latPartido, longitud: lonPartido } = lugarPartido;
+  
+    return arbitros.every(arbitro => {
+      if (arbitro.transporte) return true;
+  
+      const distanciaDirecta = this.calcularDistancia(arbitro.latitud, arbitro.longitud, latPartido, lonPartido);
+      if (distanciaDirecta <= 10) return true;
+  
+      // Buscar un árbitro con transporte que viva a menos de 10km del árbitro sin transporte
+      return arbitros.some(a =>
+        a.id !== arbitro.id &&
+        a.transporte &&
+        this.calcularDistancia(a.latitud, a.longitud, arbitro.latitud, arbitro.longitud) <= 10
+      );
+    });
+  }
+  
   private obtenerArbitrosDisponibles(partido: Partido): Arbitro[] {
     return this.usuarios.filter(usuario => this.cumpleCondiciones(usuario, partido));
   }
@@ -134,7 +208,14 @@ export class AsignadorArbitros {
     if (!categoria) return false;
   
     const franja = this.obtenerFranjaHoraria(partido.fecha);
-    const disponibilidad = this.disponibilidades.find(d => d.usuarioId === arbitro.id);
+    if (!franja) return false;
+  
+    const fechaPartido = moment(partido.fecha).format('YYYY-MM-DD');
+  
+    const disponibilidad = this.disponibilidades.find(d =>
+      d.usuarioId === arbitro.id &&
+      moment(d.fecha).format('YYYY-MM-DD') === fechaPartido
+    );
   
     if (!disponibilidad || !disponibilidad[franja]) return false;
   
@@ -145,6 +226,7 @@ export class AsignadorArbitros {
     arbitro.transporte = estado === 1;
     return true;
   }
+  
   
   private obtenerFranjaHoraria(fechaStr: string): string {
     const hora = moment(fechaStr).hour();
@@ -177,15 +259,31 @@ export class AsignadorArbitros {
     return niveles.indexOf(nivel);
   }
 
-  private formatDesignaciones(asignaciones: Estado["asignaciones"]): Record<number, Designacion> {
-    const designaciones: Record<number, Designacion> = {};
+  private formatDesignaciones(asignaciones: Estado["asignaciones"]): Record<string, Designacion> {
+    const designaciones: Record<string, Designacion> = {};
+  
     Object.entries(asignaciones).forEach(([partidoId, asignacion]) => {
-      designaciones[parseInt(partidoId)] = {
-        arbitro1: asignacion.arbitro1 ? { nombre: asignacion.arbitro1.nombre, icono: <DirectionsCarIcon style={{ color: 'blue' }} /> } : undefined,
-        arbitro2: asignacion.arbitro2 ? { nombre: asignacion.arbitro2.nombre, icono: <DirectionsWalkIcon style={{ color: 'green' }} /> } : undefined,
-        anotador: asignacion.anotador ? { nombre: asignacion.anotador.nombre, icono: <DirectionsWalkIcon style={{ color: 'red' }} /> } : undefined
+      const getIcono = (arbitro?: Arbitro) => {
+        if (!arbitro) return undefined;
+  
+        const tieneTransporte = arbitro.transporte;
+        const IconComponent = tieneTransporte ? DirectionsCarIcon : DirectionsWalkIcon;
+        const color = tieneTransporte ? 'blue' : 'green';
+  
+        return {
+          ...arbitro,
+          icono: <IconComponent style={{ color }} />
+        };
+      };
+  
+      designaciones[partidoId] = {
+        arbitro1: getIcono(asignacion.arbitro1),
+        arbitro2: getIcono(asignacion.arbitro2),
+        anotador: getIcono(asignacion.anotador)
       };
     });
+  
     return designaciones;
   }
+  
 }
