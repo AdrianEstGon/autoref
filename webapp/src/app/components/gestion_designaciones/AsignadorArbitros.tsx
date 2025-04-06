@@ -2,6 +2,7 @@ import moment from 'moment';
 import PriorityQueue from 'js-priority-queue';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+import WarningIcon from '@mui/icons-material/Warning';
 import { JSX } from 'react';
 
 type Arbitro = {
@@ -52,6 +53,7 @@ export class AsignadorArbitros {
   categorias: Categoria[];
   lugares: Lugar[];
   designaciones: Record<string, Designacion>;
+  estadoActual: Estado | null = null; 
 
   constructor(usuarios: Arbitro[], disponibilidades: any[], designaciones: Record<string, Designacion>, partidos: Partido[], categorias: Categoria[], lugares: Lugar[]) {
     this.usuarios = usuarios;
@@ -64,12 +66,24 @@ export class AsignadorArbitros {
 
   asignarArbitros(): Record<string, Designacion> | null {
     const estadoInicial: Estado = { asignaciones: {}, costo: 0 };
-    const abiertos = new PriorityQueue({ comparator: (a: Estado, b: Estado) => a.costo - b.costo });
+    const abiertos = new PriorityQueue({
+      comparator: (a: Estado, b: Estado) => {
+        const asignadosA = Object.keys(a.asignaciones).length;
+        const asignadosB = Object.keys(b.asignaciones).length;
+    
+        if (asignadosB !== asignadosA) {
+          return asignadosB - asignadosA; // Más partidos asignados primero
+        }
+        return a.costo - b.costo; // Luego menor coste
+      }
+    });
+    
     abiertos.queue(estadoInicial);
     let mejorEstado: Estado | null = null;
 
     while (abiertos.length > 0) {
       const estadoActual = abiertos.dequeue();
+      this.estadoActual = estadoActual;
       
       if (this.esObjetivo(estadoActual)) {
         mejorEstado = estadoActual;
@@ -87,92 +101,86 @@ export class AsignadorArbitros {
     return Object.keys(estado.asignaciones).length === this.partidos.length;
   }
 
-  private expandirEstado(estado: Estado): Estado[] {
-    const partidoSinAsignar = this.partidos.find(p => !estado.asignaciones[p.id]);
-    if (!partidoSinAsignar) return [];
+  expandirEstado(estado: Estado): Estado[] {
+    const nuevosEstados: Estado[] = [];
   
-    const categoriaOriginal = this.categorias.find(c => c.id === partidoSinAsignar.categoriaId);
-    if (!categoriaOriginal) return [];
+    const partidosSinAsignar = this.partidos.filter(p => !estado.asignaciones[p.id]);
   
-    const categoria = { ...categoriaOriginal }; // Clonamos para no modificar la original
+    if (partidosSinAsignar.length === 0) return [];
   
-    categoria.primerArbitro = categoria.primerArbitro === "NO" ? null : categoria.primerArbitro;
-    categoria.segundoArbitro = categoria.segundoArbitro === "NO" ? null : categoria.segundoArbitro;
-    categoria.anotador = categoria.anotador === "NO" ? null : categoria.anotador;
+    const partidoSinAsignar = partidosSinAsignar[0];
+    const categoria = this.categorias.find(c => c.id === partidoSinAsignar.categoriaId)!;
   
     const arbitrosDisponibles = this.obtenerArbitrosDisponibles(partidoSinAsignar);
-    const combinaciones: [Arbitro | null, Arbitro | null, Arbitro | null][] = [];
   
-    // Crear combinaciones posibles para arbitro1, arbitro2 y anotador
-    if (categoria.primerArbitro) {
-      const opcionesArbitro1 = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.primerArbitro || ""));
-      for (let arbitro1 of opcionesArbitro1) {
-        combinaciones.push([arbitro1, null, null]);
+    const opcionesArbitro1 = categoria.primerArbitro && categoria.primerArbitro !== 'NO'
+      ? arbitrosDisponibles.filter((a: { nivel: string; }) => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.primerArbitro!))
+      : [];
+    const opcionesArbitro2 = categoria.segundoArbitro && categoria.segundoArbitro !== 'NO'
+      ? arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.segundoArbitro!))
+      : [];
+    const opcionesAnotador = categoria.anotador && categoria.anotador !== 'NO'
+      ? arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.anotador!))
+      : [];
+  
+    const combinacionesConCosto: {
+      combinacion: [Arbitro | null, Arbitro | null, Arbitro | null];
+      costoTotal: number;
+    }[] = [];
+  
+    const penalizacionIncompleto = 100;
+  
+    for (const a1 of [...opcionesArbitro1, null]) {
+      for (const a2 of [...opcionesArbitro2, null]) {
+        for (const an of [...opcionesAnotador, null]) {
+          // Al menos un árbitro debe estar asignado
+          if (!a1 && !a2 && !an) continue;
+  
+          const arbitrosAsignados = [a1, a2, an].filter(a => a !== null) as Arbitro[];
+  
+          // Evitar que un mismo árbitro se asigne a más de un rol
+          const ids = arbitrosAsignados.map(a => a.id);
+          if (new Set(ids).size !== ids.length) continue;
+  
+          if (!this.puedenAsistir(partidoSinAsignar, arbitrosAsignados)) continue;
+  
+          let costoTotal = arbitrosAsignados.reduce(
+            (acc, arbitro) => acc + this.calcularCosto(estado, arbitro, partidoSinAsignar),
+            0
+          );
+  
+           // Penalización por cada rol faltante priorizando primer arbitro -> segundo arbitro
+          if (!a1) costoTotal += penalizacionIncompleto + 2;
+          if (!a2) costoTotal += penalizacionIncompleto + 1; 
+          if (!an) costoTotal += penalizacionIncompleto ;
+  
+          combinacionesConCosto.push({
+            combinacion: [a1, a2, an],
+            costoTotal
+          });
+        }
       }
-    } else {
-      combinaciones.push([null, null, null]);
     }
   
-    if (categoria.segundoArbitro) {
-      const opcionesArbitro2 = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.segundoArbitro || ""));
-      for (let arbitro2 of opcionesArbitro2) {
-        combinaciones.forEach(combinacion => {
-          // Aseguramos que no se repita el mismo arbitro
-          if (!combinacion[0] || combinacion[0].id !== arbitro2.id) {
-            combinacion[1] = arbitro2;
-          }
-        });
-      }
-    }
-  
-    if (categoria.anotador) {
-      const opcionesAnotador = arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.anotador ||""));
-      for (let anotador of opcionesAnotador) {
-        combinaciones.forEach(combinacion => {
-          // Aseguramos que no se repita el mismo arbitro
-          if (!combinacion[0] || combinacion[0].id !== anotador.id) {
-            if (!combinacion[1] || combinacion[1].id !== anotador.id) {
-              combinacion[2] = anotador;
-            }
-          }
-        });
-      }
-    }
-  
-    // Filtrar combinaciones que no cumplen con los criterios
-    const combinacionesValidas = combinaciones.filter(combinacion => {
-      // Filtramos los trios que pueden asistir al partido
-      return this.puedenAsistir(partidoSinAsignar, combinacion.filter(a => a !== null) as Arbitro[]);
-    });
-  
-    // Calcular el costo para cada combinación válida
-    const combinacionesConCosto = combinacionesValidas.map(combinacion => {
-      const costoTotal = combinacion.reduce(
-        (acc, arbitro) => acc + (arbitro ? this.calcularCosto(estado, arbitro, partidoSinAsignar) : 0),
-        0
-      );
-      return { combinacion, costoTotal };
-    });
-  
-    // Ordenar las combinaciones por costo
+    // Ordenar combinaciones por menor costo total
     combinacionesConCosto.sort((a, b) => a.costoTotal - b.costoTotal);
   
-    // Crear nuevos estados con la mejor combinación
-    const nuevosEstados: Estado[] = [];
-    if (combinacionesConCosto.length > 0) {
-      const mejor = combinacionesConCosto[0];
-      const nuevoEstado: Estado = JSON.parse(JSON.stringify(estado)); // Clonamos el estado
+    // Tomar las primeras 5 combinaciones más prometedoras
+    for (const { combinacion, costoTotal } of combinacionesConCosto.slice(0, 5)) {
+      const nuevoEstado: Estado = JSON.parse(JSON.stringify(estado));
       nuevoEstado.asignaciones[partidoSinAsignar.id] = {
-        arbitro1: mejor.combinacion[0] || undefined,
-        arbitro2: mejor.combinacion[1] || undefined,
-        anotador: mejor.combinacion[2] || undefined
+        arbitro1: combinacion[0] || undefined,
+        arbitro2: combinacion[1] || undefined,
+        anotador: combinacion[2] || undefined
       };
-      nuevoEstado.costo += mejor.costoTotal;
+      nuevoEstado.costo += costoTotal;
       nuevosEstados.push(nuevoEstado);
     }
   
     return nuevosEstados;
   }
+  
+  
   
   
 
@@ -211,6 +219,26 @@ export class AsignadorArbitros {
     if (!franja) return false;
   
     const fechaPartido = moment(partido.fecha).format('YYYY-MM-DD');
+
+    // Verificar que no tenga conflicto con partidos ya asignados
+    for (const [partidoId, asignacion] of Object.entries(this.estadoActual?.asignaciones || {})) {
+      const otroPartido = this.partidos.find(p => p.id === partidoId);
+      if (!otroPartido) continue;
+
+      const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
+      if (!yaAsignado) continue;
+
+      const inicioA = moment(partido.fecha);
+      const finA = moment(partido.fecha).add(90, 'minutes');
+
+      const inicioB = moment(otroPartido.fecha);
+      const finB = moment(otroPartido.fecha).add(90, 'minutes');
+
+      // Si se solapan, no se puede asignar
+      if (finA.isAfter(inicioB) && inicioA.isBefore(finB)) {
+        return false;
+      }
+    }
   
     const disponibilidad = this.disponibilidades.find(d =>
       d.usuarioId === arbitro.id &&
