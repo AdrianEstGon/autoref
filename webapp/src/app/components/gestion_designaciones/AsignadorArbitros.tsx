@@ -12,6 +12,7 @@ type Arbitro = {
   latitud: number;
   longitud: number;
   transporte: boolean;
+  clubId?: string; // <- Nuevo campo opcional
 };
 
 type Partido = {
@@ -19,6 +20,8 @@ type Partido = {
   categoriaId: number;
   fecha: string;
   lugar: string;
+  clubIdLocal?: string;
+  clubIdVisitante?: string;
 };
 
 type Categoria = {
@@ -129,38 +132,48 @@ export class AsignadorArbitros {
     }[] = [];
   
     const penalizacionIncompleto = 100;
+
+    const arbitroIncompleto: Arbitro = {
+      id: 'incompleto',
+      nombre: 'Incompleto',
+      nivel: '',
+      latitud: 0,
+      longitud: 0,
+      transporte: false
+    };
+    
   
     for (const a1 of [...opcionesArbitro1, null]) {
       for (const a2 of [...opcionesArbitro2, null]) {
         for (const an of [...opcionesAnotador, null]) {
-          // Al menos un árbitro debe estar asignado
           if (!a1 && !a2 && !an) continue;
-  
+    
           const arbitrosAsignados = [a1, a2, an].filter(a => a !== null) as Arbitro[];
-  
-          // Evitar que un mismo árbitro se asigne a más de un rol
           const ids = arbitrosAsignados.map(a => a.id);
           if (new Set(ids).size !== ids.length) continue;
-  
           if (!this.puedenAsistir(partidoSinAsignar, arbitrosAsignados)) continue;
-  
+    
           let costoTotal = arbitrosAsignados.reduce(
             (acc, arbitro) => acc + this.calcularCosto(estado, arbitro, partidoSinAsignar),
             0
           );
-  
-           // Penalización por cada rol faltante priorizando primer arbitro -> segundo arbitro
-          if (!a1) costoTotal += penalizacionIncompleto + 2;
-          if (!a2) costoTotal += penalizacionIncompleto + 1; 
-          if (!an) costoTotal += penalizacionIncompleto ;
-  
+    
+          const a1Final = a1 ?? (categoria.primerArbitro && categoria.primerArbitro !== 'NO' ? arbitroIncompleto : null);
+          const a2Final = a2 ?? (categoria.segundoArbitro && categoria.segundoArbitro !== 'NO' ? arbitroIncompleto : null);
+          const anFinal = an ?? (categoria.anotador && categoria.anotador !== 'NO' ? arbitroIncompleto : null);
+    
+          if (a1Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + 2;
+          if (a2Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + 1;
+          if (anFinal === arbitroIncompleto) costoTotal += penalizacionIncompleto;
+    
           combinacionesConCosto.push({
-            combinacion: [a1, a2, an],
+            combinacion: [a1Final, a2Final, anFinal],
             costoTotal
           });
         }
       }
     }
+    
   
     // Ordenar combinaciones por menor costo total
     combinacionesConCosto.sort((a, b) => a.costoTotal - b.costoTotal);
@@ -293,6 +306,13 @@ export class AsignadorArbitros {
     Object.entries(asignaciones).forEach(([partidoId, asignacion]) => {
       const getIcono = (arbitro?: Arbitro) => {
         if (!arbitro) return undefined;
+
+        if (arbitro.nombre === "Incompleto") {
+          return {
+            nombre: "Incompleto",
+            icono: <WarningIcon style={{ color: 'orange' }} />
+          };
+        }
   
         const tieneTransporte = arbitro.transporte;
         const IconComponent = tieneTransporte ? DirectionsCarIcon : DirectionsWalkIcon;

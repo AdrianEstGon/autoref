@@ -158,15 +158,22 @@ const DesignacionesView = () => {
         setDesignaciones(designacionesCargadas);
   
         // Filtrar automáticamente con las fechas establecidas
-        const partidosFiltradosIniciales = partidosLista.filter((partido: { fecha: moment.MomentInput; }) => {
+        const partidosFiltradosIniciales = partidosLista
+        .filter((partido: { fecha: moment.MomentInput }) => {
           const fechaPartido = moment(partido.fecha);
           return fechaPartido.isBetween(moment(), moment().add(7, "days"), "day", "[]");
-        }).sort((a: { fecha: moment.MomentInput; }, b: { fecha: moment.MomentInput; }) => moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1);
+        })
+        .sort((a: { lugar: string; fecha: moment.MomentInput; }, b: { lugar: string; fecha: moment.MomentInput; }) => {
+          const lugarA = a.lugar.toLowerCase();
+          const lugarB = b.lugar.toLowerCase();
 
-        // Ordenar los partidos por fecha
-        partidosFiltradosIniciales.sort((a: { fecha: moment.MomentInput; }, b: { fecha: moment.MomentInput; }) => moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1);
+          if (lugarA < lugarB) return -1;
+          if (lugarA > lugarB) return 1;
 
-        setPartidosFiltrados(partidosFiltradosIniciales);
+          return moment(a.fecha).diff(moment(b.fecha));
+        });
+
+      setPartidosFiltrados(partidosFiltradosIniciales);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
         toast.error("Error al cargar los datos");
@@ -187,16 +194,22 @@ const DesignacionesView = () => {
         (!lugarFiltro || partido.lugar === lugarFiltro.nombre)
       );
     });
-
-    // Ordenar por nombre del polideportivo y luego por fecha y hora
+  
+    // Ordenar primero por lugar (alfabéticamente), luego por fecha y hora
     filtrados.sort((a, b) => {
-      if (a.lugar.toLowerCase() < b.lugar.toLowerCase()) return -1;
-      if (a.lugar.toLowerCase() > b.lugar.toLowerCase()) return 1;
-      return moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1;
+      const lugarA = a.lugar.toLowerCase();
+      const lugarB = b.lugar.toLowerCase();
+  
+      if (lugarA < lugarB) return -1;
+      if (lugarA > lugarB) return 1;
+  
+      // Si el lugar es el mismo, ordenar por fecha/hora
+      return moment(a.fecha).diff(moment(b.fecha));
     });
-
+  
     setPartidosFiltrados(filtrados);
   };
+  
 
   const obtenerArbitrosDisponibles = (fechaHora: string) => {
     const franja = obtenerFranja(fechaHora); // Obtener la franja para el partido
@@ -253,7 +266,11 @@ const DesignacionesView = () => {
     return (
       <Autocomplete
         options={arbitrosDisponiblesFiltrados}
-        getOptionLabel={(option) => `${option.nombre} ${option.primerApellido} ${option.segundoApellido}`}
+        getOptionLabel={(option) => {
+          if (option.nombre === "Incompleto") return "Incompleto";
+          return `${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`.trim();
+        }}
+        
         value={designaciones[partido.id]?.[arbitro] ?? null}
         onChange={(_, newValue) => setDesignaciones({
           ...designaciones,
@@ -267,8 +284,11 @@ const DesignacionesView = () => {
           const { key, ...restProps } = props;
           return (
             <li key={key} {...restProps}>
-              {option.icono} {/* Usamos directamente el icono que ya está calculado */}
-              {option.nombre} {option.primerApellido} {option.segundoApellido}
+              {option.icono}
+              {option.nombre === "Incompleto"
+                ? " Incompleto"
+                : ` ${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`
+}
             </li>
           );
         }}
