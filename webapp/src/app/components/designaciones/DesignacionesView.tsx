@@ -138,7 +138,7 @@ const DesignacionesView = () => {
                           {partido.equipoLocal} - {partido.equipoVisitante}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
+                          {moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm").format("dddd, DD MMMM YYYY - HH:mm")}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
                           Lugar: {partido.lugar}

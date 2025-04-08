@@ -16,6 +16,7 @@ type Arbitro = {
 };
 
 type Partido = {
+  hora: string;
   id: string;
   categoriaId: number;
   fecha: string;
@@ -71,11 +72,11 @@ export class AsignadorArbitros {
     const estadoInicial: Estado = { asignaciones: {}, costo: 0 };
     const abiertos = new PriorityQueue({
       comparator: (a: Estado, b: Estado) => {
-        const asignadosA = Object.keys(a.asignaciones).length;
-        const asignadosB = Object.keys(b.asignaciones).length;
+        const asignadosA = this.contarPartidosRealmenteAsignados(a.asignaciones);
+        const asignadosB = this.contarPartidosRealmenteAsignados(b.asignaciones);
     
         if (asignadosB !== asignadosA) {
-          return asignadosB - asignadosA; // Más partidos asignados primero
+          return asignadosB - asignadosA; // Más partidos realmente asignados primero
         }
         return a.costo - b.costo; // Luego menor coste
       }
@@ -99,6 +100,14 @@ export class AsignadorArbitros {
     
     return mejorEstado ? this.formatDesignaciones(mejorEstado.asignaciones) : null;
   }
+
+  private contarPartidosRealmenteAsignados(asignaciones: Estado["asignaciones"]): number {
+    return Object.values(asignaciones).filter(({ arbitro1, arbitro2, anotador }) => {
+      const valid = (a?: Arbitro) => a && a.nombre !== 'Incompleto';
+      return valid(arbitro1) || valid(arbitro2) || valid(anotador);
+    }).length;
+  }
+  
 
   private esObjetivo(estado: Estado): boolean {
     return Object.keys(estado.asignaciones).length === this.partidos.length;
@@ -146,7 +155,7 @@ export class AsignadorArbitros {
     for (const a1 of [...opcionesArbitro1, null]) {
       for (const a2 of [...opcionesArbitro2, null]) {
         for (const an of [...opcionesAnotador, null]) {
-          if (!a1 && !a2 && !an) continue;
+//          if (!a1 && !a2 && !an) continue;
     
           const arbitrosAsignados = [a1, a2, an].filter(a => a !== null) as Arbitro[];
           const ids = arbitrosAsignados.map(a => a.id);
@@ -193,10 +202,6 @@ export class AsignadorArbitros {
     return nuevosEstados;
   }
   
-  
-  
-  
-
   private puedenAsistir(partido: Partido, arbitros: Arbitro[]): boolean {
     const lugarPartido = this.lugares.find(l => l.nombre === partido.lugar);
     if (!lugarPartido) return false;
@@ -228,27 +233,54 @@ export class AsignadorArbitros {
     const categoria = this.categorias.find(cat => cat.id === partido.categoriaId);
     if (!categoria) return false;
   
-    const franja = this.obtenerFranjaHoraria(partido.fecha);
+    const franja = this.obtenerFranjaHoraria(partido.hora);
     if (!franja) return false;
   
     const fechaPartido = moment(partido.fecha).format('YYYY-MM-DD');
-
-    // Verificar que no tenga conflicto con partidos ya asignados
+  
+    const construirMomento = (p: Partido) => {
+      const fecha = moment(p.fecha).format('YYYY-MM-DD');
+      return moment(`${fecha} ${p.hora}`, 'YYYY-MM-DD HH:mm:ss');
+    };
+  
     for (const [partidoId, asignacion] of Object.entries(this.estadoActual?.asignaciones || {})) {
       const otroPartido = this.partidos.find(p => p.id === partidoId);
       if (!otroPartido) continue;
-
+  
       const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
       if (!yaAsignado) continue;
-
-      const inicioA = moment(partido.fecha);
-      const finA = moment(partido.fecha).add(90, 'minutes');
-
-      const inicioB = moment(otroPartido.fecha);
-      const finB = moment(otroPartido.fecha).add(90, 'minutes');
-
-      // Si se solapan, no se puede asignar
-      if (finA.isAfter(inicioB) && inicioA.isBefore(finB)) {
+  
+      const duracion = 90;
+  
+      let primero: Partido, segundo: Partido;
+      let momentoPrimero: moment.Moment, momentoSegundo: moment.Moment;
+  
+      const momentoActual = construirMomento(partido);
+      const momentoOtro = construirMomento(otroPartido);
+  
+      if (momentoActual.isBefore(momentoOtro)) {
+        primero = partido;
+        segundo = otroPartido;
+        momentoPrimero = momentoActual;
+        momentoSegundo = momentoOtro;
+      } else {
+        primero = otroPartido;
+        segundo = partido;
+        momentoPrimero = momentoOtro;
+        momentoSegundo = momentoActual;
+      }
+  
+      const anticipacionPrimero = this.obtenerAnticipacion(primero);
+      const anticipacionSegundo = this.obtenerAnticipacion(segundo);
+      const tiempoTransporte = this.estimarTiempoTransporte(arbitro, primero, segundo);
+  
+      const inicioPrimero = momentoPrimero.clone().subtract(anticipacionPrimero, 'minutes');
+      const finPrimero = inicioPrimero.clone().add(duracion + anticipacionPrimero, 'minutes');
+  
+      const inicioSegundo = momentoSegundo.clone().subtract(anticipacionSegundo + tiempoTransporte, 'minutes');
+      const finSegundo = inicioSegundo.clone().add(duracion + anticipacionSegundo + tiempoTransporte, 'minutes');
+  
+      if (finPrimero.isAfter(inicioSegundo)) {
         return false;
       }
     }
@@ -263,14 +295,27 @@ export class AsignadorArbitros {
     const estado = disponibilidad[franja];
     if (estado === 3) return false;
   
-    // Asignamos transporte a una copia del árbitro
     arbitro.transporte = estado === 1;
     return true;
   }
   
+  private obtenerAnticipacion(partido: Partido): number {
+    const categoria = this.categorias.find(c => c.id === partido.categoriaId);
+    if (!categoria) return 30;
   
-  private obtenerFranjaHoraria(fechaStr: string): string {
-    const hora = moment(fechaStr).hour();
+    const nombreCategoria = (categoria as any).nombre?.toUpperCase() || '';
+  
+    if (nombreCategoria.includes("NACIONAL") || nombreCategoria.includes("SUPERLIGA")) {
+      return 60;
+    }
+  
+    return 30;
+  }
+  
+  
+  
+  private obtenerFranjaHoraria(horaStr: string): string {
+    const hora = moment(horaStr, 'HH:mm:ss').hour();
   
     if (hora >= 9 && hora < 12) return 'franja1';
     if (hora >= 12 && hora < 15) return 'franja2';
@@ -279,6 +324,7 @@ export class AsignadorArbitros {
   
     return '';
   }
+  
   
 
   private calcularCosto(estado: Estado, arbitro: Arbitro, partido: Partido): number {
@@ -294,6 +340,44 @@ export class AsignadorArbitros {
     const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
+
+  private estimarTiempoTransporte(arbitro: Arbitro, desde: Partido, hasta: Partido): number {
+    const origen = this.lugares.find(l => l.nombre === desde.lugar);
+    const destino = this.lugares.find(l => l.nombre === hasta.lugar);
+    if (!origen || !destino) return 0;
+  
+    const distancia = this.calcularDistancia(origen.latitud, origen.longitud, destino.latitud, destino.longitud);
+  
+    let tieneTransporte = arbitro.transporte;
+  
+    // Si NO tiene transporte, vemos si algún compañero asignado al mismo partido puede llevarlo
+    if (!tieneTransporte && this.estadoActual) {
+      const asignacionDesde = this.estadoActual.asignaciones[desde.id];
+      if (asignacionDesde) {
+        const compañeros = [asignacionDesde.arbitro1, asignacionDesde.arbitro2, asignacionDesde.anotador]
+          .filter(a => a && a.id !== arbitro.id) as Arbitro[];
+  
+        const alguienCercaConTransporte = compañeros.some(comp =>
+          comp.transporte &&
+          this.calcularDistancia(comp.latitud, comp.longitud, arbitro.latitud, arbitro.longitud) <= 10
+        );
+  
+        if (alguienCercaConTransporte) {
+          tieneTransporte = true;
+        }
+      }
+    }
+  
+    // Cálculo final del tiempo estimado
+    if (tieneTransporte) {
+      return distancia > 10.0
+        ? Math.round((distancia / 60) * 90) // >10km → 90km/h
+        : Math.round(distancia * 1.2);      // ≤10km → 1.2 min/km
+    } else {
+      return Math.round(distancia * 4);     // Caminando → 4 min/km
+    }
+  }
+  
 
   private nivelIndex(nivel: string): number {
     const niveles = ["Candidato Territorial I Pista", "Nivel I Pista", "Nivel I + Hab. Nivel II Pista", "Nivel II Pista", "Nivel II + Hab. Nacional C Pista", "Nacional C Pista", "Nacional B Pista", "Nacional A Pista", "Internacional Pista"];

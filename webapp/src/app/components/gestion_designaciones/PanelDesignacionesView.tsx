@@ -36,7 +36,7 @@ const DesignacionesView = () => {
   const [lugares, setLugares] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
   const [paginaActual, setPaginaActual] = useState(1);
-  const partidosPorPagina = 5; // Número de partidos por página
+  const partidosPorPagina = 10; // Número de partidos por página
 
 
 
@@ -211,49 +211,52 @@ const DesignacionesView = () => {
   };
   
 
-  const obtenerArbitrosDisponibles = (fechaHora: string) => {
-    const franja = obtenerFranja(fechaHora); // Obtener la franja para el partido
-    
-    return usuarios.filter((usuario) => {
-      const disponibilidad = disponibilidades.find(
-        (disp) => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(moment(fechaHora), "day")
-      );
-      return (
-        disponibilidad && (disponibilidad[franja] === 1 || disponibilidad[franja] === 2)
-      );
-    }).map(usuario => {
-      const disponibilidad = disponibilidades.find(disp => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(moment(fechaHora), "day"));
-      
-      let icono;
-      if (disponibilidad?.[franja] === 1) {
-        icono = <DirectionsCarIcon style={{ color: "blue", marginRight: 5 }} />;
-      } else if (disponibilidad?.[franja] === 2) {
-        icono = <DirectionsWalkIcon style={{ color: "green", marginRight: 5 }} />;
-      }
+  const obtenerArbitrosDisponibles = (fecha: string, hora: string) => {
+    const fechaHoraCompleta = moment(`${fecha} ${hora}`, 'YYYY-MM-DD HH:mm:ss');
+    const franja = obtenerFranja(hora); // Esto puede seguir usando solo la hora
   
-      return {
-        ...usuario,
-        icono, // Incluimos el ícono aquí
-        label: (
-          <>
-            {icono}
-            {usuario.nombre} {usuario.primerApellido} {usuario.segundoApellido}
-          </>
-        )
-      };
-    }).sort((a, b) => {
-      // Ordenar los árbitros alfabéticamente por su nombre completo
-      const nombreA = `${a.nombre} ${a.primerApellido} ${a.segundoApellido}`;
-      const nombreB = `${b.nombre} ${b.primerApellido} ${b.segundoApellido}`;
-      return nombreA.localeCompare(nombreB); // Orden alfabético
-    });
-    ;
+    return usuarios
+      .filter((usuario) => {
+        const disponibilidad = disponibilidades.find(
+          (disp) => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(fechaHoraCompleta, "day")
+        );
+        return disponibilidad && (disponibilidad[franja] === 1 || disponibilidad[franja] === 2);
+      })
+      .map((usuario) => {
+        const disponibilidad = disponibilidades.find(
+          (disp) => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(fechaHoraCompleta, "day")
+        );
+  
+        let icono;
+        if (disponibilidad?.[franja] === 1) {
+          icono = <DirectionsCarIcon style={{ color: "blue", marginRight: 5 }} />;
+        } else if (disponibilidad?.[franja] === 2) {
+          icono = <DirectionsWalkIcon style={{ color: "green", marginRight: 5 }} />;
+        }
+  
+        return {
+          ...usuario,
+          icono,
+          label: (
+            <>
+              {icono}
+              {usuario.nombre} {usuario.primerApellido} {usuario.segundoApellido}
+            </>
+          ),
+        };
+      })
+      .sort((a, b) => {
+        const nombreA = `${a.nombre} ${a.primerApellido} ${a.segundoApellido}`;
+        const nombreB = `${b.nombre} ${b.primerApellido} ${b.segundoApellido}`;
+        return nombreA.localeCompare(nombreB);
+      });
   };
+  
   
 
   const renderAutocomplete = (partido: any, tipo: string, arbitro: "arbitro1" | "arbitro2" | "anotador") => {
     // Obtener los árbitros disponibles para el partido
-    const arbitrosDisponibles = obtenerArbitrosDisponibles(partido.fecha);
+    const arbitrosDisponibles = obtenerArbitrosDisponibles(partido.fecha, partido.hora);
   
     // Filtrar los árbitros ya asignados en otros roles del partido
     const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map((key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre);
@@ -312,13 +315,15 @@ const DesignacionesView = () => {
     );
   };
   
-  const obtenerFranja = (fechaHora: string) => {
-    const horaPartido = moment(fechaHora).hour();
-    if (horaPartido >= 9 && horaPartido < 12) return "franja1";
-    if (horaPartido >= 12 && horaPartido < 15) return "franja2";
-    if (horaPartido >= 15 && horaPartido < 18) return "franja3";
-    if (horaPartido >= 18 && horaPartido <= 22) return "franja4";
-    return "";
+  const obtenerFranja = (horaStr: string) => {
+    const hora = moment(horaStr, 'HH:mm:ss').hour();
+      
+        if (hora >= 9 && hora < 12) return 'franja1';
+        if (hora >= 12 && hora < 15) return 'franja2';
+        if (hora >= 15 && hora < 18) return 'franja3';
+        if (hora >= 18 && hora < 21) return 'franja4';
+      
+        return '';
   };
 
   
@@ -541,19 +546,20 @@ const DesignacionesView = () => {
                             />
                           </Grid>
                           <Grid item xs={10}>
-                            <Typography variant="h6" color="primary">
-                              {partido.equipoLocal} - {partido.equipoVisitante}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              Lugar: {partido.lugar}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              Categoría: {partido.categoria}
-                            </Typography>
-                          </Grid>
+                          <Typography variant="h6" color="primary">
+                            {partido.equipoLocal} - {partido.equipoVisitante}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {moment(partido.fecha).format("dddd, DD MMMM YYYY")} - {moment(partido.hora, "HH:mm:ss").format("HH:mm")}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Lugar: {partido.lugar}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Categoría: {partido.categoria}
+                          </Typography>
+                        </Grid>
+
                         </Grid>
                         <Grid container spacing={2} mt={2}>
                           <Grid item xs={12} sm={4}>
