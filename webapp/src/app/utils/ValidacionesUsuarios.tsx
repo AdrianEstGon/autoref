@@ -56,10 +56,6 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.nivel = '';
   }
 
-  if (!nuevoUsuario.clubVinculadoId) {
-    erroresTemp.clubVinculadoId = '';
-  }
-
   if (!nuevoUsuario.fechaNacimiento) {
     erroresTemp.fechaNacimiento = 'Debe ingresar una fecha de nacimiento.';
     isValid = false;

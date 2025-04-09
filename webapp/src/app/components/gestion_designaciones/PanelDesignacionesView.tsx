@@ -18,6 +18,7 @@ import usuariosService from "../../services/UserService";
 import categoriaService from "../../services/CategoriaService";
 import polideportivoService from "../../services/PolideportivoService";
 import disponibilidadService from "../../services/DisponibilidadService";
+import equipoService from "../../services/EquipoService";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { toast } from "react-toastify";
@@ -34,9 +35,8 @@ const DesignacionesView = () => {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<any[]>([]);
   const [lugares, setLugares] = useState<any[]>([]);
+  const [equipos, setEquipos] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
-  const [paginaActual, setPaginaActual] = useState(1);
-  const partidosPorPagina = 10; // Número de partidos por página
 
 
 
@@ -55,11 +55,6 @@ const DesignacionesView = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [confirmarAccion, setConfirmarAccion] = useState(false);
 
-  // Calcular los partidos de la página actual
-  const indexUltimoPartido = paginaActual * partidosPorPagina;
-  const indexPrimerPartido = indexUltimoPartido - partidosPorPagina;
-  const partidosEnPagina = partidosFiltrados.slice(indexPrimerPartido, indexUltimoPartido);
-
   type Designacion = {
     arbitro1?: { nombre: string; icono: JSX.Element };
     arbitro2?: { nombre: string; icono: JSX.Element };
@@ -74,12 +69,14 @@ const DesignacionesView = () => {
         const categoriasLista = await categoriaService.getCategorias();
         const lugaresLista = await polideportivoService.getPolideportivos();
         const disponibilidadesLista = await disponibilidadService.getDisponibilidades();
+        const equiposLista = await equipoService.getEquipos(); 
   
         setPartidos(partidosLista);
         setUsuarios(usuariosLista);
         setCategorias(categoriasLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar categorías alfabéticamente
         setLugares(lugaresLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar polideportivos alfabéticamente
         setDisponibilidades(disponibilidadesLista);
+        setEquipos(equiposLista); 
   
         // Crear un mapa de disponibilidades para rápido acceso
         const disponibilidadMap = new Map();
@@ -366,11 +363,6 @@ const DesignacionesView = () => {
     setOpenDialog(false); // Cerrar el diálogo sin hacer nada
   };
 
-  // Manejar cambio de página
-  const handlePaginaCambio = (event: React.ChangeEvent<unknown>, nuevaPagina: number) => {
-    setPaginaActual(nuevaPagina);
-  };
-
   const handleCheckboxChange = (partidoId: number) => {
     const newSelection = new Set(partidosSeleccionados);
     if (newSelection.has(partidoId.toString())) {
@@ -386,7 +378,7 @@ const DesignacionesView = () => {
     const selected = event.target.checked;
     if (selected) {
       // Seleccionar todos los partidos de la página actual
-      const partidosIds = new Set(partidosEnPagina.map((partido) => partido.id));
+      const partidosIds = new Set(partidos.map((partido) => partido.id));
       setPartidosSeleccionados(partidosIds);
     } else {
       // Desmarcar todos
@@ -423,7 +415,7 @@ const DesignacionesView = () => {
     
     
     
-    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designacionesFiltradas, partidosAAsignar, categorias, lugares);
+    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designacionesFiltradas, partidosAAsignar, categorias, lugares, equipos);
     const nuevasDesignaciones = asignador.asignarArbitros(); // Asignar árbitros solo a los partidos seleccionados
   
     if (nuevasDesignaciones) {
@@ -521,7 +513,7 @@ const DesignacionesView = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={partidosSeleccionados.size === partidosEnPagina.length}
+                  checked={partidosSeleccionados.size === partidos.length}
                   onChange={handleSeleccionarTodos}
                   color="primary"
                 />

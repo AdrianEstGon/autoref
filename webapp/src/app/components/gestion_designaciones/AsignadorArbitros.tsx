@@ -12,7 +12,7 @@ type Arbitro = {
   latitud: number;
   longitud: number;
   transporte: boolean;
-  clubId?: string; // <- Nuevo campo opcional
+  clubVinculadoId?: string; // <- Nuevo campo opcional
 };
 
 type Partido = {
@@ -21,8 +21,13 @@ type Partido = {
   categoriaId: number;
   fecha: string;
   lugar: string;
-  clubIdLocal?: string;
-  clubIdVisitante?: string;
+  equipoLocalId?: string;
+  equipoVisitanteId?: string;
+};
+
+type Equipo = {
+  id: string;
+  clubId: string;
 };
 
 type Categoria = {
@@ -51,21 +56,38 @@ type Designacion = {
 };
 
 export class AsignadorArbitros {
+
+    // Constantes de configuración
+    static PENALIZACION_INCOMPLETO_BASE = 100;
+    static PENALIZACION_ARBITRO1_EXTRA = 2;
+    static PENALIZACION_ARBITRO2_EXTRA = 1;
+    static PENALIZACION_CONFLICTO_CLUB = 50;
+  
+    static ANTICIPACION_NACIONAL = 60;
+    static ANTICIPACION_OTROS = 30;
+    static DURACION_PARTIDO_MINUTOS = 90;
+    static VELOCIDAD_VEHICULO_KMH = 90;
+    static CAMINANDO_MIN_POR_KM = 4;
+    static DISTANCIA_CAMINANDO_MAX_KM = 10;
+    static MINUTOS_VEHICULO_LOCAL = 1.2;
+
   usuarios: Arbitro[];
   disponibilidades: any[];
   partidos: Partido[];
   categorias: Categoria[];
   lugares: Lugar[];
+  equipos: Equipo[]
   designaciones: Record<string, Designacion>;
   estadoActual: Estado | null = null; 
 
-  constructor(usuarios: Arbitro[], disponibilidades: any[], designaciones: Record<string, Designacion>, partidos: Partido[], categorias: Categoria[], lugares: Lugar[]) {
+  constructor(usuarios: Arbitro[], disponibilidades: any[], designaciones: Record<string, Designacion>, partidos: Partido[], categorias: Categoria[], lugares: Lugar[], equipos: Equipo[]) {
     this.usuarios = usuarios;
     this.disponibilidades = disponibilidades;
     this.designaciones = designaciones;
     this.partidos = partidos;
     this.categorias = categorias;
     this.lugares = lugares;
+    this.equipos = equipos;
   }
 
   asignarArbitros(): Record<string, Designacion> | null {
@@ -140,7 +162,7 @@ export class AsignadorArbitros {
       costoTotal: number;
     }[] = [];
   
-    const penalizacionIncompleto = 100;
+    const penalizacionIncompleto = AsignadorArbitros.PENALIZACION_INCOMPLETO_BASE;
 
     const arbitroIncompleto: Arbitro = {
       id: 'incompleto',
@@ -171,8 +193,8 @@ export class AsignadorArbitros {
           const a2Final = a2 ?? (categoria.segundoArbitro && categoria.segundoArbitro !== 'NO' ? arbitroIncompleto : null);
           const anFinal = an ?? (categoria.anotador && categoria.anotador !== 'NO' ? arbitroIncompleto : null);
     
-          if (a1Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + 2;
-          if (a2Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + 1;
+          if (a1Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + AsignadorArbitros.PENALIZACION_ARBITRO1_EXTRA;
+          if (a2Final === arbitroIncompleto) costoTotal += penalizacionIncompleto + AsignadorArbitros.PENALIZACION_ARBITRO2_EXTRA;
           if (anFinal === arbitroIncompleto) costoTotal += penalizacionIncompleto;
     
           combinacionesConCosto.push({
@@ -250,7 +272,7 @@ export class AsignadorArbitros {
       const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
       if (!yaAsignado) continue;
   
-      const duracion = 90;
+      const duracion = AsignadorArbitros.DURACION_PARTIDO_MINUTOS;
   
       let primero: Partido, segundo: Partido;
       let momentoPrimero: moment.Moment, momentoSegundo: moment.Moment;
@@ -301,12 +323,12 @@ export class AsignadorArbitros {
   
   private obtenerAnticipacion(partido: Partido): number {
     const categoria = this.categorias.find(c => c.id === partido.categoriaId);
-    if (!categoria) return 30;
+    if (!categoria) return AsignadorArbitros.ANTICIPACION_OTROS;
   
     const nombreCategoria = (categoria as any).nombre?.toUpperCase() || '';
   
     if (nombreCategoria.includes("NACIONAL") || nombreCategoria.includes("SUPERLIGA")) {
-      return 60;
+      return AsignadorArbitros.ANTICIPACION_NACIONAL;
     }
   
     return 30;
@@ -330,7 +352,27 @@ export class AsignadorArbitros {
   private calcularCosto(estado: Estado, arbitro: Arbitro, partido: Partido): number {
     const ubicacionPartido = this.lugares.find(l => l.nombre === partido.lugar);
     if (!ubicacionPartido) return Infinity;
-    return this.calcularDistancia(arbitro.latitud, arbitro.longitud, ubicacionPartido.latitud, ubicacionPartido.longitud);
+  
+    let costo = this.calcularDistancia(
+      arbitro.latitud,
+      arbitro.longitud,
+      ubicacionPartido.latitud,
+      ubicacionPartido.longitud
+    );
+  
+    if (arbitro.clubVinculadoId) {
+      const equipoLocal = this.equipos.find(e => e.id === partido.equipoLocalId);
+      const equipoVisitante = this.equipos.find(e => e.id === partido.equipoVisitanteId);
+  
+      const clubLocal = equipoLocal?.clubId;
+      const clubVisitante = equipoVisitante?.clubId;
+  
+      if (clubLocal === arbitro.clubVinculadoId || clubVisitante === arbitro.clubVinculadoId) {
+        costo += AsignadorArbitros.PENALIZACION_CONFLICTO_CLUB; 
+      }
+    }
+  
+    return costo;
   }
 
   private calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -350,33 +392,39 @@ export class AsignadorArbitros {
   
     let tieneTransporte = arbitro.transporte;
   
-    // Si NO tiene transporte, vemos si algún compañero asignado al mismo partido puede llevarlo
     if (!tieneTransporte && this.estadoActual) {
+      // 1. Verifica si algún compañero del partido "desde" tiene transporte
       const asignacionDesde = this.estadoActual.asignaciones[desde.id];
-      if (asignacionDesde) {
-        const compañeros = [asignacionDesde.arbitro1, asignacionDesde.arbitro2, asignacionDesde.anotador]
-          .filter(a => a && a.id !== arbitro.id) as Arbitro[];
+      const compañeros = asignacionDesde
+        ? [asignacionDesde.arbitro1, asignacionDesde.arbitro2, asignacionDesde.anotador]
+            .filter(a => a && a.id !== arbitro.id) as Arbitro[]
+        : [];
   
-        const alguienCercaConTransporte = compañeros.some(comp =>
-          comp.transporte &&
-          this.calcularDistancia(comp.latitud, comp.longitud, arbitro.latitud, arbitro.longitud) <= 10
-        );
+      const compañeroConTransporte = compañeros.some(comp => comp.transporte);
   
-        if (alguienCercaConTransporte) {
-          tieneTransporte = true;
-        }
+      // 2. Verifica si hay otros árbitros con transporte cerca del polideportivo
+      const alguienCercaConTransporte = this.usuarios.some(a =>
+        a.id !== arbitro.id &&
+        a.transporte &&
+        this.calcularDistancia(origen.latitud, origen.longitud, a.latitud, a.longitud) <= 10
+      );
+      
+  
+      if (compañeroConTransporte || alguienCercaConTransporte) {
+        tieneTransporte = true;
       }
     }
   
     // Cálculo final del tiempo estimado
     if (tieneTransporte) {
       return distancia > 10.0
-        ? Math.round((distancia / 60) * 90) // >10km → 90km/h
-        : Math.round(distancia * 1.2);      // ≤10km → 1.2 min/km
+        ? Math.round((distancia / 60) * AsignadorArbitros.VELOCIDAD_VEHICULO_KMH)
+        : Math.round(distancia * AsignadorArbitros.MINUTOS_VEHICULO_LOCAL);
     } else {
-      return Math.round(distancia * 4);     // Caminando → 4 min/km
+      return Math.round(distancia * AsignadorArbitros.CAMINANDO_MIN_POR_KM);
     }
   }
+  
   
 
   private nivelIndex(nivel: string): number {

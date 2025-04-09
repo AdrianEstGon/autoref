@@ -375,7 +375,7 @@ const DisponibilidadView = () => {
                   </Typography>
                   <Grid container spacing={1} alignItems="center">
                     {/* Select */}
-                    <Grid item xs={6}>
+                    <Grid item xs={10}>
                       <Select
                         fullWidth
                         value={availability[franja] || ''}
@@ -389,7 +389,7 @@ const DisponibilidadView = () => {
                     </Grid>
                     
                     {/* Icono */}
-                    <Grid item xs={6} display="flex" justifyContent="center" alignItems="center">
+                    <Grid item xs={2} display="flex" justifyContent="center" alignItems="center">
                       {availability[franja] === 1 && (
                         <IconButton color="primary" >
                           <DirectionsCarIcon />
@@ -422,7 +422,7 @@ const DisponibilidadView = () => {
             </DialogContent>
             <DialogActions sx={{ backgroundColor: '#F0F4F8' }}>
               <Button onClick={handleCloseDialog} color="error">Cancelar</Button>
-              <Button onClick={handleSave} color="primary" variant="contained">Guardar</Button>
+              <Button onClick={handleSave} color="primary">Guardar</Button>
             </DialogActions>
           </Dialog>
 

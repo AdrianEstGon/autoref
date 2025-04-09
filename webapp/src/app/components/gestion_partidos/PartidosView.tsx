@@ -251,32 +251,33 @@ const PartidosView: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell colSpan={8} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
+                  <TableCell colSpan={8} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fafafa' }}>
                     Gestión de Partidos
                   </TableCell>
                 </TableRow>
                 <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Fecha</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Hora</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Lugar</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Equipo Local</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Equipo Visitante</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Categoría</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Jornada</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Fecha</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Hora</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lugar</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Equipo Local</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Equipo Visitante</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Categoría</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Jornada</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
+
                 </TableRow>
               </TableHead>
               <TableBody>
                 {partidos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(partido => (
                   <TableRow key={partido.id ?? `temp-${Math.random()}`}>
-                    <TableCell>{formatDate(partido.fecha)}</TableCell>
-                    <TableCell>{formatTime(partido.hora)}</TableCell>
-                    <TableCell>{partido.lugar || '-'}</TableCell>
-                    <TableCell>{partido.equipoLocal}</TableCell>
-                    <TableCell>{partido.equipoVisitante}</TableCell>
-                    <TableCell>{partido.categoria}</TableCell>
-                    <TableCell>{partido.jornada}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{formatDate(partido.fecha)}</TableCell>
+                    <TableCell align="center">{formatTime(partido.hora)}</TableCell>
+                    <TableCell align="center">{partido.lugar || '-'}</TableCell>
+                    <TableCell align="center">{partido.equipoLocal}</TableCell>
+                    <TableCell align="center">{partido.equipoVisitante}</TableCell>
+                    <TableCell align="center">{partido.categoria}</TableCell>
+                    <TableCell align="center">{partido.jornada}</TableCell>
+                    <TableCell align="center">
                       <IconButton onClick={() => handleModify(partido)} color="primary">
                         <EditIcon />
                       </IconButton>
@@ -289,33 +290,51 @@ const PartidosView: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <Box 
+                      sx={{ 
+                        position: 'fixed', 
+                        bottom: 0, 
+                        left: 0, 
+                        width: '100%', 
+                        backgroundColor: '#eafaff', 
+                        borderTop: '1px solid #ccc', 
+                        py: 2, 
+                        px: { xs: 2, sm: 4, md: 8 }, 
+                        display: 'flex', 
+                        flexDirection: { xs: 'column', sm: 'row' }, 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        zIndex: 10,
+                      }}
+                    >
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'left', gap: 2, mt: 3 }}>
+                      <Button variant="contained" color="primary" onClick={handleAdd} startIcon={<AddIcon />}>Agregar Partido</Button>
+                      <Button variant="outlined" component="label" sx={{
+                          color: 'green',  // Cambia el color del texto
+                          borderColor: 'green',  // Cambia el color del borde
+                          '&:hover': {
+                            borderColor: 'green',  // Cambia el color del borde al pasar el mouse
+                            backgroundColor: 'rgba(0, 128, 0, 0.1)'  // Opción para agregar un fondo verde claro al hacer hover (opcional)
+                          }
+                        }}>
+                        <UploadFileIcon /> Importar partidos desde Excel
+                        <input type="file" id="upload-file" accept=".xlsx, .xls" onChange={handleFileUpload} hidden />
+                      </Button>
+                    </Box>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'left', gap: 2, mt: 3 }}>
-            <Button variant="contained" color="primary" onClick={handleAdd} startIcon={<AddIcon />}>Agregar Partido</Button>
-            <Button variant="outlined" component="label" sx={{
-                color: 'green',  // Cambia el color del texto
-                borderColor: 'green',  // Cambia el color del borde
-                '&:hover': {
-                  borderColor: 'green',  // Cambia el color del borde al pasar el mouse
-                  backgroundColor: 'rgba(0, 128, 0, 0.1)'  // Opción para agregar un fondo verde claro al hacer hover (opcional)
-                }
-              }}>
-              <UploadFileIcon /> Importar partidos desde Excel
-              <input type="file" id="upload-file" accept=".xlsx, .xls" onChange={handleFileUpload} hidden />
-            </Button>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      component="div"
+                      count={partidos.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                      labelRowsPerPage="Filas por página"
+                      labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+                      sx={{ mr: { xs: 0, sm: 4, md: 12 } }}
+                    />
           </Box>
-
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={partidos.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Filas por página"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-          />
 
           <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
             <DialogTitle>Eliminar Partido</DialogTitle>

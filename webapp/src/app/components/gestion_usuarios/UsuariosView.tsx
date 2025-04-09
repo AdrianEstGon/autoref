@@ -128,29 +128,29 @@ const UsuariosView: React.FC = () => {
                   </TableCell>
                 </TableRow>
                 <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Nombre</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Primer apellido</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Segundo apellido</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Nivel</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Fecha de Nacimiento</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Club Vinculado</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Correo Electrónico</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Número de Licencia</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Nombre</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Primer apellido</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Segundo apellido</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Nivel</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Fecha de Nacimiento</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Club Vinculado</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Correo Electrónico</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Número de Licencia</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {usuariosPaginados.map((usuario) => (
                   <TableRow key={usuario.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
-                    <TableCell>{usuario.nombre}</TableCell>
-                    <TableCell>{usuario.primerApellido}</TableCell>
-                    <TableCell>{usuario.segundoApellido}</TableCell>
-                    <TableCell>{usuario.nivel}</TableCell>
-                    <TableCell>{formatDate(usuario.fechaNacimiento)}</TableCell>
-                    <TableCell>{usuario.clubVinculado}</TableCell>
-                    <TableCell>{usuario.email}</TableCell>
-                    <TableCell>{usuario.licencia}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.nombre}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.primerApellido}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.segundoApellido}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.nivel}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{formatDate(usuario.fechaNacimiento)}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.clubVinculado}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.email}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>{usuario.licencia}</TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>
                       <Tooltip title="Modificar usuario" arrow>
                         <IconButton color="primary" onClick={() => handleModify(usuario)}>
                           <EditIcon />
@@ -167,22 +167,48 @@ const UsuariosView: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box sx={{ display: 'flex', justifyContent: 'left', mt: 2 }}>
-            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAdd}>
+          <Box 
+            sx={{ 
+              position: 'fixed', 
+              bottom: 0, 
+              left: 0, 
+              width: '100%', 
+              backgroundColor: '#eafaff', 
+              borderTop: '1px solid #ccc', 
+              py: 2, 
+              px: { xs: 2, sm: 4, md: 8 }, 
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' }, 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              zIndex: 10,
+            }}
+          >
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<AddIcon />} 
+              onClick={handleAdd}
+              sx={{ mb: { xs: 1, sm: 0 } }}
+            >
               Agregar Usuario
             </Button>
+
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={usuarios.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+              sx={{ mr: { xs: 0, sm: 4, md: 12 } }}
+              
+            />
           </Box>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={usuarios.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Filas por página"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-          />
+
         </Container>
       </Box>
   

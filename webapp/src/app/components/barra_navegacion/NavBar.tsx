@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Button, Menu, MenuItem, Box, IconButton, useMediaQuery, Drawer, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Button, Menu, MenuItem, Box, IconButton, useMediaQuery, Drawer, Avatar, ListItem, ListItemText, Typography, List } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';  
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';  
 import MenuIcon from '@mui/icons-material/Menu';  
@@ -8,6 +8,13 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Badge, Menu as MuiMenu, MenuItem as MuiMenuItem } from '@mui/material';
+import moment from 'moment'; // Asegúrate de tener moment instalado
+
+
+
+
 
 const NavigationBar = () => {
   const [anchorElPanel, setAnchorElPanel] = useState<null | HTMLElement>(null);
@@ -18,6 +25,13 @@ const NavigationBar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'Tienes un nuevo mensaje', date: new Date() },
+    { id: 2, message: 'Nueva designación disponible', date: new Date() },
+    { id: 3, message: 'Recordatorio: disponibilidad pendiente', date: new Date() }
+  ]); 
+
 
   useEffect(() => {
     const role = window.localStorage.getItem('userRole');
@@ -38,6 +52,7 @@ const NavigationBar = () => {
       window.removeEventListener("storage", actualizarFotoPerfil);
     };
   }, []);
+
 
   const handleMenuPanelClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElPanel(event.currentTarget);
@@ -118,23 +133,59 @@ const NavigationBar = () => {
             </Box>
           )}
 
-          <>
-            <Button title='Mi perfil' color="inherit" sx={{ display: 'flex', alignItems: 'center' }} onClick={handleMenuPanelPerfilClick}>
-              {profilePhoto ? <Avatar src={profilePhoto} sx={{ width: 32, height: 32, mr: 1 }} /> : <AccountCircleIcon sx={{ mr: 1 }} />}
-            </Button>
-            <Menu
-              anchorEl={anchorElPanelPerfil}
-              open={Boolean(anchorElPanelPerfil)}
-              onClose={handleClosePanelMenuPerfil}
-            >
-              <MenuItem onClick={() => handleNavigate('/miPerfil')}>
-                <AccountCircleIcon sx={{ mr: 1 }} /> Mi perfil
-              </MenuItem>
-              <MenuItem onClick={() => handleLogout()}>
-                <ExitToAppIcon sx={{ mr: 1, color: 'red' }} /> Cerrar sesión
-              </MenuItem>
-            </Menu>
-          </>
+<Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
+  <IconButton color="inherit" onClick={() => setOpenNotifications(true)} sx={{ mr: 2 }}>
+    <Badge badgeContent={notifications.length} color="error">
+      <NotificationsIcon />
+    </Badge>
+  </IconButton>
+
+  {/* Panel de Notificaciones */}
+  <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
+    <Box sx={{ width: 400, padding: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Notificaciones
+      </Typography>
+      <List>
+        {notifications.length > 0 ? (
+          notifications.map((notification) => (
+            <ListItem key={notification.id} divider>
+              <ListItemText
+                primary={notification.message}
+                secondary={`Fecha: ${moment(notification.date).format("DD/MM/YYYY")}`}
+              />
+            </ListItem>
+          ))
+        ) : (
+          <Typography variant="body2" textAlign="center">
+            No hay notificaciones.
+          </Typography>
+        )}
+      </List>
+    </Box>
+  </Drawer>
+
+  <Button title="Mi perfil" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} onClick={handleMenuPanelPerfilClick}>
+    {profilePhoto ? (
+      <Avatar src={profilePhoto} sx={{ width: 32, height: 32, mr: 1 }} />
+    ) : (
+      <AccountCircleIcon sx={{ mr: 1 }} />
+    )}
+  </Button>
+
+  <Menu
+    anchorEl={anchorElPanelPerfil}
+    open={Boolean(anchorElPanelPerfil)}
+    onClose={handleClosePanelMenuPerfil}
+  >
+    <MenuItem onClick={() => handleNavigate('/miPerfil')}>
+      <AccountCircleIcon sx={{ mr: 1 }} /> Mi perfil
+    </MenuItem>
+    <MenuItem onClick={handleLogout}>
+      <ExitToAppIcon sx={{ mr: 1, color: 'red' }} /> Cerrar sesión
+    </MenuItem>
+  </Menu>
+</Box>
         </Toolbar>
       </AppBar>
     </div>
