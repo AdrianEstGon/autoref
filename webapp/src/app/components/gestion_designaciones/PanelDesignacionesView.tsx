@@ -19,6 +19,7 @@ import categoriaService from "../../services/CategoriaService";
 import polideportivoService from "../../services/PolideportivoService";
 import disponibilidadService from "../../services/DisponibilidadService";
 import equipoService from "../../services/EquipoService";
+import notificacionesService from "../../services/NotificacionService";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { toast } from "react-toastify";
@@ -27,6 +28,7 @@ import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import { Pagination } from "@mui/material";
 import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros"; // Adjust the path as needed
 import { AutoFixHigh } from "@mui/icons-material";
+import { CircularProgress } from '@mui/material';
 
 moment.locale("es");
 
@@ -49,6 +51,7 @@ const DesignacionesView = () => {
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
   const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<string>>(new Set());
+  const [asignando, setAsignando] = useState(false);
 
 
   // Estado para el diálogo de confirmación
@@ -333,34 +336,65 @@ const DesignacionesView = () => {
       for (const partido of partidosFiltrados) {
         const designacion = designaciones[partido.id];
   
-        // Verificar que arbitros hay para el partido
-        const arbitro1Id = designacion?.arbitro1 ? usuarios.find(usuario => usuario.nombre === designacion.arbitro1?.nombre)?.id : null;
-        const arbitro2Id = designacion?.arbitro2?.nombre ? usuarios.find(usuario => usuario.nombre === designacion.arbitro2?.nombre)?.id : null;
-        const anotadorId = (designacion?.anotador ?? null) ? usuarios.find(usuario => usuario.nombre === designacion.anotador?.nombre)?.id : null;
+        const arbitro1 = designacion?.arbitro1;
+        const arbitro2 = designacion?.arbitro2;
+        const anotador = designacion?.anotador;
   
-        // Crear el objeto de partido actualizado
+        const arbitro1Id = arbitro1 ? usuarios.find(usuario => usuario.nombre === arbitro1.nombre)?.id : null;
+        const arbitro2Id = arbitro2 ? usuarios.find(usuario => usuario.nombre === arbitro2.nombre)?.id : null;
+        const anotadorId = anotador ? usuarios.find(usuario => usuario.nombre === anotador.nombre)?.id : null;
+  
         const partidoActualizado: any = {
           ...partido,
-          arbitro1Id: arbitro1Id ?? null, // Si no hay árbitro, se asigna null
-          arbitro2Id: arbitro2Id ?? null, // Si no hay árbitro, se asigna null
-          anotadorId: anotadorId ?? null, // Si no hay anotador, se asigna null
+          arbitro1Id: arbitro1Id ?? null,
+          arbitro2Id: arbitro2Id ?? null,
+          anotadorId: anotadorId ?? null,
         };
   
-        // Llamada a la API para actualizar el partido
         await partidosService.actualizarPartido(partidoActualizado);
+  
+        const nombreLugar = lugares.find(l => l.id === partido.lugarId)?.nombre ?? "lugar desconocido";
+        const fechaPartido = new Date(partido.fecha);
+        const dia = fechaPartido.getDate().toString().padStart(2, '0');
+        const mes = (fechaPartido.getMonth() + 1).toString().padStart(2, '0');
+        const año = fechaPartido.getFullYear();
+        const [hours, minutes] = partido.hora.split(':').map(Number);
+        const horaFormateada = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        fechaPartido.setHours(hours, minutes, 0, 0);
+
+  
+        const mensaje = `Has sido designado para el partido ${partido.equipoLocal} - ${partido.equipoVisitante}, que se disputa en el ${nombreLugar} a las ${horaFormateada} del día ${dia}/${mes}/${año}`;
+  
+        // Crear notificaciones
+        const crearNotificacionSiAplica = async (usuarioId: string | undefined | null) => {
+          if (usuarioId) {
+            await notificacionesService.crearNotificacion({
+              usuarioId,
+              mensaje,
+              fecha: fechaPartido,
+            });            
+          }
+        };
+  
+        await Promise.all([
+          crearNotificacionSiAplica(arbitro1Id),
+          crearNotificacionSiAplica(arbitro2Id),
+          crearNotificacionSiAplica(anotadorId),
+        ]);
       }
-      
+  
       toast.success("Designaciones publicadas correctamente");
-      setOpenDialog(false); // Cerrar el diálogo después de publicar
+      setOpenDialog(false);
     } catch (error) {
       console.error("Error al publicar designaciones:", error);
       toast.error("Error al publicar designaciones");
-      setOpenDialog(false); // Cerrar el diálogo en caso de error
+      setOpenDialog(false);
     }
   };
+  
 
   const handleCancelar = () => {
-    setOpenDialog(false); // Cerrar el diálogo sin hacer nada
+    setOpenDialog(false); 
   };
 
   const handleCheckboxChange = (partidoId: number) => {
@@ -388,39 +422,54 @@ const DesignacionesView = () => {
 
 
   const asignarArbitrosAutomaticamente = () => {
-    // Filtrar solo los partidos seleccionados
-    const partidosAAsignar = partidosFiltrados.filter(partido => partidosSeleccionados.has(partido.id));
+    setAsignando(true); // Comienza el loading
   
-    // Si no hay partidos seleccionados, mostrar un mensaje
-    if (partidosAAsignar.length === 0) {
-      toast.warn("No se ha seleccionado ningún partido para asignar.");
-      return;
-    }
+    // Simula asincronía (si tu asignador es síncrono, usa setTimeout para ver el ícono de carga)
+    setTimeout(() => {
+      const partidosAAsignar = partidosFiltrados.filter(partido =>
+        partidosSeleccionados.has(partido.id)
+      );
   
-    const designacionesFiltradas = Object.fromEntries(
-      Object.entries(designaciones).filter(([partidoId]) =>
-        partidosSeleccionados.has(partidoId.toString()) // Comparación directa como string
-      )
-    );
-
-    // Verificar si alguna designación ya tiene árbitros asignados
-    const tieneArbitrosAsignados = Object.values(designacionesFiltradas).some(designacion =>
-      designacion.arbitro1 || designacion.arbitro2 || designacion.anotador
-    );
-
-    if (tieneArbitrosAsignados) {
-      toast.warn("No se pueden asignar árbitros a partidos que ya tienen designaciones.");
-      return;
-    }
-    
-    
-    
-    const asignador = new AsignadorArbitros(usuarios, disponibilidades, designacionesFiltradas, partidosAAsignar, categorias, lugares, equipos);
-    const nuevasDesignaciones = asignador.asignarArbitros(); // Asignar árbitros solo a los partidos seleccionados
+      if (partidosAAsignar.length === 0) {
+        toast.warn("No se ha seleccionado ningún partido para asignar.");
+        setAsignando(false);
+        return;
+      }
   
-    if (nuevasDesignaciones) {
-      setDesignaciones({ ...designaciones, ...nuevasDesignaciones }); // Actualizamos solo las designaciones necesarias
-    }
+      const designacionesFiltradas = Object.fromEntries(
+        Object.entries(designaciones).filter(([partidoId]) =>
+          partidosSeleccionados.has(partidoId.toString())
+        )
+      );
+  
+      const tieneArbitrosAsignados = Object.values(designacionesFiltradas).some(designacion =>
+        designacion.arbitro1 || designacion.arbitro2 || designacion.anotador
+      );
+  
+      if (tieneArbitrosAsignados) {
+        toast.warn("No se pueden asignar árbitros a partidos que ya tienen designaciones.");
+        setAsignando(false);
+        return;
+      }
+  
+      const asignador = new AsignadorArbitros(
+        usuarios,
+        disponibilidades,
+        designacionesFiltradas,
+        partidosAAsignar,
+        categorias,
+        lugares,
+        equipos
+      );
+  
+      const nuevasDesignaciones = asignador.asignarArbitros();
+  
+      if (nuevasDesignaciones) {
+        setDesignaciones({ ...designaciones, ...nuevasDesignaciones });
+      }
+  
+      setAsignando(false); // Finaliza el loading
+    }, 300); // Esto simula un delay mínimo para que se vea el spinner
   };
   
   
@@ -499,16 +548,25 @@ const DesignacionesView = () => {
               </Button>
             </Grid>
 
+
             <Grid item xs={12} sm="auto" md={6}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={asignarArbitrosAutomaticamente}
-              startIcon={<AutoFixHigh />}  // Añade el ícono al inicio del botón
-            >
-              Designar Automáticamente
-            </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={asignarArbitrosAutomaticamente}
+                startIcon={
+                  asignando ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <AutoFixHigh />
+                  )
+                }
+                disabled={asignando}
+              >
+                {asignando ? "Asignando..." : "Designar Automáticamente"}
+              </Button>
             </Grid>
+
 
             <FormControlLabel
               control={

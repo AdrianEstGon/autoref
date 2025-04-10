@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Button, Menu, MenuItem, Box, IconButton, useMediaQuery, Drawer, Avatar, ListItem, ListItemText, Typography, List } from '@mui/material';
+import { AppBar, Toolbar, Button, Menu, MenuItem, Box, IconButton, useMediaQuery, Drawer, Avatar, Typography, List, CardContent, Card, Divider, Collapse, Tooltip } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';  
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';  
 import MenuIcon from '@mui/icons-material/Menu';  
@@ -7,14 +7,12 @@ import PeopleIcon from '@mui/icons-material/People';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useTheme } from '@mui/material/styles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate } from 'react-router-dom';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { Badge, Menu as MuiMenu, MenuItem as MuiMenuItem } from '@mui/material';
-import moment from 'moment'; // Asegúrate de tener moment instalado
-
-
-
-
+import { Badge } from '@mui/material';
+import moment from 'moment'; 
+import notificacionesService from '../../services/NotificacionService';
 
 const NavigationBar = () => {
   const [anchorElPanel, setAnchorElPanel] = useState<null | HTMLElement>(null);
@@ -26,13 +24,9 @@ const NavigationBar = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
   const [openNotifications, setOpenNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: 'Tienes un nuevo mensaje', date: new Date() },
-    { id: 2, message: 'Nueva designación disponible', date: new Date() },
-    { id: 3, message: 'Recordatorio: disponibilidad pendiente', date: new Date() }
-  ]); 
-
-
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [slidingOutNotification, setSlidingOutNotification] = useState<string | null>(null); // Controla la notificación que se desliza
+  
   useEffect(() => {
     const role = window.localStorage.getItem('userRole');
     const foto = window.localStorage.getItem('fotoPerfil');
@@ -41,18 +35,57 @@ const NavigationBar = () => {
   }, []);
 
   useEffect(() => {
-    const actualizarFotoPerfil = () => {
-      const foto = localStorage.getItem("fotoPerfil");
-      setProfilePhoto(foto && foto !== '{}' ? foto : null);
+    const fetchNotifications = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('userLogged') || '{}');
+        if (!user?.id) return;
+  
+        // Obtener notificaciones desde el servicio
+        const notificaciones = await notificacionesService.getNotificacionesPorUsuario(user.id);
+  
+        const ahora = new Date();
+        const futuras = notificaciones.filter((n: any) => {
+          const fechaNotificacion = new Date(n.fecha);
+          // Si la fecha de la notificación ya ha pasado, eliminarla
+          if (fechaNotificacion < ahora) {
+            notificacionesService.eliminarNotificacion(n.id);  // Llamar al servicio para eliminar la notificación
+            return false; // No agregar la notificación a la lista de futuras
+          }
+          if (n.leida) return false; // No agregar las leídas
+          return true; // Solo agregar las futuras
+        });
+  
+        setNotifications(futuras);
+      } catch (error) {
+        console.error('Error al cargar notificaciones:', error);
+      }
     };
   
-    window.addEventListener("storage", actualizarFotoPerfil);
-    
-    return () => {
-      window.removeEventListener("storage", actualizarFotoPerfil);
-    };
+    fetchNotifications();
   }, []);
+  
 
+  const marcarComoLeida = async (id: string) => {
+    try {
+      const notificacion = notifications.find((n) => n.id === id);
+      if (!notificacion) return;
+
+      const notificacionActualizada = { ...notificacion, leida: true };
+
+      await notificacionesService.actualizarNotificacion(id, notificacionActualizada);
+
+      // Marca la notificación para que se deslice hacia la derecha
+      setSlidingOutNotification(id);
+
+      // Elimina la notificación después de un pequeño retraso para que se vea el efecto de deslizamiento
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        setSlidingOutNotification(null); // Resetea la notificación deslizada
+      }, 500); // 500 ms (tiempo de la animación) antes de eliminarla
+    } catch (error) {
+      console.error('Error al marcar como leída:', error);
+    }
+  };
 
   const handleMenuPanelClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElPanel(event.currentTarget);
@@ -133,59 +166,118 @@ const NavigationBar = () => {
             </Box>
           )}
 
-<Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
-  <IconButton color="inherit" onClick={() => setOpenNotifications(true)} sx={{ mr: 2 }}>
-    <Badge badgeContent={notifications.length} color="error">
-      <NotificationsIcon />
-    </Badge>
-  </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
+            <IconButton color="inherit" onClick={() => setOpenNotifications(true)} sx={{ mr: 2 }}>
+              <Badge badgeContent={notifications.length} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
 
-  {/* Panel de Notificaciones */}
-  <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
-    <Box sx={{ width: 400, padding: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Notificaciones
-      </Typography>
-      <List>
-        {notifications.length > 0 ? (
-          notifications.map((notification) => (
-            <ListItem key={notification.id} divider>
-              <ListItemText
-                primary={notification.message}
-                secondary={`Fecha: ${moment(notification.date).format("DD/MM/YYYY")}`}
-              />
-            </ListItem>
-          ))
-        ) : (
-          <Typography variant="body2" textAlign="center">
-            No hay notificaciones.
-          </Typography>
-        )}
-      </List>
-    </Box>
-  </Drawer>
+            <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
+              <Box
+                sx={{
+                  width: isMobile ? '100vw' : 400,
+                  p: 2,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor: '#f9fafb',
+                }}
+              >
+                <Typography variant="h5" fontWeight="600" gutterBottom>
+                  Notificaciones
+                </Typography>
 
-  <Button title="Mi perfil" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} onClick={handleMenuPanelPerfilClick}>
-    {profilePhoto ? (
-      <Avatar src={profilePhoto} sx={{ width: 32, height: 32, mr: 1 }} />
-    ) : (
-      <AccountCircleIcon sx={{ mr: 1 }} />
-    )}
-  </Button>
+                <Divider sx={{ mb: 2 }} />
 
-  <Menu
-    anchorEl={anchorElPanelPerfil}
-    open={Boolean(anchorElPanelPerfil)}
-    onClose={handleClosePanelMenuPerfil}
-  >
-    <MenuItem onClick={() => handleNavigate('/miPerfil')}>
-      <AccountCircleIcon sx={{ mr: 1 }} /> Mi perfil
-    </MenuItem>
-    <MenuItem onClick={handleLogout}>
-      <ExitToAppIcon sx={{ mr: 1, color: 'red' }} /> Cerrar sesión
-    </MenuItem>
-  </Menu>
-</Box>
+                <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                  {notifications.length > 0 ? (
+                    <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {notifications.map((notification) => (
+                        <Card
+                          variant="outlined"
+                          key={notification.id}
+                          sx={{
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            boxShadow: 1,
+                            position: 'relative',
+                            transition: 'transform 0.5s ease-out', // Animación suave
+                            transform: slidingOutNotification === notification.id ? 'translateX(100%)' : 'translateX(0)', // Deslizar la tarjeta hacia la derecha
+                            overflow: 'hidden', // Para evitar que el contenido se desborde
+                          }}
+                        >
+                          <CardContent sx={{ p: 2, pb: 6 }}>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                mb: 1,
+                                fontStyle: 'italic',
+                                color: 'text.secondary',
+                                fontWeight: '400',
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {notification.mensaje}
+                            </Typography>
+                          </CardContent>
+
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              bottom: 16,
+                              right: 16,
+                              display: 'flex',
+                              alignItems: 'center',
+                              zIndex: 1000,
+                            }}
+                          >
+                            <Tooltip title="Marcar como leída">
+                              <Button
+                                variant="outlined"
+                                color="success"
+                                size="small"
+                                onClick={() => marcarComoLeida(notification.id)}
+                                sx={{ display: 'flex', alignItems: 'center' }}
+                              >
+                                <CheckCircleIcon sx={{ marginRight: 1 }} />
+                                Marcar como leída
+                              </Button>
+                            </Tooltip>
+                          </Box>
+                        </Card>
+                      ))}
+                    </List>
+                  ) : (
+                    <Typography variant="body2" textAlign="center" sx={{ mt: 4 }}>
+                      No hay notificaciones disponibles.
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            </Drawer>
+
+            <Button title="Mi perfil" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} onClick={handleMenuPanelPerfilClick}>
+              {profilePhoto ? (
+                <Avatar src={profilePhoto} sx={{ width: 32, height: 32, mr: 1 }} />
+              ) : (
+                <AccountCircleIcon sx={{ mr: 1 }} />
+              )}
+            </Button>
+
+            <Menu
+              anchorEl={anchorElPanelPerfil}
+              open={Boolean(anchorElPanelPerfil)}
+              onClose={handleClosePanelMenuPerfil}
+            >
+              <MenuItem onClick={() => handleNavigate('/miPerfil')}>
+                <AccountCircleIcon sx={{ mr: 1 }} /> Mi perfil
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <ExitToAppIcon sx={{ mr: 1, color: 'red' }} /> Cerrar sesión
+              </MenuItem>
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
     </div>
