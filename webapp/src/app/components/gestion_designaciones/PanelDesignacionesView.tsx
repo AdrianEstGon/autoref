@@ -1,4 +1,4 @@
-import React, { useState, useEffect, JSX } from "react";
+import React, { useState, useEffect, JSX, useMemo, useCallback } from "react";
 import { 
   Container, Typography, Grid, Card, CardContent, Select, MenuItem, FormControl, InputLabel, TextField, Button,
   Dialog,
@@ -212,27 +212,17 @@ const DesignacionesView = () => {
   
 
   const obtenerArbitrosDisponibles = (fecha: string, hora: string) => {
-    const fechaHoraCompleta = moment(`${fecha} ${hora}`, 'YYYY-MM-DD HH:mm:ss');
-    const franja = obtenerFranja(hora); // Esto puede seguir usando solo la hora
+    const fechaStr = moment(fecha).format("YYYY-MM-DD");
+    const franja = obtenerFranja(hora);
   
     return usuarios
-      .filter((usuario) => {
-        const disponibilidad = disponibilidades.find(
-          (disp) => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(fechaHoraCompleta, "day")
-        );
-        return disponibilidad && (disponibilidad[franja] === 1 || disponibilidad[franja] === 2);
-      })
       .map((usuario) => {
-        const disponibilidad = disponibilidades.find(
-          (disp) => disp.usuarioId === usuario.id && moment(disp.fecha).isSame(fechaHoraCompleta, "day")
-        );
+        const disp = mapDisponibilidades.get(`${usuario.id}_${fechaStr}`);
+        if (!disp || (disp[franja] !== 1 && disp[franja] !== 2)) return null;
   
-        let icono;
-        if (disponibilidad?.[franja] === 1) {
-          icono = <DirectionsCarIcon style={{ color: "blue", marginRight: 5 }} />;
-        } else if (disponibilidad?.[franja] === 2) {
-          icono = <DirectionsWalkIcon style={{ color: "green", marginRight: 5 }} />;
-        }
+        const icono = disp[franja] === 1
+          ? <DirectionsCarIcon style={{ color: "blue", marginRight: 5 }} />
+          : <DirectionsWalkIcon style={{ color: "green", marginRight: 5 }} />;
   
         return {
           ...usuario,
@@ -242,9 +232,10 @@ const DesignacionesView = () => {
               {icono}
               {usuario.nombre} {usuario.primerApellido} {usuario.segundoApellido}
             </>
-          ),
+          )
         };
       })
+      .filter(Boolean)
       .sort((a, b) => {
         const nombreA = `${a.nombre} ${a.primerApellido} ${a.segundoApellido}`;
         const nombreB = `${b.nombre} ${b.primerApellido} ${b.segundoApellido}`;
@@ -252,11 +243,30 @@ const DesignacionesView = () => {
       });
   };
   
+  const mapDisponibilidades = useMemo(() => {
+    const map = new Map<string, Record<string, any>>();
+    disponibilidades.forEach((disp) => {
+      const fecha = moment(disp.fecha).format("YYYY-MM-DD");
+      const key = `${disp.usuarioId}_${fecha}`;
+      map.set(key, disp);
+    });
+    return map;
+  }, [disponibilidades]);
   
+  const obtenerFranja = (horaStr: string) => {
+    const hora = moment(horaStr, 'HH:mm:ss').hour();
+      
+        if (hora >= 9 && hora < 12) return 'franja1';
+        if (hora >= 12 && hora < 15) return 'franja2';
+        if (hora >= 15 && hora < 18) return 'franja3';
+        if (hora >= 18 && hora < 21) return 'franja4';
+      
+        return '';
+  };
 
   const renderAutocomplete = (partido: any, tipo: string, arbitro: "arbitro1" | "arbitro2" | "anotador") => {
     // Obtener los árbitros disponibles para el partido
-    const arbitrosDisponibles = obtenerArbitrosDisponibles(partido.fecha, partido.hora);
+    const arbitrosDisponibles = arbitrosPorPartido.get(partido.id) || [];
   
     // Filtrar los árbitros ya asignados en otros roles del partido
     const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map((key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre);
@@ -314,65 +324,78 @@ const DesignacionesView = () => {
       />
     );
   };
-  
-  const obtenerFranja = (horaStr: string) => {
-    const hora = moment(horaStr, 'HH:mm:ss').hour();
-      
-        if (hora >= 9 && hora < 12) return 'franja1';
-        if (hora >= 12 && hora < 15) return 'franja2';
-        if (hora >= 15 && hora < 18) return 'franja3';
-        if (hora >= 18 && hora < 21) return 'franja4';
-      
-        return '';
-  };
 
+  const arbitrosPorPartido = useMemo(() => {
+    const cache = new Map<string, any[]>();
+  
+    partidos.forEach((partido) => {
+      const disponibles = obtenerArbitrosDisponibles(partido.fecha, partido.hora);
+      cache.set(partido.id, disponibles);
+    });
+  
+    return cache;
+  }, [partidos, usuarios, disponibilidades]);
   
   const publicarDesignaciones = async () => {
     setOpenDialog(true); // Abrir el diálogo de confirmación
   };
 
+  const usuariosPorNombre = useMemo(() => {
+    const map = new Map<string, any>();
+    usuarios.forEach((u) => {
+      const key = u.nombre; // Podrías incluir también apellido para evitar colisiones
+      map.set(key, u);
+    });
+    return map;
+  }, [usuarios]);
+
   const handleConfirmar = async () => {
     try {
-      for (const partido of partidosFiltrados) {
+      // Ejecutar en paralelo todos los partidos
+      await Promise.all(partidosFiltrados.map(async (partido) => {
         const designacion = designaciones[partido.id];
+        if (!designacion) return;
   
-        const arbitro1 = designacion?.arbitro1;
-        const arbitro2 = designacion?.arbitro2;
-        const anotador = designacion?.anotador;
+        const { arbitro1, arbitro2, anotador } = designacion;
   
-        const arbitro1Id = arbitro1 ? usuarios.find(usuario => usuario.nombre === arbitro1.nombre)?.id : null;
-        const arbitro2Id = arbitro2 ? usuarios.find(usuario => usuario.nombre === arbitro2.nombre)?.id : null;
-        const anotadorId = anotador ? usuarios.find(usuario => usuario.nombre === anotador.nombre)?.id : null;
+        const getUsuarioId = (usuario: any) => usuario ? usuariosPorNombre.get(usuario.nombre)?.id ?? null : null;
   
-        const partidoActualizado: any = {
+        const arbitro1Id = getUsuarioId(arbitro1);
+        const arbitro2Id = getUsuarioId(arbitro2);
+        const anotadorId = getUsuarioId(anotador);
+  
+        const partidoActualizado = {
           ...partido,
-          arbitro1Id: arbitro1Id ?? null,
-          arbitro2Id: arbitro2Id ?? null,
-          anotadorId: anotadorId ?? null,
+          arbitro1Id,
+          arbitro2Id,
+          anotadorId,
         };
   
+        // Actualizar el partido
         await partidosService.actualizarPartido(partidoActualizado);
   
+        // Preparar mensaje y fecha
         const nombreLugar = lugares.find(l => l.id === partido.lugarId)?.nombre ?? "lugar desconocido";
+  
         const fechaPartido = new Date(partido.fecha);
+        const [hours, minutes] = partido.hora.split(':').map(Number);
+        fechaPartido.setHours(hours, minutes, 0, 0);
+  
         const dia = fechaPartido.getDate().toString().padStart(2, '0');
         const mes = (fechaPartido.getMonth() + 1).toString().padStart(2, '0');
         const año = fechaPartido.getFullYear();
-        const [hours, minutes] = partido.hora.split(':').map(Number);
         const horaFormateada = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        fechaPartido.setHours(hours, minutes, 0, 0);
-
   
         const mensaje = `Has sido designado para el partido ${partido.equipoLocal} - ${partido.equipoVisitante}, que se disputa en el ${nombreLugar} a las ${horaFormateada} del día ${dia}/${mes}/${año}`;
   
-        // Crear notificaciones
-        const crearNotificacionSiAplica = async (usuarioId: string | undefined | null) => {
+        // Crear notificaciones en paralelo
+        const crearNotificacionSiAplica = async (usuarioId: string | null) => {
           if (usuarioId) {
             await notificacionesService.crearNotificacion({
               usuarioId,
               mensaje,
               fecha: fechaPartido,
-            });            
+            });
           }
         };
   
@@ -381,10 +404,11 @@ const DesignacionesView = () => {
           crearNotificacionSiAplica(arbitro2Id),
           crearNotificacionSiAplica(anotadorId),
         ]);
-      }
+      }));
   
       toast.success("Designaciones publicadas correctamente");
       setOpenDialog(false);
+  
     } catch (error) {
       console.error("Error al publicar designaciones:", error);
       toast.error("Error al publicar designaciones");
