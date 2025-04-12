@@ -29,7 +29,12 @@ const DesignacionesView = () => {
   const [selectedPartidoId, setSelectedPartidoId] = useState<string | null>(null);
   const [selectedEstado, setSelectedEstado] = useState<number | null>(null);
   const [disabledButtons, setDisabledButtons] = useState<Record<string, boolean>>({});
+  const [usuarioId, setUsuarioId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    setUsuarioId(id);
+  }, []);
 
   useEffect(() => {
     const cargarPartidosDesignados = async () => {
@@ -39,13 +44,12 @@ const DesignacionesView = () => {
 
         const partidosDesignados = await partidosService.getPartidosByUserId(usuarioId);
 
-        
         if (Array.isArray(partidosDesignados)) {
-          const partidosPasados = partidosDesignados.filter((partido) =>
+          const partidosFuturos = partidosDesignados.filter((partido) =>
             moment(partido.fecha).isAfter(moment())
           );
 
-          const partidosOrdenados = partidosPasados.sort((a, b) =>
+          const partidosOrdenados = partidosFuturos.sort((a, b) =>
             moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1
           );
 
@@ -63,32 +67,31 @@ const DesignacionesView = () => {
   }, []);
 
   const handleConfirm = async () => {
-    if (!selectedPartidoId || selectedEstado === null) return;
-  
+    if (!selectedPartidoId || selectedEstado === null || !usuarioId) return;
+
     try {
       const partido = partidos.find((p) => p.id === selectedPartidoId);
       if (!partido) return;
-  
-      const usuarioId = localStorage.getItem("userId");
-      if (!usuarioId) return;
-  
+
+      // Actualizamos el estado correcto dependiendo del rol
+      const updatedPartido = { ...partido };
       if (partido.arbitro1Id === usuarioId) {
-        partido.EstadoArbitro1 = selectedEstado;
+        updatedPartido.estadoArbitro1 = selectedEstado;
       } else if (partido.arbitro2Id === usuarioId) {
-        partido.EstadoArbitro2 = selectedEstado;
+        updatedPartido.estadoArbitro2 = selectedEstado;
       } else if (partido.anotadorId === usuarioId) {
-        partido.EstadoAnotador = selectedEstado;
+        updatedPartido.estadoAnotador = selectedEstado;
       } else {
         console.error("El usuario no tiene un rol en este partido.");
         return;
       }
-  
-      const updatedPartido = await partidosService.actualizarPartido(partido);
-  
+
+      await partidosService.actualizarPartido(updatedPartido);
+
       setPartidos((prevPartidos) =>
         prevPartidos.map((p) => (p.id === selectedPartidoId ? updatedPartido : p))
       );
-  
+
       setDisabledButtons((prev) => ({ ...prev, [selectedPartidoId]: true }));
     } catch (error) {
       console.error("Error al actualizar la designación:", error);
@@ -98,7 +101,6 @@ const DesignacionesView = () => {
       setSelectedEstado(null);
     }
   };
-  
 
   const handleOpenDialog = (partidoId: string, estado: number) => {
     setSelectedPartidoId(partidoId);
@@ -111,198 +113,123 @@ const DesignacionesView = () => {
     setSelectedPartidoId(null);
     setSelectedEstado(null);
   };
-  
-  
 
   return (
-    <Box
-      sx={{
-        backgroundColor: '#eafaff',
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Box sx={{ backgroundColor: "#eafaff", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <NavigationBar />
 
       <Container sx={{ marginTop: 4 }}>
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 2,
-            marginBottom: 3,
-            minHeight: "80vh",
-            backgroundColor: "#f9f9f9",
-            borderRadius: "12px",
-            position: "relative",  // Necesario para posicionar los botones
-          }}
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", backgroundColor: "#f9f9f9" }}>
-            <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
-              Mis Designaciones
-            </Typography>
-          </Box>
+        <Paper elevation={3} sx={{ padding: 2, marginBottom: 3, minHeight: "80vh", backgroundColor: "#f9f9f9", borderRadius: "12px" }}>
+          <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+            Mis Designaciones
+          </Typography>
 
           <Grid container spacing={2}>
             {partidos.length > 0 ? (
               partidos.map((partido) => (
                 <Grid item xs={12} key={partido.id}>
                   <Box sx={{ display: "flex", height: "100%" }}>
-                    <Paper
-                      elevation={2}
-                      sx={{ display: "flex", flexDirection: "row", width: "100%", height: "100%" }}
-                    >
-                      {/* Card - 90% */}
-                      <Box sx={{ flex: 9, display: "flex" }}>
-                        <Link
-                          to={`/detallesPartido/${partido.id}`}
-                          style={{ textDecoration: "none", width: "100%" }}
-                        >
-                          <Card
-                            sx={{
-                              backgroundColor: "#F0F4F8",
-                              borderRadius: "12px 0 0 12px",
-                              width: "100%",
-                              height: "100%",
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "space-between",
-                              "&:hover": {
-                                boxShadow: 6,
-                                transform: "scale(1.02)",
-                                transition: "all 0.3s ease",
-                              },
-                              transition: "all 0.3s ease",
-                            }}
-                          >
+                    <Paper elevation={2} sx={{ display: "flex", width: "100%" }}>
+                      <Box sx={{ flex: 9 }}>
+                        <Link to={`/detallesPartido/${partido.id}`} style={{ textDecoration: "none" }}>
+                          <Card sx={{ backgroundColor: "#F0F4F8", borderRadius: "12px 0 0 12px", height: "100%", transition: "all 0.3s ease", "&:hover": { boxShadow: 6, transform: "scale(1.02)" } }}>
                             <CardContent>
                               <Typography variant="h6" color="primary">
                                 {partido.equipoLocal} - {partido.equipoVisitante}
                               </Typography>
                               <Typography variant="body2" color="textSecondary">
-                                {moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm").format(
-                                  "dddd, DD MMMM YYYY - HH:mm"
-                                )}
+                                {moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm").format("dddd, DD MMMM YYYY - HH:mm")}
                               </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Lugar: {partido.lugar}
-                              </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Categoría: {partido.categoria}
-                              </Typography>
-
+                              <Typography variant="body2" color="textSecondary">Lugar: {partido.lugar}</Typography>
+                              <Typography variant="body2" color="textSecondary">Categoría: {partido.categoria}</Typography>
                               <Grid container spacing={2} mt={2}>
-                                {partido.arbitro1 && (
-                                  <Grid item xs={12} sm={4} key="arbitro1">
-                                    <Typography variant="body2">Árbitro 1: {partido.arbitro1}</Typography>
-                                  </Grid>
-                                )}
-                                {partido.arbitro2 && (
-                                  <Grid item xs={12} sm={4} key="arbitro2">
-                                    <Typography variant="body2">Árbitro 2: {partido.arbitro2}</Typography>
-                                  </Grid>
-                                )}
-                                {partido.anotador && (
-                                  <Grid item xs={12} sm={4} key="anotador">
-                                    <Typography variant="body2">Anotador: {partido.anotador}</Typography>
-                                  </Grid>
-                                )}
+                                {partido.arbitro1 && <Grid item xs={12} sm={4}><Typography variant="body2">Árbitro 1: {partido.arbitro1}</Typography></Grid>}
+                                {partido.arbitro2 && <Grid item xs={12} sm={4}><Typography variant="body2">Árbitro 2: {partido.arbitro2}</Typography></Grid>}
+                                {partido.anotador && <Grid item xs={12} sm={4}><Typography variant="body2">Anotador: {partido.anotador}</Typography></Grid>}
                               </Grid>
-
                             </CardContent>
                           </Card>
                         </Link>
                       </Box>
 
-                      {/* Botones - 10% */}
-                      <Box
-                        sx={{
-                          flex: 1,
-                          backgroundColor: "#f0f4f8",
-                          borderLeft: "2px solid #d0d0d0",
-                          borderRadius: "0 12px 12px 0",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 1,
-                          paddingY: 1,
-                        }}
-                      >
-                        <Tooltip title="Aceptar designación" arrow placement="right">
-                          <IconButton
-                            onClick={() => handleOpenDialog(partido.id, 1)}
-                            sx={{
-                              backgroundColor: "#4CAF50",
-                              color: "white",
-                              "&:hover": {
-                                backgroundColor: "#45a049",
-                              },
-                            }}
-                          >
-                            <CheckIcon />
-                          </IconButton>
-                        </Tooltip>
+                      <Box sx={{ flex: 1, backgroundColor: "#f0f4f8", borderLeft: "2px solid #d0d0d0", borderRadius: "0 12px 12px 0", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 1, paddingY: 1 }}>
+                        {(() => {
+                          if (!usuarioId) return null;
 
-                        <Tooltip title="Rechazar designación" arrow placement="right">
-                          <IconButton
-                             onClick={() => handleOpenDialog(partido.id, 2)}
-                            sx={{
-                              backgroundColor: "#F44336",
-                              color: "white",
-                              "&:hover": {
-                                backgroundColor: "#e53935",
-                              },
-                            }}
-                          >
-                            <CloseIcon />
-                          </IconButton>
-                        </Tooltip>
+                          let estadoActual = null;
+
+                          if (partido.arbitro1Id === usuarioId) {
+                            estadoActual = partido.estadoArbitro1;
+                          } else if (partido.arbitro2Id === usuarioId) {
+                            estadoActual = partido.estadoArbitro2;
+                          } else if (partido.anotadorId === usuarioId) {
+                            estadoActual = partido.estadoAnotador;
+                          }
+
+                          if (estadoActual === 0) {
+                            return (
+                              <>
+                                <Tooltip title="Aceptar designación" arrow placement="right">
+                                  <span>
+                                    <IconButton onClick={() => handleOpenDialog(partido.id, 1)} sx={{ backgroundColor: "#4CAF50", color: "white", "&:hover": { backgroundColor: "#45a049" } }}>
+                                      <CheckIcon />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                                <Tooltip title="Rechazar designación" arrow placement="right">
+                                  <span>
+                                    <IconButton onClick={() => handleOpenDialog(partido.id, 2)} sx={{ backgroundColor: "#F44336", color: "white", "&:hover": { backgroundColor: "#e53935" } }}>
+                                      <CloseIcon />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                              </>
+                            );
+                          } else {
+                            return (
+                              <Box sx={{ textAlign: "center", color: estadoActual === 1 ? "#4CAF50" : "#F44336", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", flexDirection: "column" }}>
+                                {estadoActual === 1 ? (
+                                  <>
+                                    <CheckIcon sx={{ color: "#4CAF50", fontSize: 32 }} />
+                                    <Typography variant="body2">Aceptado</Typography>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CloseIcon sx={{ color: "#F44336", fontSize: 32 }} />
+                                    <Typography variant="body2">Rechazado</Typography>
+                                  </>
+                                )}
+                              </Box>
+                            );
+                          }
+                        })()}
                       </Box>
                     </Paper>
                   </Box>
                 </Grid>
-
-
-
               ))
             ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100%",
-                  marginTop: "20%",
-                  padding: 4,
-                }}
-              >
-                <Typography color="black">
-                  No tienes partidos designados.
-                </Typography>
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", marginTop: "20%", padding: 4 }}>
+                <Typography color="black">No tienes partidos designados.</Typography>
               </Box>
             )}
           </Grid>
         </Paper>
       </Container>
+
       <Dialog open={dialogOpen} onClose={handleCancel}>
         <DialogTitle>Confirmar acción</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Estás seguro de que deseas {selectedEstado === 1 ? 'aceptar' : 'rechazar'} esta designación?
+            ¿Estás seguro de que deseas {selectedEstado === 1 ? "aceptar" : "rechazar"} esta designación?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel} color="error">
-            Cancelar
-          </Button>
-          <Button onClick={handleConfirm} color="primary" autoFocus>
-            Confirmar
-          </Button>
+          <Button onClick={handleCancel} color="error">Cancelar</Button>
+          <Button onClick={handleConfirm} color="primary" autoFocus>Confirmar</Button>
         </DialogActions>
       </Dialog>
     </Box>
-    
   );
 };
 

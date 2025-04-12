@@ -6,7 +6,9 @@ import {
   DialogTitle,
   DialogActions,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  Box,
+  Chip
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -27,7 +29,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import { Pagination } from "@mui/material";
 import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros"; // Adjust the path as needed
-import { AutoFixHigh } from "@mui/icons-material";
+import { AccessTime, AutoFixHigh, Cancel, CheckCircle } from "@mui/icons-material";
 import { CircularProgress } from '@mui/material';
 
 moment.locale("es");
@@ -89,22 +91,34 @@ const DesignacionesView = () => {
   
         // Procesar designaciones con información visual de los árbitros
         const designacionesCargadas: Record<string | number, Designacion> = {};
-        partidosLista.forEach((partido: { arbitro1Id: any; arbitro2Id: any; anotadorId: any; fecha: moment.MomentInput; id: string | number; }) => {
+        partidosLista.forEach((partido: {
+          hora: any; arbitro1Id: any; arbitro2Id: any; anotadorId: any; fecha: moment.MomentInput; id: string | number; 
+}) => {
           const arbitro1 = usuariosLista.find((user: { id: any; }) => user.id === partido.arbitro1Id);
           const arbitro2 = usuariosLista.find((user: { id: any; }) => user.id === partido.arbitro2Id);
           const anotador = usuariosLista.find((user: { id: any; }) => user.id === partido.anotadorId);
           
           const obtenerIcono = (usuarioId: string, fechaHora: string) => {
+            // Convierte la fechaHora (que es una cadena de texto) a un objeto moment.
+            const fechaHoraMoment = moment(fechaHora, "YYYY-MM-DD HH:mm:ss");
+          
+            // Buscar la disponibilidad correspondiente al usuario y la fecha
             const disponibilidad = disponibilidadesLista.find(
               (disp: { usuarioId: string; fecha: string }) =>
-                disp.usuarioId === usuarioId && moment(disp.fecha).isSame(moment(fechaHora), "day")
+                disp.usuarioId === usuarioId && moment(disp.fecha).isSame(fechaHoraMoment, "day")
             );
           
             if (!disponibilidad) return null;
           
-            const franja = obtenerFranja(fechaHora);
+            // Extraer la hora de fechaHoraMoment y pasarla como una cadena a obtenerFranja
+            const horaStr = fechaHoraMoment.format('HH:mm:ss');
+            
+            // Obtener la franja horaria de la fechaHora (ahora es un objeto moment)
+            const franja = obtenerFranja(horaStr);
+            
             if (!franja || !(franja in disponibilidad)) return null;
           
+            // Devolver los iconos correspondientes a la disponibilidad
             if (disponibilidad[franja] === 1) {
               return <DirectionsCarIcon style={{ color: "blue", marginRight: 5 }} />;
             } else if (disponibilidad[franja] === 2) {
@@ -113,9 +127,13 @@ const DesignacionesView = () => {
           
             return null;
           };
+          
+          
           designacionesCargadas[partido.id] = {
             arbitro1: arbitro1 ? (() => {
-              const icono = partido.fecha ? obtenerIcono(arbitro1.id, moment(partido.fecha).toISOString()) : null;
+              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const icono = obtenerIcono(arbitro1.id, fechaHoraPartido);
+
               return {
                 ...arbitro1,
                 icono,
@@ -128,7 +146,8 @@ const DesignacionesView = () => {
               };
             })() : null,
             arbitro2: arbitro2 ? (() => {
-              const icono = partido.fecha ? obtenerIcono(arbitro2.id, moment(partido.fecha).toISOString()) : null;
+              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const icono = obtenerIcono(arbitro2.id, fechaHoraPartido);
               return {
                 ...arbitro2,
                 icono,
@@ -141,7 +160,9 @@ const DesignacionesView = () => {
               };
             })() : null,
             anotador: anotador ? (() => {
-              const icono = partido.fecha ? obtenerIcono(anotador.id, moment(partido.fecha).toISOString()) : null;
+              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const icono = obtenerIcono(anotador.id, fechaHoraPartido);
+
               return {
                 ...anotador,
                 icono,
@@ -182,8 +203,6 @@ const DesignacionesView = () => {
   
     cargarDatos();
   }, [fechaInicio, fechaFin]);  // Asegúrate de que se recarguen los partidos cuando cambien las fechas
-
-
   
   const aplicarFiltro = () => {
     let filtrados = partidos.filter((partido) => {
@@ -254,30 +273,68 @@ const DesignacionesView = () => {
   }, [disponibilidades]);
   
   const obtenerFranja = (horaStr: string) => {
-    const hora = moment(horaStr, 'HH:mm:ss').hour();
-      
-        if (hora >= 9 && hora < 12) return 'franja1';
-        if (hora >= 12 && hora < 15) return 'franja2';
-        if (hora >= 15 && hora < 18) return 'franja3';
-        if (hora >= 18 && hora < 21) return 'franja4';
-      
-        return '';
+    // Convertir la horaStr (cadena) a un objeto moment
+    const horaMoment = moment(horaStr, 'HH:mm:ss');
+    
+    // Obtener la hora de ese objeto moment
+    const hora = horaMoment.hour();
+  
+    // Determinar en qué franja horaria cae la hora
+    if (hora >= 9 && hora < 12) return 'franja1';
+    if (hora >= 12 && hora < 15) return 'franja2';
+    if (hora >= 15 && hora < 18) return 'franja3';
+    if (hora >= 18 && hora < 21) return 'franja4';
+    
+    // Si no cae en ninguna franja, retornar vacío
+    return '';
   };
+  
 
-  const renderAutocomplete = (partido: any, tipo: string, arbitro: "arbitro1" | "arbitro2" | "anotador") => {
-    // Obtener los árbitros disponibles para el partido
+  const renderAutocomplete = (
+    partido: any,
+    tipo: string,
+    arbitro: "arbitro1" | "arbitro2" | "anotador"
+  ) => {
     const arbitrosDisponibles = arbitrosPorPartido.get(partido.id) || [];
   
-    // Filtrar los árbitros ya asignados en otros roles del partido
-    const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map((key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre);
+    const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map(
+      (key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre
+    );
   
-    // Filtrar las opciones para que no aparezcan los árbitros ya asignados
     const arbitrosDisponiblesFiltrados = arbitrosDisponibles.filter(
       (usuario) => !arbitrosAsignados.includes(usuario.nombre)
     );
   
+    const seleccionado = designaciones[partido.id]?.[arbitro];
+  
+    // Obtener estado según el tipo
+    let estado: number = 0;
+    if (arbitro === "arbitro1") estado = partido.estadoArbitro1;
+    if (arbitro === "arbitro2") estado = partido.estadoArbitro2;
+    if (arbitro === "anotador") estado = partido.estadoAnotador;
+  
+    const estadoTexto = {
+      0: "Pendiente",
+      1: "Aceptada",
+      2: "Rechazada"
+    }[estado];
+  
+    const estadoColor = {
+      0: "warning",
+      1: "success",
+      2: "error"
+    }[estado];
+  
+    // Seleccionar el ícono correspondiente al estado
+    const estadoIcono = {
+      0: <AccessTime fontSize="small" />,
+      1: <CheckCircle fontSize="small" />,
+      2: <Cancel fontSize="small" />
+    }[estado];
+  
     return (
-      <Autocomplete
+      <Box>
+        <Autocomplete
         options={arbitrosDisponiblesFiltrados}
         getOptionLabel={(option) => {
           if (option.nombre === "Incompleto") return "Incompleto";
@@ -322,6 +379,22 @@ const DesignacionesView = () => {
           );
         }}
       />
+  
+        {/* Estado visual debajo del autocomplete con ícono */}
+        {seleccionado && seleccionado.nombre !== "Incompleto" && (
+          <Box mt={1}>
+            <Chip
+              label={`Estado: ${estadoTexto}`}
+              color={estadoColor as "success" | "warning" | "error"}
+              size="small"
+              variant="outlined"
+              icon={estadoIcono}
+            />
+          </Box>
+
+        )}
+
+      </Box>
     );
   };
 
@@ -358,23 +431,35 @@ const DesignacionesView = () => {
   
         const { arbitro1, arbitro2, anotador } = designacion;
   
-        const getUsuarioId = (usuario: any) => usuario ? usuariosPorNombre.get(usuario.nombre)?.id ?? null : null;
+        const getUsuarioId = (usuario: any) =>
+          usuario && usuariosPorNombre.has(usuario.nombre)
+            ? usuariosPorNombre.get(usuario.nombre)!.id
+            : null;
+        
+        const estadoArbitro1 = 0;
+        const estadoArbitro2 = 0;
+        const estadoAnotador = 0;
   
         const arbitro1Id = getUsuarioId(arbitro1);
         const arbitro2Id = getUsuarioId(arbitro2);
         const anotadorId = getUsuarioId(anotador);
   
+        // Actualizar los valores del partido
         const partidoActualizado = {
           ...partido,
           arbitro1Id,
           arbitro2Id,
           anotadorId,
+          estadoArbitro1,
+          estadoArbitro2,
+          estadoAnotador,
+
         };
   
         // Actualizar el partido
         await partidosService.actualizarPartido(partidoActualizado);
   
-        // Preparar mensaje y fecha
+        // Preparar el mensaje y la fecha
         const nombreLugar = lugares.find(l => l.id === partido.lugarId)?.nombre ?? "lugar desconocido";
   
         const fechaPartido = new Date(partido.fecha);
@@ -404,6 +489,30 @@ const DesignacionesView = () => {
           crearNotificacionSiAplica(arbitro2Id),
           crearNotificacionSiAplica(anotadorId),
         ]);
+  
+        // **Actualizar el estado de la designación a "Pendiente" (0)**
+        setDesignaciones((prevDesignaciones) => ({
+          ...prevDesignaciones,
+          [partido.id]: {
+            ...(arbitro1 ? { arbitro1: { ...arbitro1, estado: 0 } } : { arbitro1: null }),
+            ...(arbitro2 ? { arbitro2: { ...arbitro2, estado: 0 } } : { arbitro2: null }),
+            ...(anotador ? { anotador: { ...anotador, estado: 0 } } : { anotador: null }),
+          }
+        }));
+
+        // Actualizar el array de partidos con el nuevo estado
+        setPartidos((prev) =>
+          prev.map((p) => (p.id === partido.id ? partidoActualizado : p))
+        );
+
+        setPartidosFiltrados((prev) =>
+          prev.map((p) => (p.id === partido.id ? partidoActualizado : p))
+        );
+
+
+        
+        
+  
       }));
   
       toast.success("Designaciones publicadas correctamente");
