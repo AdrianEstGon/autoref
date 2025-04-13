@@ -73,23 +73,6 @@ const HistorialDesignacionesView = () => {
     >
       <NavigationBar />
   
-      {/* Botón de Notificaciones */}
-      <Box position="fixed" bottom={16} right={16}>
-        <Tooltip title="Notificaciones">
-          <Fab
-            sx={{
-              backgroundColor: "yellow",
-              "&:hover": { backgroundColor: "gold" },
-            }}
-            onClick={() => setOpenNotifications(true)}
-          >
-            <Badge badgeContent={notificaciones.length} color="error">
-              <NotificationsIcon sx={{ color: "black", fontSize: 32 }} />
-            </Badge>
-          </Fab>
-        </Tooltip>
-      </Box>
-  
       <Container sx={{ marginTop: 4 }}>
       <Paper
           elevation={3}
@@ -192,31 +175,6 @@ const HistorialDesignacionesView = () => {
 </Grid>
         </Paper>
       </Container>
-  
-      {/* Panel de Notificaciones */}
-      <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
-        <Box sx={{ width: 400, padding: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Notificaciones
-          </Typography>
-          <List>
-            {notificaciones.length > 0 ? (
-              notificaciones.map((notification) => (
-                <ListItem key={notification.id} divider>
-                  <ListItemText
-                    primary={notification.message}
-                    secondary={`Fecha: ${moment(notification.date).format("DD/MM/YYYY")}`}
-                  />
-                </ListItem>
-              ))
-            ) : (
-              <Typography variant="body2" textAlign="center">
-                No hay notificaciones.
-              </Typography>
-            )}
-          </List>
-        </Box>
-      </Drawer>
     </Box>
   );
 }  

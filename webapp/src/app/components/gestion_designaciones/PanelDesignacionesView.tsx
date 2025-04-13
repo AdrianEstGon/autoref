@@ -8,7 +8,10 @@ import {
   Checkbox,
   FormControlLabel,
   Box,
-  Chip
+  Chip,
+  Tooltip,
+  IconButton,
+  Popover
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -29,7 +32,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import { Pagination } from "@mui/material";
 import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros"; // Adjust the path as needed
-import { AccessTime, AutoFixHigh, Cancel, CheckCircle } from "@mui/icons-material";
+import { AccessTime, AutoFixHigh, Cancel, CheckCircle, Info, Comment as CommentIcon, ChatBubbleOutline } from "@mui/icons-material";
 import { CircularProgress } from '@mui/material';
 
 moment.locale("es");
@@ -41,6 +44,7 @@ const DesignacionesView = () => {
   const [lugares, setLugares] = useState<any[]>([]);
   const [equipos, setEquipos] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
+  
 
 
 
@@ -55,10 +59,13 @@ const DesignacionesView = () => {
   const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<string>>(new Set());
   const [asignando, setAsignando] = useState(false);
 
+  const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
+  const [comentario, setComentario] = useState<string | null>(null);
+
+
 
   // Estado para el diálogo de confirmación
   const [openDialog, setOpenDialog] = useState(false);
-  const [confirmarAccion, setConfirmarAccion] = useState(false);
 
   type Designacion = {
     arbitro1?: { nombre: string; icono: JSX.Element };
@@ -204,6 +211,18 @@ const DesignacionesView = () => {
     cargarDatos();
   }, [fechaInicio, fechaFin]);  // Asegúrate de que se recarguen los partidos cuando cambien las fechas
   
+  // Función que maneja la apertura del popover
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, comentario: string) => {
+    setComentario(comentario);
+    setPopoverAnchorEl(event.currentTarget);
+  };
+
+  // Función que maneja el cierre del popover
+  const handlePopoverClose = () => {
+    setPopoverAnchorEl(null);
+    setComentario(null);
+  };
+
   const aplicarFiltro = () => {
     let filtrados = partidos.filter((partido) => {
       const fechaPartido = moment(partido.fecha);
@@ -289,114 +308,193 @@ const DesignacionesView = () => {
     return '';
   };
   
+  const renderComentario = (
+    partido: { id: string | number; fecha: any; hora: any; },
+    arbitro: string | number,
+    handlePopoverOpen: (event: React.MouseEvent<HTMLElement>, comentario: string) => void
+  ) => {
+    const seleccionado = designaciones[partido.id]?.[arbitro as keyof Designacion];
+    if (!seleccionado || seleccionado.nombre === "Incompleto") return null;
 
+    const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss");
+    const disponibilidad = disponibilidades.find(
+      (disp) =>
+        disp.usuarioId === (seleccionado as any)?.id &&
+        moment(disp.fecha).isSame(fechaHoraPartido, "day") &&
+        disp.comentarios?.trim() !== ""
+    );
+
+    if (!disponibilidad) return null;
+
+    return (
+      <Box mt={1} display="flex" alignItems="center" gap={1}>
+        <Grid container alignItems="center" spacing={1}>
+          <Grid item>
+            <Chip
+              label="Comentario disponible"
+              color="primary"
+              size="small"
+              icon={<ChatBubbleOutline />}
+              onClick={(e) => handlePopoverOpen(e, disponibilidad.comentarios)}
+            />
+          </Grid>
+          <Grid item xs>
+            <Typography variant="body2" align="left" sx={{ paddingLeft: 1 }}>
+              {/* Aquí podrías agregar más contenido si lo necesitas */}
+            </Typography>
+          </Grid>
+        </Grid>
+    
+        <Popover
+          open={Boolean(popoverAnchorEl)}
+          anchorEl={popoverAnchorEl}
+          onClose={handlePopoverClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+          PaperProps={{
+            sx: {
+              backgroundColor: '#ffffff', // Fondo blanco para un look limpio
+              mt: 1,
+              borderRadius: 4, // Bordes ligeramente redondeados
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', // Sombra sutil
+              padding: 2,
+              maxWidth: 400,
+              minWidth: 250,
+              color: '#333333', // Texto en gris oscuro para mejor legibilidad
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '0.875rem',
+              lineHeight: 1.5,
+              wordWrap: 'break-word',
+              wordBreak: 'break-word',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          }}
+        >
+          <Box sx={{ padding: 2 }}>
+            <Typography variant="body2" align="center">{comentario}</Typography>
+          </Box>
+        </Popover>
+      </Box>
+    );
+  }    
+  
   const renderAutocomplete = (
     partido: any,
     tipo: string,
     arbitro: "arbitro1" | "arbitro2" | "anotador"
   ) => {
     const arbitrosDisponibles = arbitrosPorPartido.get(partido.id) || [];
-  
+
     const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map(
       (key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre
     );
-  
+
     const arbitrosDisponiblesFiltrados = arbitrosDisponibles.filter(
       (usuario) => !arbitrosAsignados.includes(usuario.nombre)
     );
-  
+
     const seleccionado = designaciones[partido.id]?.[arbitro];
-  
+
     // Obtener estado según el tipo
     let estado: number = 0;
     if (arbitro === "arbitro1") estado = partido.estadoArbitro1;
     if (arbitro === "arbitro2") estado = partido.estadoArbitro2;
     if (arbitro === "anotador") estado = partido.estadoAnotador;
-  
+
     const estadoTexto = {
       0: "Pendiente",
       1: "Aceptada",
       2: "Rechazada"
     }[estado];
-  
+
     const estadoColor = {
       0: "warning",
       1: "success",
       2: "error"
     }[estado];
-  
-    // Seleccionar el ícono correspondiente al estado
+
     const estadoIcono = {
       0: <AccessTime fontSize="small" />,
       1: <CheckCircle fontSize="small" />,
       2: <Cancel fontSize="small" />
     }[estado];
-  
+
     return (
       <Box>
         <Autocomplete
-        options={arbitrosDisponiblesFiltrados}
-        getOptionLabel={(option) => {
-          if (option.nombre === "Incompleto") return "Incompleto";
-          return `${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`.trim();
-        }}
-        
-        value={designaciones[partido.id]?.[arbitro] ?? null}
-        onChange={(_, newValue) => setDesignaciones({
-          ...designaciones,
-          [partido.id]: {
-            ...designaciones[partido.id],
-            [arbitro]: newValue,
-          }
-        })}
-        noOptionsText="No hay árbitros disponibles"
-        renderOption={(props, option) => {
-          const { key, ...restProps } = props;
-          return (
-            <li key={key} {...restProps}>
-              {option.icono}
-              {option.nombre === "Incompleto"
-                ? " Incompleto"
-                : ` ${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`
-}
-            </li>
-          );
-        }}
-        renderInput={(params) => {
-          const selectedUser = designaciones[partido.id]?.[arbitro];
-          return (
-            <TextField
-              {...params}
-              label={tipo}
-              fullWidth
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: selectedUser ? (
-                  <>{selectedUser.icono}</> // Mostrar el ícono al lado del nombre del árbitro
-                ) : null
-              }}
-            />
-          );
-        }}
-      />
-  
+          options={arbitrosDisponiblesFiltrados}
+          getOptionLabel={(option) => {
+            if (option.nombre === "Incompleto") return "Incompleto";
+            return `${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`.trim();
+          }}
+          
+          value={designaciones[partido.id]?.[arbitro] ?? null}
+          onChange={(_, newValue) => setDesignaciones({
+            ...designaciones,
+            [partido.id]: {
+              ...designaciones[partido.id],
+              [arbitro]: newValue,
+            }
+          })}
+          noOptionsText="No hay árbitros disponibles"
+          renderOption={(props, option) => {
+            const { key, ...restProps } = props;
+            return (
+              <li key={key} {...restProps}>
+                {option.icono}
+                {option.nombre === "Incompleto"
+                  ? " Incompleto"
+                  : ` ${option.nombre} ${option.primerApellido ?? ""} ${option.segundoApellido ?? ""}`}
+              </li>
+            );
+          }}
+          renderInput={(params) => {
+            const selectedUser = designaciones[partido.id]?.[arbitro];
+            return (
+              <TextField
+                {...params}
+                label={tipo}
+                fullWidth
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: selectedUser ? (
+                    <>{selectedUser.icono}</> // Mostrar el ícono al lado del nombre del árbitro
+                  ) : null
+                }}
+              />
+            );
+          }}
+        />
+
         {/* Estado visual debajo del autocomplete con ícono */}
         {seleccionado && seleccionado.nombre !== "Incompleto" && (
-          <Box mt={1}>
+          <Box mt={1} display="flex" alignItems="center" gap={1}>
             <Chip
               label={`Estado: ${estadoTexto}`}
-              color={estadoColor as "success" | "warning" | "error"}
+              color={estadoColor as 'success'|'warning'|'error'}
               size="small"
               variant="outlined"
               icon={estadoIcono}
             />
           </Box>
-
         )}
+
+        {/* Mostrar comentario usando renderComentario */}
+        {renderComentario(partido, arbitro, handlePopoverOpen)}
 
       </Box>
     );
   };
+
+  
 
   const arbitrosPorPartido = useMemo(() => {
     const cache = new Map<string, any[]>();

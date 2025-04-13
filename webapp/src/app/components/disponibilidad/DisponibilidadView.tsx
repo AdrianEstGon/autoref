@@ -41,7 +41,6 @@ const DisponibilidadView = () => {
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const loadAvailabilityForDate = async (date: Date) => {
     const usuarioId = localStorage.getItem("userId"); // Get user ID
     if (!usuarioId) {
@@ -189,6 +188,22 @@ const DisponibilidadView = () => {
     }
   };
 
+  function useDebounce(value: string, delay: number) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+  
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+  
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+  
+    return debouncedValue;
+  }
+
   const eventStyleGetter = (event: CustomEvent) => {
     let backgroundColor = 'white';
     if (event.availability === 1) {
@@ -268,15 +283,16 @@ const DisponibilidadView = () => {
 
   const handleSelectSlot = async (slotInfo: { start: Date }) => {
     setSelectedDate(slotInfo.start);
-    await loadAvailabilityForDate(slotInfo.start); // Llamamos al nuevo método aquí
+    await loadAvailabilityForDate(slotInfo.start);
     setOpenDialog(true);
   };
-
+  
   const handleSelectEvent = async (event: any) => {
     setSelectedDate(event.start);
-    await loadAvailabilityForDate(event.start); // También llamamos al método aquí
+    await loadAvailabilityForDate(event.start);
     setOpenDialog(true);
   };
+  
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -410,14 +426,15 @@ const DisponibilidadView = () => {
                 </Box>
               ))}
               <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Comentarios"
-                variant="outlined"
-                value={availability.comments || ''}
-                onChange={(e) => setAvailability({ ...availability, comments: e.target.value })}
-                sx={{ backgroundColor: '#FFFFFF' }}
+               fullWidth
+               multiline
+               rows={3}
+               label="Comentarios"
+               variant="outlined"
+               value={availability.comments || ''}
+               onChange={(e) => setAvailability({ ...availability, comments: e.target.value })}
+               sx={{ backgroundColor: '#FFFFFF' }}
+                inputProps={{ maxLength: 200 }}  // Limita los caracteres a 200
               />
             </DialogContent>
             <DialogActions sx={{ backgroundColor: '#F0F4F8' }}>
