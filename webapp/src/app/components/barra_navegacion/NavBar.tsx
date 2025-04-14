@@ -26,6 +26,31 @@ const NavigationBar = () => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [slidingOutNotification, setSlidingOutNotification] = useState<string | null>(null); // Controla la notificación que se desliza
+  const [userLogged, setUserLogged] = useState<any | null>(null);
+
+useEffect(() => {
+  const storedUser = window.localStorage.getItem('userLogged');
+  const infoUser = storedUser ? JSON.parse(storedUser) : null;
+  setUserLogged(infoUser);
+
+  if (infoUser) {
+    const sessionExpired = hasSessionExpired(infoUser);
+    if (sessionExpired) {
+      window.localStorage.removeItem('userLogged');
+      window.localStorage.removeItem('userRole');
+      window.localStorage.removeItem('fotoPerfil');
+      setUserLogged(null);
+      window.location.href = '/';
+    }
+  }
+}, []);
+
+const hasSessionExpired = (dataUser: any) => {
+  const currentTime = new Date().getTime();
+  const userTime = new Date(dataUser.timestamp).getTime();
+  const threeHour = 60 * 60 * 1000 * 3;
+  return (currentTime - userTime) >= threeHour; // 3 horas de inactividad
+};
   
   useEffect(() => {
     const role = window.localStorage.getItem('userRole');

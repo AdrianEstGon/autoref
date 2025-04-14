@@ -36,31 +36,34 @@ const HistorialDesignacionesView = () => {
       try {
         const usuarioId = localStorage.getItem("userId");
         if (!usuarioId) return;
-
+  
         const partidosDesignados = await partidosService.getPartidosByUserId(usuarioId);
-
-        // Verificar que la respuesta sea un array antes de aplicar filter
+  
         if (Array.isArray(partidosDesignados)) {
-          const partidosPasados = partidosDesignados.filter((partido) =>
-            moment(partido.fecha).isBefore(moment())
-          );
-          // Ordenar los partidos por fecha y hora (de antes a después)
-            const partidosOrdenados = partidosPasados.sort((a, b) => 
-                moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1
-            );
-
-            setPartidos(partidosOrdenados);
+          const partidosPasados = partidosDesignados.filter((partido) => {
+            const fechaCompleta = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss");
+            return fechaCompleta.isBefore(moment());
+          });
+  
+          const partidosOrdenados = partidosPasados.sort((a, b) => {
+            const fechaA = moment(`${a.fecha} ${a.hora}`, "YYYY-MM-DD HH:mm:ss");
+            const fechaB = moment(`${b.fecha} ${b.hora}`, "YYYY-MM-DD HH:mm:ss");
+            return fechaA.diff(fechaB);
+          });
+  
+          setPartidos(partidosOrdenados);
         } else {
-          setPartidos([]); // Evitar errores estableciendo un array vacío
+          setPartidos([]);
         }
       } catch (error) {
         console.error("Error al cargar los partidos designados:", error);
         setPartidos([]);
       }
     };
-
+  
     cargarPartidosDesignados();
   }, []);
+  
 
   return (
     <Box
@@ -119,8 +122,9 @@ const HistorialDesignacionesView = () => {
                 {partido.equipoLocal} - {partido.equipoVisitante}
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                {moment(partido.fecha).format("dddd, DD MMMM YYYY - HH:mm")}
+                {moment(partido.fecha).format("dddd, DD MMMM YYYY")} - {partido.hora.slice(0, 5)}
               </Typography>
+
               <Typography variant="body2" color="textSecondary">
                 Lugar: {partido.lugar}
               </Typography>

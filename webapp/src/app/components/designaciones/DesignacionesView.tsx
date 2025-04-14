@@ -41,18 +41,21 @@ const DesignacionesView = () => {
       try {
         const usuarioId = localStorage.getItem("userId");
         if (!usuarioId) return;
-
+  
         const partidosDesignados = await partidosService.getPartidosByUserId(usuarioId);
-
+  
         if (Array.isArray(partidosDesignados)) {
-          const partidosFuturos = partidosDesignados.filter((partido) =>
-            moment(partido.fecha).isAfter(moment())
-          );
-
-          const partidosOrdenados = partidosFuturos.sort((a, b) =>
-            moment(a.fecha).isBefore(moment(b.fecha)) ? -1 : 1
-          );
-
+          const partidosFuturos = partidosDesignados.filter((partido) => {
+            const fechaCompleta = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss");
+            return fechaCompleta.isAfter(moment());
+          });
+  
+          const partidosOrdenados = partidosFuturos.sort((a, b) => {
+            const fechaA = moment(`${a.fecha} ${a.hora}`, "YYYY-MM-DD HH:mm:ss");
+            const fechaB = moment(`${b.fecha} ${b.hora}`, "YYYY-MM-DD HH:mm:ss");
+            return fechaA.valueOf() - fechaB.valueOf();
+          });
+  
           setPartidos(partidosOrdenados);
         } else {
           setPartidos([]);
@@ -62,9 +65,10 @@ const DesignacionesView = () => {
         setPartidos([]);
       }
     };
-
+  
     cargarPartidosDesignados();
   }, []);
+  
 
   const handleConfirm = async () => {
     if (!selectedPartidoId || selectedEstado === null || !usuarioId) return;
