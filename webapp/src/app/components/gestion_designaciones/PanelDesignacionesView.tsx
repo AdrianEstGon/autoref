@@ -44,10 +44,6 @@ const DesignacionesView = () => {
   const [lugares, setLugares] = useState<any[]>([]);
   const [equipos, setEquipos] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
-  
-
-
-
   const [disponibilidades, setDisponibilidades] = useState<any[]>([]);
 
   // Estados de filtros
@@ -202,6 +198,7 @@ const DesignacionesView = () => {
         });
 
       setPartidosFiltrados(partidosFiltradosIniciales);
+      setPartidosSeleccionados(new Set());
       } catch (error) {
         console.error("Error al cargar los datos:", error);
         toast.error("Error al cargar los datos");
@@ -577,7 +574,7 @@ const DesignacionesView = () => {
             await notificacionesService.crearNotificacion({
               usuarioId,
               mensaje,
-              fecha: fechaPartido,
+              fecha: fechaPartido.toISOString(),
             });
           }
         };
@@ -643,7 +640,7 @@ const DesignacionesView = () => {
     const selected = event.target.checked;
     if (selected) {
       // Seleccionar todos los partidos de la página actual
-      const partidosIds = new Set(partidos.map((partido) => partido.id));
+      const partidosIds = new Set(partidosFiltrados.map((partido) => partido.id));
       setPartidosSeleccionados(partidosIds);
     } else {
       // Desmarcar todos
@@ -802,7 +799,7 @@ const DesignacionesView = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={partidosSeleccionados.size === partidos.length}
+                  checked={partidosSeleccionados.size === partidosFiltrados.length}
                   onChange={handleSeleccionarTodos}
                   color="primary"
                 />
