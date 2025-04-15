@@ -400,7 +400,7 @@ const PerfilView = () => {
             error={Boolean(oldPasswordError)}
             helperText={oldPasswordError}
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, mt: 2 }}
           />
           <TextField
             fullWidth

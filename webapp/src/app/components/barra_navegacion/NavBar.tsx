@@ -13,6 +13,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Badge } from '@mui/material';
 import moment from 'moment'; 
 import notificacionesService from '../../services/NotificacionService';
+import toast from 'react-hot-toast';
 
 const NavigationBar = () => {
   const [anchorElPanel, setAnchorElPanel] = useState<null | HTMLElement>(null);
@@ -40,7 +41,8 @@ useEffect(() => {
       window.localStorage.removeItem('userRole');
       window.localStorage.removeItem('fotoPerfil');
       setUserLogged(null);
-      window.location.href = '/';
+      navigate('/');
+      toast.error('Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
     }
   }
 }, []);
@@ -65,19 +67,26 @@ const hasSessionExpired = (dataUser: any) => {
         const user = JSON.parse(localStorage.getItem('userLogged') || '{}');
         if (!user?.id) return;
   
-        // Obtener notificaciones desde el servicio
-        const notificaciones = await notificacionesService.getNotificacionesPorUsuario(user.id);
-  
         const ahora = new Date();
-        const futuras = notificaciones.filter((n: any) => {
-          const fechaNotificacion = new Date(n.fecha);
-          // Si la fecha de la notificación ya ha pasado, eliminarla
-          if (fechaNotificacion < ahora) {
-            notificacionesService.eliminarNotificacion(n.id);  // Llamar al servicio para eliminar la notificación
-            return false; // No agregar la notificación a la lista de futuras
+        // Normalizar fecha actual para comparar solo el día
+        const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  
+        // 1. Eliminar notificaciones antiguas (de todos los usuarios)
+        const todas = await notificacionesService.getNotificaciones(); // <- Necesitás este método
+        await Promise.all(todas.map(async (n: any) => {
+          const fecha = new Date(n.fecha);
+          const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+          if (fechaNormalizada < hoy) {
+            await notificacionesService.eliminarNotificacion(n.id);
           }
-          if (n.leida) return false; // No agregar las leídas
-          return true; // Solo agregar las futuras
+        }));
+  
+        // 2. Cargar notificaciones del usuario
+        const notificacionesUsuario = await notificacionesService.getNotificacionesPorUsuario(user.id);
+        const futuras = notificacionesUsuario.filter((n: any) => {
+          const fecha = new Date(n.fecha);
+          const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+          return fechaNormalizada >= hoy && !n.leida;
         });
   
         setNotifications(futuras);
@@ -88,6 +97,7 @@ const hasSessionExpired = (dataUser: any) => {
   
     fetchNotifications();
   }, []);
+  
   
 
   const marcarComoLeida = async (id: string) => {
