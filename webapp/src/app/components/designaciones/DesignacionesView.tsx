@@ -136,20 +136,20 @@ const DesignacionesView = () => {
                     <Paper elevation={2} sx={{ display: "flex", width: "100%" }}>
                       <Box sx={{ flex: 9 }}>
                         <Link to={`/detallesPartido/${partido.id}`} style={{ textDecoration: "none" }}>
-                          <Card sx={{ backgroundColor: "#F0F4F8", borderRadius: "12px 0 0 12px", height: "100%", transition: "all 0.3s ease", "&:hover": { boxShadow: 6, transform: "scale(1.02)" } }}>
+                          <Card sx={{ backgroundColor: "#f7fafc", borderRadius: "12px 0 0 12px", height: "100%", transition: "all 0.3s ease", "&:hover": { boxShadow: 6, transform: "scale(1.02)" } }}>
                             <CardContent>
                               <Typography variant="h6" color="primary">
                                 {partido.equipoLocal} - {partido.equipoVisitante}
                               </Typography>
-                              <Typography variant="body2" color="textSecondary">
+                              <Typography variant="body2">
                                 {moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm").format("dddd, DD MMMM YYYY - HH:mm")}
                               </Typography>
-                              <Typography variant="body2" color="textSecondary">Lugar: {partido.lugar}</Typography>
-                              <Typography variant="body2" color="textSecondary">Categoría: {partido.categoria}</Typography>
+                              <Typography variant="body2">Lugar: {partido.lugar}</Typography>
+                              <Typography variant="body2">Categoría: {partido.categoria}</Typography>
                               <Grid container spacing={2} mt={2}>
-                                {partido.arbitro1 && <Grid item xs={12} sm={4}><Typography variant="body2">Árbitro 1: {partido.arbitro1}</Typography></Grid>}
-                                {partido.arbitro2 && <Grid item xs={12} sm={4}><Typography variant="body2">Árbitro 2: {partido.arbitro2}</Typography></Grid>}
-                                {partido.anotador && <Grid item xs={12} sm={4}><Typography variant="body2">Anotador: {partido.anotador}</Typography></Grid>}
+                                {partido.arbitro1 && <Grid item xs={12} sm={4}><Typography><b>Árbitro 1:</b> {partido.arbitro1}</Typography></Grid>}
+                                {partido.arbitro2 && <Grid item xs={12} sm={4}><Typography><b>Árbitro 2:</b> {partido.arbitro2}</Typography></Grid>}
+                                {partido.anotador && <Grid item xs={12} sm={4}><Typography><b>Anotador:</b> {partido.anotador}</Typography></Grid>}
                               </Grid>
                             </CardContent>
                           </Card>

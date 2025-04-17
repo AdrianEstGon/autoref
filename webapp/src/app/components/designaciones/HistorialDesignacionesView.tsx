@@ -105,7 +105,7 @@ const HistorialDesignacionesView = () => {
         <Link to={`/detallesPartido/${partido.id}`} style={{ textDecoration: "none" }}>
           <Card
             sx={{
-              backgroundColor: "#F0F4F8",
+              backgroundColor: "#f7fafc",
               borderRadius: "12px",
               width: "100%",
               cursor: "pointer",
@@ -121,14 +121,14 @@ const HistorialDesignacionesView = () => {
               <Typography variant="h6" color="primary">
                 {partido.equipoLocal} - {partido.equipoVisitante}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2">
                 {moment(partido.fecha).format("dddd, DD MMMM YYYY")} - {partido.hora.slice(0, 5)}
               </Typography>
 
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2">
                 Lugar: {partido.lugar}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2">
                 Categoría: {partido.categoria}
               </Typography>
 
@@ -136,21 +136,21 @@ const HistorialDesignacionesView = () => {
                 <Grid item xs={12} sm={4}>
                   {partido.arbitro1 && (
                     <Typography variant="body2">
-                      Árbitro 1: {partido.arbitro1}
+                      <b>Árbitro 1:</b> {partido.arbitro1}
                     </Typography>
                   )}
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   {partido.arbitro2 && (
                     <Typography variant="body2">
-                      Árbitro 2: {partido.arbitro2}
+                      <b>Árbitro 2:</b> {partido.arbitro2}
                     </Typography>
                   )}
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   {partido.anotador && (
                     <Typography variant="body2">
-                      Anotador: {partido.anotador}
+                      <b>Anotador:</b> {partido.anotador}
                     </Typography>
                   )}
                 </Grid>

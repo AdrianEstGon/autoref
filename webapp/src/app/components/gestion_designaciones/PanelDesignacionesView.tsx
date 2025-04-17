@@ -813,7 +813,7 @@ const DesignacionesView = () => {
               partidosFiltrados.map((partido) => {
                 return (
                   <Grid item xs={12} key={partido.id}>
-                    <Card sx={{ backgroundColor: "#F0F4F8", borderRadius: "12px", width: "100%" }}>
+                    <Card sx={{ backgroundColor: "#f7fafc", borderRadius: "12px", width: "100%" }}>
                       <CardContent>
                         <Grid container spacing={2} alignItems="center">
                           <Grid item>
@@ -827,13 +827,13 @@ const DesignacionesView = () => {
                           <Typography variant="h6" color="primary">
                             {partido.equipoLocal} - {partido.equipoVisitante}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary">
+                          <Typography variant="body2">
                             {moment(partido.fecha).format("dddd, DD MMMM YYYY")} - {moment(partido.hora, "HH:mm:ss").format("HH:mm")}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary">
+                          <Typography variant="body2">
                             Lugar: {partido.lugar}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary">
+                          <Typography variant="body2">
                             Categoría: {partido.categoria}
                           </Typography>
                         </Grid>
