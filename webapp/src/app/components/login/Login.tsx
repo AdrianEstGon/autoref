@@ -70,7 +70,10 @@ function Login() {
           if (token) {
             // Almacenar el token en localStorage para futuras solicitudes
             window.localStorage.setItem('authToken', token);
-            userLogin.timestamp = new Date();
+            const now = new Date();
+            const localTimestamp = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+            userLogin.timestamp = localTimestamp;
+
             window.localStorage.setItem('userLogged', JSON.stringify(userLogin));
             window.localStorage.setItem('userId', userLogin.id);
 
