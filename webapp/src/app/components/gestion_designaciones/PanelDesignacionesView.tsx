@@ -574,8 +574,8 @@ const DesignacionesView = () => {
             await notificacionesService.crearNotificacion({
               usuarioId,
               mensaje,
-              fecha: fechaPartido.toISOString(),
-            });
+              fecha: fechaPartido.toLocaleString('sv-SE').replace(' ', 'T'), // formato ISO sin conversión a UTC
+            });            
           }
         };
   

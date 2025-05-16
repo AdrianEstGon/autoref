@@ -161,22 +161,28 @@ const HistorialDesignacionesView = () => {
       </Grid>
     ))
   ) : (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: '20%',
-        width: "100%",
-        padding: 4,
-      }}
-    >
-      <Typography color="black">
-        No tienes partidos arbitrados.
-      </Typography>
-    </Box>
-  )}
-</Grid>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                marginTop: "10%",
+                padding: 4,
+              }}
+            >
+              <img
+                src="/notFoundIcon.png"
+                alt="No designaciones"
+                style={{ maxWidth: "200px", marginBottom: "16px", opacity: 0.7 }}
+              />
+              <Typography variant="h6" color="textSecondary">
+                No tienes partidos arbitrados.
+              </Typography>
+            </Box>
+          )}
+        </Grid>
         </Paper>
       </Container>
     </Box>

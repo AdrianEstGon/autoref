@@ -68,12 +68,18 @@ const actualizarNotificacion = async (id: string, notificacion: any) => {
 
 const eliminarNotificacion = async (id: string) => {
     try {
-        await axios.delete(`${API_URL}/Notificaciones/${id}`, getAuthHeaders());
-    } catch (error) {
-        console.error(`Error eliminando notificación con ID ${id}:`, error);
-        throw error;
+      const response = await axios.delete(`${API_URL}/Notificaciones/${id}`, getAuthHeaders());
+      console.log("Respuesta del backend:", response);
+    } catch (error: any) {
+      console.error(`Error eliminando notificación con ID ${id}:`, error);
+      // Esto imprime detalles si el error no es por código de estado, sino por parsing u otra cosa
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Status:", error.response.status);
+      }
+      throw error;
     }
-};
+  };
 
 export default {
     getNotificaciones,

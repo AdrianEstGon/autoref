@@ -68,15 +68,12 @@ const hasSessionExpired = (dataUser: any) => {
         if (!user?.id) return;
   
         const ahora = new Date();
-        // Normalizar fecha actual para comparar solo el día
-        const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
   
-        // 1. Eliminar notificaciones antiguas (de todos los usuarios)
-        const todas = await notificacionesService.getNotificaciones(); // <- Necesitás este método
+        // 1. Eliminar notificaciones antiguas (comparar fecha completa)
+        const todas = await notificacionesService.getNotificaciones(); // Método necesario
         await Promise.all(todas.map(async (n: any) => {
-          const fecha = new Date(n.fecha);
-          const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-          if (fechaNormalizada < hoy) {
+          const fechaNoti = new Date(n.fecha);
+          if (fechaNoti < ahora) {
             await notificacionesService.eliminarNotificacion(n.id);
           }
         }));
@@ -85,8 +82,7 @@ const hasSessionExpired = (dataUser: any) => {
         const notificacionesUsuario = await notificacionesService.getNotificacionesPorUsuario(user.id);
         const futuras = notificacionesUsuario.filter((n: any) => {
           const fecha = new Date(n.fecha);
-          const fechaNormalizada = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-          return fechaNormalizada >= hoy && !n.leida;
+          return fecha >= ahora && !n.leida;
         });
   
         setNotifications(futuras);
@@ -97,6 +93,7 @@ const hasSessionExpired = (dataUser: any) => {
   
     fetchNotifications();
   }, []);
+  
   
   
 
