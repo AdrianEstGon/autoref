@@ -232,14 +232,19 @@ const DisponibilidadView = () => {
   };
 
   const dayPropGetter = (date: Date) => {
-    return {
-      style: {
-        height: isMobile ? '250px' : '300px', // Aumentamos la altura de cada celda del día
-        minHeight: isMobile ? '250px' : '300px', // Aseguramos una altura mínima para el día
-        overflow: 'hidden', // Evita que los eventos se salgan de la celda
-      },
-    };
+  const isWithin7Days = isDateWithin7Days(date);
+
+  return {
+    style: {
+      height: isMobile ? '250px' : '300px',
+      minHeight: isMobile ? '250px' : '300px',
+      overflow: 'hidden',
+      backgroundColor: isWithin7Days ? '#f0f0f0' : 'white',
+      pointerEvents: (isWithin7Days ? 'none' : 'auto') as React.CSSProperties['pointerEvents'], // bloquea clics en los días deshabilitados
+      opacity: isWithin7Days ? 0.5 : 1, // visualmente apagado
+    },
   };
+};
   
 
 
@@ -281,13 +286,27 @@ const DisponibilidadView = () => {
     </Box>
   );
 
+    const isDateWithin7Days = (date: Date) => {
+    const today = moment().startOf("day");
+    const selected = moment(date).startOf("day");
+    return selected.diff(today, "days") < 7;
+  };
+
   const handleSelectSlot = async (slotInfo: { start: Date }) => {
+    if (isDateWithin7Days(slotInfo.start)) {
+      toast.warning("Solo puedes modificar tu disponibilidad con al menos 7 días de antelación");
+      return;
+    }
     setSelectedDate(slotInfo.start);
     await loadAvailabilityForDate(slotInfo.start);
     setOpenDialog(true);
   };
-  
+
   const handleSelectEvent = async (event: any) => {
+    if (isDateWithin7Days(event.start)) {
+      toast.warning("Solo puedes modificar tu disponibilidad con al menos 7 días de antelación");
+      return;
+    }
     setSelectedDate(event.start);
     await loadAvailabilityForDate(event.start);
     setOpenDialog(true);

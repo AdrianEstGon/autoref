@@ -57,11 +57,18 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
   }
 
   if (!nuevoUsuario.fechaNacimiento) {
-    erroresTemp.fechaNacimiento = 'Debe ingresar una fecha de nacimiento.';
-    isValid = false;
+  erroresTemp.fechaNacimiento = 'Debe ingresar una fecha de nacimiento.';
+  isValid = false;
   } else {
-    erroresTemp.fechaNacimiento = '';
+    const edad = calcularEdad(nuevoUsuario.fechaNacimiento);
+    if (edad < 16 || edad > 110) {
+      erroresTemp.fechaNacimiento = 'La edad debe estar comprendida entre 16 y 110 años.';
+      isValid = false;
+    } else {
+      erroresTemp.fechaNacimiento = '';
+    }
   }
+
 
   if (!nuevoUsuario.direccion) {
     erroresTemp.direccion = 'Debe ingresar una dirección.';
@@ -119,3 +126,15 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     return regex.test(codigoPostal);
   };
   
+  const calcularEdad = (fechaNacimiento: string): number => {
+  const hoy = new Date();
+  const nacimiento = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const mes = hoy.getMonth() - nacimiento.getMonth();
+
+  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+
+  return edad;
+};
