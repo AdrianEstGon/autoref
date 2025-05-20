@@ -376,11 +376,22 @@ const PerfilView = () => {
           <Button
             variant="outlined"
             color="primary"
-            onClick={() => setOpenDialog(true)}
-            sx={{ mt: 3, width: "100%" }} // Ocupa todo el ancho disponible
+            onClick={() => {
+              // Limpiar todos los campos y errores antes de abrir el diálogo
+              setOldPassword("");
+              setNewPassword("");
+              setConfirmPassword("");
+              setOldPasswordError("");
+              setNewPasswordError("");
+              setConfirmPasswordError("");
+              setPasswordError("");
+              setOpenDialog(true);
+            }}
+            sx={{ mt: 3, width: "100%" }}
           >
             Modificar Contraseña
           </Button>
+
         </Grid>
       </Grid>
     </CardContent>
