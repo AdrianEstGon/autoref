@@ -134,7 +134,7 @@ const DesignacionesView = () => {
           
           designacionesCargadas[partido.id] = {
             arbitro1: arbitro1 ? (() => {
-              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const fechaHoraPartido = `${partido.fecha} ${partido.hora}`;
               const icono = obtenerIcono(arbitro1.id, fechaHoraPartido);
 
               return {
@@ -149,7 +149,7 @@ const DesignacionesView = () => {
               };
             })() : null,
             arbitro2: arbitro2 ? (() => {
-              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const fechaHoraPartido = `${partido.fecha} ${partido.hora}`;
               const icono = obtenerIcono(arbitro2.id, fechaHoraPartido);
               return {
                 ...arbitro2,
@@ -163,7 +163,7 @@ const DesignacionesView = () => {
               };
             })() : null,
             anotador: anotador ? (() => {
-              const fechaHoraPartido = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss").toISOString();
+              const fechaHoraPartido = `${partido.fecha} ${partido.hora}`;
               const icono = obtenerIcono(anotador.id, fechaHoraPartido);
 
               return {
