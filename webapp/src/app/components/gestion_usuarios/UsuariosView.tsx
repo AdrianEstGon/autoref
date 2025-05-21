@@ -157,10 +157,16 @@ const UsuariosView: React.FC = () => {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Eliminar usuario" arrow>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(usuario.id)}>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDeleteDialog(usuario.id)}
+                          aria-label="eliminar usuario"
+                          data-testid="delete-user-button"
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
+
                     </TableCell>
                   </TableRow>
                 ))}

@@ -111,14 +111,19 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         onClose();
         navigate('/gestionUsuarios/usuariosView');
       } catch (error: any) {
-        toast.error(`Error: ${error.message}`); 
+        const mensajeBackend = error?.response?.data?.message;
+        const mensaje = mensajeBackend || error.message || 'Error desconocido';
+        toast.error(mensaje);
       }
+
     }
   };
 
   const handleCancel = () => {
-    navigate('/gestionUsuarios/usuariosView');
-  };
+  onClose();
+  navigate('/gestionUsuarios/usuariosView');
+};
+
 
   return (
     <Dialog open={open} onClose={handleCancel}>
