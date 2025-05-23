@@ -28,7 +28,7 @@ const setup = async () => {
       nombre: 'Pedro',
       primerApellido: 'Ramírez',
       segundoApellido: 'López',
-      nivel: 'Avanzado',
+      nivel: "Nivel I Pista",
       fechaNacimiento: '1990-01-01',
       clubVinculado: 'Club A',
       email: 'pedro@example.com',

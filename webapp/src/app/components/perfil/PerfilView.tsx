@@ -47,6 +47,7 @@ const PerfilView = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
 
   const [passwordError, setPasswordError] = useState("");
   const [oldPasswordError, setOldPasswordError] = useState("");
@@ -116,7 +117,8 @@ const PerfilView = () => {
         const usuarioId = localStorage.getItem("userId");
         if (usuarioId) {
           await userService.uploadProfilePicture(e.target.files[0]);
-          setPerfil({ ...perfil, fotoPerfil: fotoURL });
+          // setPerfil({ ...perfil, fotoPerfil: fotoURL }); // NO actualizar aquí perfil directamente
+          setFotoPreview(fotoURL);  // Actualizamos la preview localmente
           localStorage.setItem("fotoPerfil", fotoURL);
           toast.success("Foto de perfil actualizada con éxito");
           window.dispatchEvent(new Event("storage")); // Notificar cambios
@@ -230,7 +232,10 @@ const PerfilView = () => {
     <CardContent>
       <Grid container spacing={3} justifyContent="center">
         <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
-          <Avatar src={perfil.fotoPerfil} sx={{ width: 120, height: 120, boxShadow: 3 }} />
+          <Avatar
+            src={fotoPreview || perfil.fotoPerfil} // <-- mostrar fotoPreview si existe, sino la original
+            sx={{ width: 120, height: 120, boxShadow: 3 }}
+          />
           <Tooltip title="Modificar foto de perfil">
             <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
               <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
