@@ -365,11 +365,11 @@ const DisponibilidadView = () => {
             Mi Disponibilidad
           </Typography>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <IconButton onClick={() => setCurrentDate(moment(currentDate).subtract(1, "months").toDate())} color="primary">
+            <IconButton onClick={() => setCurrentDate(moment(currentDate).subtract(1, "months").toDate())} color="primary" aria-label="Mes anterior">
               <ArrowBackIcon />
             </IconButton>
             <Typography variant="h6">{moment(currentDate).format("MMMM YYYY")}</Typography>
-            <IconButton onClick={() => setCurrentDate(moment(currentDate).add(1, "months").toDate())} color="primary">
+            <IconButton onClick={() => setCurrentDate(moment(currentDate).add(1, "months").toDate())} color="primary" aria-label="Mes siguiente">
               <ArrowForwardIcon />
             </IconButton>
           </Box>

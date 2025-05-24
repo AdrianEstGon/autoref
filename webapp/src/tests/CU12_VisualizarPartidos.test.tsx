@@ -65,7 +65,7 @@ describe('PartidosView – tabla y múltiples datos', () => {
     // Esperamos filas de datos
     await waitFor(() => {
       const rows = screen.getAllByRole('row');
-      // título, cabecera, + dos datos = al menos 4 filas
+      // título, cabecera, + dos partidos = al menos 4 filas
       expect(rows.length).toBeGreaterThanOrEqual(4);
     });
 

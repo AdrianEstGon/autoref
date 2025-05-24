@@ -388,7 +388,7 @@ const DesignacionesView = () => {
     tipo: string,
     arbitro: "arbitro1" | "arbitro2" | "anotador"
   ) => {
-    const arbitrosDisponibles = arbitrosPorPartido.get(partido.id) || [];
+    const arbitrosDisponibles = obtenerArbitrosDisponibles(partido.fecha, partido.hora);
 
     const arbitrosAsignados = Object.keys(designaciones[partido.id] || {}).map(
       (key) => designaciones[partido.id]?.[key as keyof Designacion]?.nombre
@@ -460,11 +460,12 @@ const DesignacionesView = () => {
                 {...params}
                 label={tipo}
                 fullWidth
+                data-testid={`autocomplete-${arbitro}-${partido.id}`} 
                 InputProps={{
                   ...params.InputProps,
                   startAdornment: selectedUser ? (
-                    <>{selectedUser.icono}</> // Mostrar el ícono al lado del nombre del árbitro
-                  ) : null
+                    <>{selectedUser.icono}</>
+                  ) : null,
                 }}
               />
             );
