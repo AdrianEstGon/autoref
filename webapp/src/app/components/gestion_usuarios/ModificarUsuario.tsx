@@ -10,7 +10,26 @@ import { niveles } from './UserUtils';
 interface ModificarUsuarioProps {
   open: boolean;
   onClose: () => void;
-  onUpdate: () => void; 
+  onUpdate: () => void;
+  usuario: {
+    id: string;
+    nombre: string;
+    primerApellido: string;
+    segundoApellido: string;
+    fechaNacimiento: string;
+    nivel: string;
+    clubVinculadoId: string;
+    licencia: string;
+    email: string;
+    username: string;
+    password: string;
+    direccion: string;
+    pais: string;
+    region: string;
+    ciudad: string;
+    codigoPostal: string;
+    esAdmin: boolean;
+  };
 }
 
 const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUpdate }) => {

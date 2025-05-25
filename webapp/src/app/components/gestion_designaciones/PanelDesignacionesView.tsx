@@ -492,45 +492,35 @@ const DesignacionesView = () => {
     );
   };
 
-  
 
-  const arbitrosPorPartido = useMemo(() => {
-    const cache = new Map<string, any[]>();
-  
-    partidos.forEach((partido) => {
-      const disponibles = obtenerArbitrosDisponibles(partido.fecha, partido.hora);
-      cache.set(partido.id, disponibles);
-    });
-  
-    return cache;
-  }, [partidos, usuarios, disponibilidades]);
-  
   const publicarDesignaciones = async () => {
     setOpenDialog(true); // Abrir el diálogo de confirmación
   };
 
-  const usuariosPorNombre = useMemo(() => {
+  const usuariosPorId = useMemo(() => {
     const map = new Map<string, any>();
     usuarios.forEach((u) => {
-      const key = u.nombre; // Podrías incluir también apellido para evitar colisiones
-      map.set(key, u);
+      map.set(u.id, u);
     });
     return map;
   }, [usuarios]);
 
+
   const handleConfirmar = async () => {
     try {
-      // Ejecutar en paralelo todos los partidos
-      await Promise.all(partidosFiltrados.map(async (partido) => {
+      await Promise.all(
+        partidosFiltrados.filter(p => partidosSeleccionados.has(p.id.toString()))
+          .map(async (partido) => {
         const designacion = designaciones[partido.id];
         if (!designacion) return;
   
         const { arbitro1, arbitro2, anotador } = designacion;
   
         const getUsuarioId = (usuario: any) =>
-          usuario && usuariosPorNombre.has(usuario.nombre)
-            ? usuariosPorNombre.get(usuario.nombre)!.id
+          usuario?.id && usuariosPorId.has(usuario.id)
+            ? usuariosPorId.get(usuario.id)!.id
             : null;
+
         
         const estadoArbitro1 = 0;
         const estadoArbitro2 = 0;
@@ -551,7 +541,6 @@ const DesignacionesView = () => {
           estadoAnotador,
 
         };
-  
         // Actualizar el partido
         await partidosService.actualizarPartido(partidoActualizado);
   

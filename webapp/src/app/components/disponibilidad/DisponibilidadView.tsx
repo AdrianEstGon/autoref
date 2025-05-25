@@ -2,7 +2,8 @@ import React, { useState, useEffect, JSX, useImperativeHandle, forwardRef } from
 import {
   Container, Typography, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
   TextField, MenuItem, IconButton, Grid, useMediaQuery, useTheme,
-  Select
+  Select,
+  Autocomplete
 } from "@mui/material";
 import NavigationBar from "../barra_navegacion/NavBar";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -413,62 +414,77 @@ const DisponibilidadView = forwardRef((_props, ref) => {
           
           {/* Dialog for editing availability */}
           <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm" data-testid="availability-dialog">
-            <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333' }} >
+            <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333', mb: 3 }}>
               Seleccionar Disponibilidad - {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}
             </DialogTitle>
             <DialogContent sx={{ backgroundColor: '#FFFFFF', color: '#333' }}>
-              {['Franja1', 'Franja2', 'Franja3', 'Franja4'].map((franja, index) => (
-                <Box key={index} mb={2}>
-                  <Typography fontWeight="bold" color="#333">
-                    {`Franja ${index + 1}: ${["9:00-12:00", "12:00-15:00", "15:00-18:00", "18:00-22:00"][index]}`}
-                  </Typography>
-                  <Grid container spacing={1} alignItems="center">
-                    {/* Select */}
-                    <Grid item xs={10}>
-                      <Select
-                        fullWidth
-                        value={availability[franja] || ''}
-                        onChange={(e) => handleChange(franja, e.target.value)}
-                        sx={{ backgroundColor: '#FFFFFF' }}
-                        data-testid={`select-${franja.toLowerCase()}`} // ✅ Añadir testid aquí
-                      >
-                        <MenuItem value={1}>Disponible con transporte</MenuItem>
-                        <MenuItem value={2}>Disponible sin transporte</MenuItem>
-                        <MenuItem value={3}>No disponible</MenuItem>
-                      </Select>
+              {['Franja1', 'Franja2', 'Franja3', 'Franja4'].map((franja, index) => {
+                const franjaLabel = `Franja ${index + 1}: ${["9:00-12:00", "12:00-15:00", "15:00-18:00", "18:00-22:00"][index]}`;
+                return (
+                  <Box key={index} mb={2}>
+                    <Grid container spacing={1} alignItems="center">
+                      <Grid item xs={10}>
+                        <Autocomplete
+                          sx ={{ mt: 2 }}
+                          fullWidth
+                          disablePortal={process.env.NODE_ENV === 'test'}
+                          options={[
+                            { label: 'Disponible con transporte', value: 1 },
+                            { label: 'Disponible sin transporte', value: 2 },
+                            { label: 'No disponible', value: 3 },
+                          ]}
+                          getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+                          isOptionEqualToValue={(option, value) => option.value === (value as any)?.value}
+                          value={
+                            [
+                              { label: 'Disponible con transporte', value: 1 },
+                              { label: 'Disponible sin transporte', value: 2 },
+                              { label: 'No disponible', value: 3 },
+                            ].find((opt) => opt.value === availability[franja]) || null
+                          }
+                          onChange={(_, newValue) => handleChange(franja, newValue ? newValue.value : '')}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label={franjaLabel}
+                              variant="outlined"
+                              data-testid={`autocomplete-${franja.toLowerCase()}`}
+                            />
+                            
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={2} display="flex" justifyContent="center" alignItems="center">
+                        {availability[franja] === 1 && (
+                          <IconButton color="primary">
+                            <DirectionsCarIcon />
+                          </IconButton>
+                        )}
+                        {availability[franja] === 2 && (
+                          <IconButton color="success">
+                            <DirectionsWalkIcon />
+                          </IconButton>
+                        )}
+                        {availability[franja] === 3 && (
+                          <IconButton color="error">
+                            <DoNotDisturbIcon />
+                          </IconButton>
+                        )}
+                      </Grid>
                     </Grid>
-                    
-                    {/* Icono */}
-                    <Grid item xs={2} display="flex" justifyContent="center" alignItems="center">
-                      {availability[franja] === 1 && (
-                        <IconButton color="primary" >
-                          <DirectionsCarIcon />
-                        </IconButton>
-                      )}
-                      {availability[franja] === 2 && (
-                        <IconButton color="success">
-                          <DirectionsWalkIcon />
-                        </IconButton>
-                      )}
-                      {availability[franja] === 3 && (
-                        <IconButton color="error">
-                          <DoNotDisturbIcon />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Box>
-              ))}
+                  </Box>
+                );
+              })}
               <TextField
-               fullWidth
-               multiline
-               rows={3}
-               label="Comentarios"
-               variant="outlined"
-               value={availability.comments || ''}
-               onChange={(e) => setAvailability({ ...availability, comments: e.target.value })}
-               sx={{ backgroundColor: '#FFFFFF' }}
-                inputProps={{ maxLength: 200 }}  // Limita los caracteres a 200
+                fullWidth
+                multiline
+                rows={3}
+                label="Comentarios"
+                variant="outlined"
+                value={availability.comments || ''}
+                onChange={(e) => setAvailability({ ...availability, comments: e.target.value })}
+                sx={{ backgroundColor: '#FFFFFF' }}
+                inputProps={{ maxLength: 200 }}
               />
             </DialogContent>
             <DialogActions sx={{ backgroundColor: '#F0F4F8' }}>
@@ -476,6 +492,8 @@ const DisponibilidadView = forwardRef((_props, ref) => {
               <Button onClick={handleSave} color="primary">Guardar</Button>
             </DialogActions>
           </Dialog>
+
+
 
         </Paper>
       </Container>

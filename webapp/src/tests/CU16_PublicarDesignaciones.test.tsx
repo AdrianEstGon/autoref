@@ -1,110 +1,165 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-
+import DesignacionesView from '../app/components/gestion_designaciones/PanelDesignacionesView';
+import { BrowserRouter } from 'react-router-dom';
 import partidosService from '../app/services/PartidoService';
-import notificacionesService from '../app/services/NotificacionService';
 import usuariosService from '../app/services/UserService';
 import categoriaService from '../app/services/CategoriaService';
 import polideportivoService from '../app/services/PolideportivoService';
 import disponibilidadService from '../app/services/DisponibilidadService';
 import equipoService from '../app/services/EquipoService';
-
-import DesignacionesView from '../app/components/gestion_designaciones/PanelDesignacionesView';
+import notificacionesService from '../app/services/NotificacionService';
+import moment from 'moment';
 
 jest.mock('../app/services/PartidoService');
-jest.mock('../app/services/NotificacionService');
 jest.mock('../app/services/UserService');
 jest.mock('../app/services/CategoriaService');
 jest.mock('../app/services/PolideportivoService');
 jest.mock('../app/services/DisponibilidadService');
 jest.mock('../app/services/EquipoService');
+jest.mock('../app/services/NotificacionService');
 
-describe('CU02 - Publicar Designaciones', () => {
+// Mock simple del Autocomplete con select
+// Mock de Autocomplete que respeta correctamente el valor y el cambio
+jest.mock('@mui/material/Autocomplete', () => (props: any) => {
+  const { onChange, renderInput, value, options } = props;
+
+  const selectedValue = value?.id ?? ''; // extrae el ID si está definido
+
+  return (
+    <div>
+      <select
+        data-testid="mock-autocomplete"
+        value={selectedValue}
+        onChange={(e) => {
+          const selected = props.options.find((opt: any) => opt.id === e.target.value);
+          onChange(null, selected ?? null);
+        }}
+      >
+        <option value="">Selecciona</option>
+        {props.options.map((opt: any) => (
+          <option key={opt.id} value={opt.id}>
+            {`${opt.nombre} ${opt.primerApellido} ${opt.segundoApellido}`}
+          </option>
+        ))}
+      </select>
+      {renderInput({ InputProps: {}, inputProps: {} })}
+    </div>
+  );
+});
+
+
+describe('Flujo completo de publicación de designaciones', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    const hoy = moment().format('YYYY-MM-DD');
+
+    
+    (partidosService.getPartidos as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        fecha: hoy,
+        hora: '10:00:00',
+        equipoLocal: 'Equipo A',
+        equipoVisitante: 'Equipo B',
+        lugar: 'Cancha 1',
+        categoria: 'Sub 15',
+        categoriaId: 1,
+        estadoArbitro1: 0,
+        estadoArbitro2: 0,
+        estadoAnotador: 0,
+        arbitro1Id: null,
+        arbitro2Id: null,
+        anotadorId: null,
+        lugarId: 1,
+      },
+      {
+        id: '2',
+        fecha: hoy,
+        hora: '12:00:00',
+        equipoLocal: 'Equipo C',
+        equipoVisitante: 'Equipo D',
+        lugar: 'Cancha 2',
+        categoria: 'Sub 15',
+        categoriaId: 1,
+        estadoArbitro1: 0,
+        estadoArbitro2: 0,
+        estadoAnotador: 0,
+        arbitro1Id: null,
+        arbitro2Id: null,
+        anotadorId: null,
+        lugarId: 1,
+      },
+    ]);
+
+    (usuariosService.getUsuarios as jest.Mock).mockResolvedValue([
+      { id: 'u1', nombre: 'Juan', primerApellido: 'Pérez', segundoApellido: 'González' },
+      { id: 'u2', nombre: 'Lucía', primerApellido: 'Ramírez', segundoApellido: 'López' },
+      { id: 'u3', nombre: 'Carlos', primerApellido: 'Díaz', segundoApellido: 'Martínez' },
+    ]);
+
+    (categoriaService.getCategorias as jest.Mock).mockResolvedValue([
+      { id: 1, nombre: 'Sub 15', primerArbitro: 'Nivel I', segundoArbitro: 'Nivel I', anotador: null },
+    ]);
+
+    (polideportivoService.getPolideportivos as jest.Mock).mockResolvedValue([{ id: 1, nombre: 'Cancha 1' }]);
+    (equipoService.getEquipos as jest.Mock).mockResolvedValue([
+      { id: 'A', clubId: 'club1' },
+      { id: 'B', clubId: 'club2' },
+    ]);
+    (disponibilidadService.getDisponibilidades as jest.Mock).mockResolvedValue([
+      { usuarioId: 'u1', fecha: hoy, franja1: 1, franja2: 1, franja3: 1, franja4: 1 },
+      { usuarioId: 'u2', fecha: hoy, franja1: 1, franja2: 1, franja3: 1, franja4: 1 },
+      { usuarioId: 'u3', fecha: hoy, franja1: 1, franja2: 1, franja3: 1, franja4: 1 },
+    ]);
+
+    (partidosService.actualizarPartido as jest.Mock).mockResolvedValue({});
+    (notificacionesService.crearNotificacion as jest.Mock).mockResolvedValue({});
   });
 
-  test('debería publicar las designaciones de los partidos y notificar a cada árbitro asignado', async () => {
-    const partido1 = {
-      id: 1,
-      equipoLocal: 'Equipo A',
-      equipoVisitante: 'Equipo B',
-      fecha: '2025-07-10',
-      hora: '18:00:00',
-      lugar: 'Polideportivo Central',
-      lugarId: 1,
-      categoria: 'Senior',
-      categoriaId: 1,
-      arbitro1Id: 10,
-      arbitro2Id: 20,
-      anotadorId: 30,
-      estadoArbitro1: 0,
-      estadoArbitro2: 0,
-      estadoAnotador: 0,
-    };
+it('selecciona un partido, designa automáticamente y publica correctamente', async () => {
+  const user = userEvent.setup();
 
-    const partido2 = {
-      id: 2,
-      equipoLocal: 'Equipo C',
-      equipoVisitante: 'Equipo D',
-      fecha: '2025-07-11',
-      hora: '19:00:00',
-      lugar: 'Polideportivo Norte',
-      lugarId: 2,
-      categoria: 'Juvenil',
-      categoriaId: 2,
-      arbitro1Id: 40,
-      arbitro2Id: 50,
-      anotadorId: 60,
-      estadoArbitro1: 0,
-      estadoArbitro2: 0,
-      estadoAnotador: 0,
-    };
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
 
-    const arbitros = [
-      { id: 10, nombre: 'Árbitro Uno', primerApellido: '', segundoApellido: '' },
-      { id: 20, nombre: 'Árbitro Dos', primerApellido: '', segundoApellido: '' },
-      { id: 30, nombre: 'Árbitro Tres', primerApellido: '', segundoApellido: '' },
-      { id: 40, nombre: 'Árbitro Cuatro', primerApellido: '', segundoApellido: '' },
-      { id: 50, nombre: 'Árbitro Cinco', primerApellido: '', segundoApellido: '' },
-      { id: 60, nombre: 'Árbitro Seis', primerApellido: '', segundoApellido: '' },
-    ];
+  // Esperar a que aparezca el texto del partido
+  expect(await screen.findByText(/Equipo A - Equipo B/i)).toBeInTheDocument();
 
-    // Mock de servicios
-    (partidosService.getPartidos as jest.Mock).mockResolvedValue([partido1, partido2]);
-    (usuariosService.getUsuarios as jest.Mock).mockResolvedValue(arbitros);
-    (categoriaService.getCategorias as jest.Mock).mockResolvedValue([]);
-    (polideportivoService.getPolideportivos as jest.Mock).mockResolvedValue([]);
-    (disponibilidadService.getDisponibilidades as jest.Mock).mockResolvedValue([]);
-    (equipoService.getEquipos as jest.Mock).mockResolvedValue([]);
+  // Buscar todos los checkboxes
+  const checkboxes = screen.getAllByRole('checkbox');
 
-    const user = userEvent.setup();
+  //Seleccionamos el segundo checkbox (el primero es el de "Seleccionar todos")
+  const partidoCheckbox = checkboxes[1];
+  await user.click(partidoCheckbox);
 
-    render(
-      <MemoryRouter>
-        <DesignacionesView />
-      </MemoryRouter>
-    );
+  // Click en "Designar Automáticamente"
+  await user.click(screen.getByRole('button', { name: /Designar Automáticamente/i }));
 
-    // Esperar a que se muestre el panel
-    expect(await screen.findByText(/Panel de Designaciones/i)).toBeInTheDocument();
-
-    // Clic en botón publicar
-    await user.click(screen.getByRole('button', { name: /Publicar Designaciones/i }));
-
-    // Confirmar en el diálogo
-    const confirmar = await screen.findByRole('button', { name: /Confirmar/i });
-    await user.click(confirmar);
-
-    // Verificar llamadas a servicios
-    await waitFor(() => {
-      expect(partidosService.actualizarPartido).toHaveBeenCalledTimes(2);
-      expect(notificacionesService.crearNotificacion).toHaveBeenCalledTimes(6);
-    });
-
-    const llamadas = (notificacionesService.crearNotificacion as jest.Mock).mock.calls;
-    const ids = llamadas.map(([params]) => params.usuarioId);
-    expect(ids).toEqual(expect.arrayContaining([10, 20, 30, 40, 50, 60]));
+  // Esperar que termine la asignación (esperamos a que desaparezca el texto "Asignando...")
+  await waitFor(() => {
+    expect(screen.queryByText(/Asignando.../i)).not.toBeInTheDocument();
   });
+
+  // Click en "Publicar Designaciones"
+  await user.click(screen.getByRole('button', { name: /Publicar Designaciones/i }));
+
+  // Click en el botón de Confirmar del diálogo
+  await user.click(await screen.findByRole('button', { name: /Confirmar/i }));
+
+  // Verificamos las llamadas a los servicios
+  await waitFor(() => {
+    expect(partidosService.actualizarPartido).toHaveBeenCalledTimes(1);
+    expect(notificacionesService.crearNotificacion).toHaveBeenCalledTimes(2); // 2 notificaciones por los 2 árbitros designados
+  });
+
+  const llamadas = (notificacionesService.crearNotificacion as jest.Mock).mock.calls;
+  const usuariosNotificados = llamadas.map(([data]) => data.usuarioId);
+  expect(usuariosNotificados).toEqual(expect.arrayContaining(['u1', 'u2']));
+});
+
 });
