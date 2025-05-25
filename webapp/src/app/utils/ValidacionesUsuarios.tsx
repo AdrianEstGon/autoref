@@ -1,10 +1,10 @@
 // validaciones.ts
 export function validaciones(nuevoUsuario: { nombre: string; primerApellido: string; 
-  segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculadoId: string; 
+  segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculadoId: string | null; 
   licencia: string; username: string; email: string; password: string; direccion: string; pais: string; 
   region: string; ciudad: string; codigoPostal: string; esAdmin: boolean; }, 
   erroresTemp: { nombre: string; primerApellido: string; segundoApellido: string; fechaNacimiento: string; 
-    nivel: string; clubVinculadoId: string; licencia: string; username: string; email: string; password: string; 
+    nivel: string; clubVinculadoId: string | null; licencia: string; username: string; email: string; password: string; 
     direccion: string; pais: string; region: string; ciudad: string; codigoPostal: string; esAdmin: string; }, isValid: boolean) {
       
   if (!validarNombre(nuevoUsuario.nombre)) {

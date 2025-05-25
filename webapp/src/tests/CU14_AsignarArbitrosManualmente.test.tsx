@@ -206,4 +206,48 @@ describe('DesignacionesView', () => {
             expect(screen.getByDisplayValue(/Carlos Díaz Martínez/)).toBeInTheDocument();
         });
     });
+    // Asigna a un partido un arbitro1, un arbitro2 pero sin anotador
+    it('asigna un arbitro1 y un arbitro2 a un partido sin anotador', async () => {
+        render(
+            <BrowserRouter>
+            <DesignacionesView />
+            </BrowserRouter>
+        );
+    
+        await waitFor(() => {
+            expect(screen.getByText(/Equipo A - Equipo B/i)).toBeInTheDocument();
+        });
+    
+        const selects = await screen.findAllByTestId('mock-autocomplete');
+    
+        fireEvent.change(selects[0], { target: { value: 'u1' } }); // Arbitro 1: Juan
+        fireEvent.change(selects[1], { target: { value: 'u2' } }); // Arbitro 2: Lucía
+    
+        await waitFor(() => {
+            expect(screen.getByDisplayValue(/Juan Pérez González/)).toBeInTheDocument();
+            expect(screen.getByDisplayValue(/Lucía Ramírez López/)).toBeInTheDocument();
+        });
+    });
+  // Asigna a un partido un arbitro1, un anotador pero sin arbitro2
+  it('asigna un arbitro1 y un anotador a un partido sin arbitro2', async () => {
+    render(
+      <BrowserRouter>
+        <DesignacionesView />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Equipo A - Equipo B/i)).toBeInTheDocument();
+    });
+
+    const selects = await screen.findAllByTestId('mock-autocomplete');
+
+    fireEvent.change(selects[0], { target: { value: 'u1' } }); // Arbitro 1: Juan
+    fireEvent.change(selects[2], { target: { value: 'u3' } }); // Anotador: Carlos
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue(/Juan Pérez González/)).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/Carlos Díaz Martínez/)).toBeInTheDocument();
+    });
+  });
 });

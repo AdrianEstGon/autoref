@@ -1,4 +1,4 @@
-import React, { useState, useEffect, JSX } from "react";
+import React, { useState, useEffect, JSX, useImperativeHandle, forwardRef } from "react";
 import {
   Container, Typography, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
   TextField, MenuItem, IconButton, Grid, useMediaQuery, useTheme,
@@ -32,7 +32,7 @@ type CustomEvent = {
   icon?: JSX.Element;
 };
 
-const DisponibilidadView = () => {
+const DisponibilidadView = forwardRef((_props, ref) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -232,28 +232,33 @@ const DisponibilidadView = () => {
   };
 
   const dayPropGetter = (date: Date) => {
-  const isWithin7Days = isDateWithin7Days(date);
+    const isWithin7Days = isDateWithin7Days(date);
 
-  return {
-    style: {
-      height: isMobile ? '250px' : '300px',
-      minHeight: isMobile ? '250px' : '300px',
-      overflow: 'hidden',
-      backgroundColor: isWithin7Days ? '#f0f0f0' : 'white',
-      pointerEvents: (isWithin7Days ? 'none' : 'auto') as React.CSSProperties['pointerEvents'], // bloquea clics en los días deshabilitados
-      opacity: isWithin7Days ? 0.5 : 1, // visualmente apagado
-    },
+    return {
+      style: {
+        height: isMobile ? '250px' : '300px',
+        minHeight: isMobile ? '250px' : '300px',
+        overflow: 'hidden',
+        backgroundColor: isWithin7Days ? '#f0f0f0' : 'white',
+        pointerEvents: (isWithin7Days ? 'none' : 'auto') as React.CSSProperties['pointerEvents'], // bloquea clics en los días deshabilitados
+        opacity: isWithin7Days ? 0.5 : 1, // visualmente apagado
+      },
+    };
   };
-};
-  
 
+    const renderEventContent = ({ event }: { event: CustomEvent }) => {
+    // Generar un testid único, por ejemplo "event-YYYYMMDD-franja"
+    const testId = `event-${moment(event.start).format('YYYYMMDD')}-${event.resource}`;
+    console.log("Rendering event with testId:", testId);
 
-  const renderEventContent = ({ event }: { event: CustomEvent }) => (
-    <div style={{ display: "flex", alignItems: "center" }}>
-      {event.icon && <div style={{ marginRight: "4px" }}>{event.icon}</div>}
-      <span>{event.title}</span>
-    </div>
-  );
+    return (
+      <div data-testid={testId} style={{ display: "flex", alignItems: "center" }}>
+        {event.icon && <div style={{ marginRight: "4px" }}>{event.icon}</div>}
+        <span>{event.title}</span>
+      </div>
+    );
+  };
+
 
   const renderLegend = () => (
     <Box sx={{ mt: 2, textAlign: 'center' }}>
@@ -325,6 +330,14 @@ const DisponibilidadView = () => {
     loadAvailabilityForMonth(currentDate);
   }, [currentDate]);
 
+  useImperativeHandle(
+  process.env.NODE_ENV === 'test' ? ref : null,
+  () => ({
+    handleSelectSlot
+  })
+);
+
+
   return (
     <Box
       sx={{
@@ -376,6 +389,7 @@ const DisponibilidadView = () => {
           {renderLegend()}
           <div style={{ minHeight: isMobile ? "500px" : "700px", width: "100%", cursor:'pointer' }}>
           <Calendar
+            data-testid="calendar"
             localizer={localizer}
             events={events}
             startAccessor="start"
@@ -398,7 +412,7 @@ const DisponibilidadView = () => {
           {/* Leyenda de Disponibilidad */}
           
           {/* Dialog for editing availability */}
-          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
+          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm" data-testid="availability-dialog">
             <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333' }} >
               Seleccionar Disponibilidad - {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}
             </DialogTitle>
@@ -416,6 +430,7 @@ const DisponibilidadView = () => {
                         value={availability[franja] || ''}
                         onChange={(e) => handleChange(franja, e.target.value)}
                         sx={{ backgroundColor: '#FFFFFF' }}
+                        data-testid={`select-${franja.toLowerCase()}`} // ✅ Añadir testid aquí
                       >
                         <MenuItem value={1}>Disponible con transporte</MenuItem>
                         <MenuItem value={2}>Disponible sin transporte</MenuItem>
@@ -467,6 +482,6 @@ const DisponibilidadView = () => {
       </Box>
     
   );
-};
+});
 
 export default DisponibilidadView;

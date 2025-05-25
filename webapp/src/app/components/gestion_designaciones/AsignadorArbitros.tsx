@@ -11,7 +11,7 @@ type Arbitro = {
   nivel: string;
   latitud: number;
   longitud: number;
-  transporte: boolean;
+  transporte?: boolean;
   clubVinculadoId?: string; // Campo opcional
 };
 

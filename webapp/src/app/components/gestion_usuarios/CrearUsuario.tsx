@@ -22,7 +22,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculadoId: '', // Se mantiene como string
+    clubVinculadoId: null,
     licencia: '',
     username: '',
     email: '',
@@ -160,8 +160,12 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           getOptionLabel={(option) => option?.nombre || ""}
           value={clubes.find(club => club.id === nuevoUsuario.clubVinculadoId) || null}
           onChange={(_, newValue) => {
-            setNuevoUsuario(prevState => ({ ...prevState, clubVinculadoId: newValue?.id || '' }));
+            setNuevoUsuario(prevState => ({
+              ...prevState,
+              clubVinculadoId: newValue?.id || null  // <- aquí cambia '' por null
+            }));
           }}
+
           renderInput={(params) => (
             <TextField {...params} label="Club Vinculado" error={!!errores.clubVinculadoId} helperText={errores.clubVinculadoId} />
           )}
