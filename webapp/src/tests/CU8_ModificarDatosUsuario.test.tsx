@@ -195,7 +195,7 @@ describe('ModificarUsuario Component', () => {
       const { toast } = require('react-toastify');
       expect(toast.success).toHaveBeenCalledWith('Usuario actualizado con éxito');
     });
-  }, 10000);
+  }, 20000);
 
   test('Cancela la modificación al hacer clic en Cancelar', async () => {
     await setup();

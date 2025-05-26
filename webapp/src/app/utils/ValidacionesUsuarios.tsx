@@ -103,8 +103,6 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
  const validarNombre = (nombre: string): boolean => {
     // Permite solo caracteres alfabéticos y espacios
     const regex = /^[a-zA-ZáéíóúÁÉÍÓÚ\s]+$/;
-    console.log(regex.test(nombre));
-    console.log(nombre);
     return regex.test(nombre);
   };
   
