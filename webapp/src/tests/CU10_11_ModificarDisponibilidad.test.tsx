@@ -243,4 +243,4 @@ const set_disponibilidad = async (): Promise<void> => {
   const commentsInput = screen.getByLabelText('Comentarios') as HTMLInputElement;
   fireEvent.change(commentsInput, { target: { value: 'Comentarios iniciales' } });
   expect(commentsInput).toHaveValue('Comentarios iniciales');
-};
+}; 

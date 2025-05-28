@@ -4,7 +4,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, F
 import authService from '../../services/UserService';
 import clubsService from '../../services/ClubService'; // Importamos el servicio de clubes
 import { toast } from 'react-toastify';
-import { niveles } from './UserUtils';
+import { niveles } from '../../utils/UserUtils';
 import { validaciones } from '../../utils/ValidacionesUsuarios';
 
 interface CrearUsuarioProps {

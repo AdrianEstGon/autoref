@@ -5,7 +5,7 @@ import authService from '../../services/UserService';
 import clubsService from '../../services/ClubService'; 
 import { validaciones } from '../../utils/ValidacionesUsuarios';
 import { toast } from 'react-toastify';
-import { niveles } from './UserUtils';
+import { niveles } from '../../utils/UserUtils';
 
 interface ModificarUsuarioProps {
   open: boolean;

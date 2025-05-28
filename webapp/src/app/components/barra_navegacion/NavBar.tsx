@@ -11,7 +11,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useNavigate } from 'react-router-dom';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Badge } from '@mui/material';
-import moment from 'moment'; 
 import notificacionesService from '../../services/NotificacionService';
 import toast from 'react-hot-toast';
 

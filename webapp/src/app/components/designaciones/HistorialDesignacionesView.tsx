@@ -4,32 +4,17 @@ import {
   Typography,
   Paper,
   Box,
-  Button,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Badge,
   Grid,
   Card,
   CardContent,
-  IconButton,
-  Fab,
 } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import NavigationBar from "../barra_navegacion/NavBar";
-import Tooltip from "@mui/material/Tooltip";
 import moment from "moment";
 import partidosService from "../../services/PartidoService";
 import { Link } from "react-router-dom";
 
 const HistorialDesignacionesView = () => {
-  const [openNotifications, setOpenNotifications] = useState(false);
   const [partidos, setPartidos] = useState<any[]>([]);
-  const [notificaciones, setNotificaciones] = useState([
-    { id: 1, message: "Nuevo partido asignado", date: "2025-03-25" },
-    { id: 2, message: "Cambio en el horario de un partido", date: "2025-03-24" },
-  ]);
 
   useEffect(() => {
     const cargarPartidosDesignados = async () => {
@@ -83,7 +68,7 @@ const HistorialDesignacionesView = () => {
             padding: 2,
             marginBottom: 3,
             minHeight: "80vh",
-            backgroundColor: "#f9f9f9", // Fondo semi-transparente
+            backgroundColor: "#f9f9f9", 
             borderRadius: "12px",
           }}
         >
