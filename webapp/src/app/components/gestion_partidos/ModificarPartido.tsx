@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormHelperText } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl } from '@mui/material';
 import { Autocomplete, Popper } from '@mui/material';
 import partidosService from '../../services/PartidoService';
 import polideportivosService from '../../services/PolideportivoService';
@@ -178,14 +178,13 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
           />
         </FormControl>
 
-        {/* Otros campos del formulario */}
         <TextField
           label="Fecha"
           type="date"
           fullWidth
           margin="normal"
           name="fecha"
-          value={partidoModificado.fecha ? partidoModificado.fecha.split('T')[0] : ''} // Extrae solo la parte de la fecha
+          value={partidoModificado.fecha ? partidoModificado.fecha.split('T')[0] : ''} 
           onChange={handleChange}
           error={!!errores.fecha}
           helperText={errores.fecha}

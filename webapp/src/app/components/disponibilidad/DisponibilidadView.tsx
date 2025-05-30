@@ -1,8 +1,7 @@
 import React, { useState, useEffect, JSX, useImperativeHandle, forwardRef } from "react";
 import {
   Container, Typography, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
-  TextField, MenuItem, IconButton, Grid, useMediaQuery, useTheme,
-  Select,
+  TextField, IconButton, Grid, useMediaQuery, useTheme,
   Autocomplete
 } from "@mui/material";
 import NavigationBar from "../barra_navegacion/NavBar";
@@ -43,9 +42,9 @@ const DisponibilidadView = forwardRef((_props, ref) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const loadAvailabilityForDate = async (date: Date) => {
-    const usuarioId = localStorage.getItem("userId"); // Get user ID
+    const usuarioId = localStorage.getItem("userId"); 
     if (!usuarioId) {
-      toast.error("Error: Usuario no identificado"); // Show error toast
+      toast.error("Error: Usuario no identificado"); 
       return;
     }
 
@@ -73,7 +72,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
       }
     } catch (error) {
       console.error("Error al cargar disponibilidad:", error);
-      toast.error("Ocurrió un error al cargar la disponibilidad"); // Show error toast
+      toast.error("Ocurrió un error al cargar la disponibilidad"); 
     }
   };
 
@@ -97,7 +96,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
         const dayEvents: CustomEvent[] = ["Franja1", "Franja2", "Franja3", "Franja4"].map((franja, index) => {
           const availability = disponibilidad?.[franja.toLowerCase()] || 0;
           if (availability === 0) {
-            return null; // No agregar eventos sin disponibilidad
+            return null; 
           }
   
           return {
@@ -107,7 +106,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
             resource: franja,
             availability,
           };
-        }).filter(event => event !== null); // Eliminar eventos nulos
+        }).filter(event => event !== null);
   
         dayEvents.forEach(event => {
           if (event.availability === 1) {
@@ -137,9 +136,9 @@ const DisponibilidadView = forwardRef((_props, ref) => {
   const handleSave = async () => {
     if (!selectedDate) return;
   
-    const usuarioId = localStorage.getItem("userId"); // Get user ID
+    const usuarioId = localStorage.getItem("userId");
     if (!usuarioId) {
-      toast.error("Error: Usuario no identificado"); // Show error toast
+      toast.error("Error: Usuario no identificado");
       return;
     }
   
@@ -179,31 +178,14 @@ const DisponibilidadView = forwardRef((_props, ref) => {
         comments: disponibilidadData.comentarios
       }));
   
-      // Actualizar los eventos (en caso de que sea necesario hacer un update rápido del calendario)
       await loadAvailabilityForMonth(currentDate);
   
-      setOpenDialog(false); // Cerrar el diálogo después de guardar
+      setOpenDialog(false); 
     } catch (error) {
       console.error("Error al guardar disponibilidad:", error);
-      toast.error("Ocurrió un error al guardar la disponibilidad"); // Show error toast
+      toast.error("Ocurrió un error al guardar la disponibilidad"); 
     }
   };
-
-  function useDebounce(value: string, delay: number) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-  
-    useEffect(() => {
-      const handler = setTimeout(() => {
-        setDebouncedValue(value);
-      }, delay);
-  
-      return () => {
-        clearTimeout(handler);
-      };
-    }, [value, delay]);
-  
-    return debouncedValue;
-  }
 
   const eventStyleGetter = (event: CustomEvent) => {
     let backgroundColor = 'white';
@@ -218,15 +200,15 @@ const DisponibilidadView = forwardRef((_props, ref) => {
     return {
       style: {
         backgroundColor,
-        borderRadius: '8px', // Aumentamos el borde redondeado
+        borderRadius: '8px', 
         color: 'black',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '40px', // Aumentamos la altura de los eventos
-        fontSize: '14px', // Aumentamos el tamaño de la fuente
-        fontFamily: 'Arial, sans-serif', // Cambiamos la fuente a Arial
-        padding: '5px', // Aumentamos el padding
+        height: '40px', 
+        fontSize: '14px',
+        fontFamily: 'Arial, sans-serif', 
+        padding: '5px', 
         overflow: 'hidden',
       },
     };
@@ -242,13 +224,12 @@ const DisponibilidadView = forwardRef((_props, ref) => {
         overflow: 'hidden',
         backgroundColor: isWithin7Days ? '#f0f0f0' : 'white',
         pointerEvents: (isWithin7Days ? 'none' : 'auto') as React.CSSProperties['pointerEvents'], // bloquea clics en los días deshabilitados
-        opacity: isWithin7Days ? 0.5 : 1, // visualmente apagado
+        opacity: isWithin7Days ? 0.5 : 1, 
       },
     };
   };
 
     const renderEventContent = ({ event }: { event: CustomEvent }) => {
-    // Generar un testid único, por ejemplo "event-YYYYMMDD-franja"
     const testId = `event-${moment(event.start).format('YYYYMMDD')}-${event.resource}`;
     console.log("Rendering event with testId:", testId);
 
@@ -370,8 +351,8 @@ const DisponibilidadView = forwardRef((_props, ref) => {
               maxWidth: '1200px',
               display: 'flex', 
               flexDirection: 'column',
-              flex: 1, // Permite que se expanda completamente
-              height: '100%', // Se asegura de que cubra todo
+              flex: 1, 
+              height: '100%', 
               marginTop: '2rem',
             }}
           >
@@ -401,18 +382,15 @@ const DisponibilidadView = forwardRef((_props, ref) => {
             date={currentDate}
             onNavigate={(date) => setCurrentDate(date)}
             eventPropGetter={eventStyleGetter}
-            dayPropGetter={dayPropGetter} // Asegurar que los eventos se vean correctamente
-            views={{ month: true }} // Asegurar que la vista sea mensual
+            dayPropGetter={dayPropGetter}
+            views={{ month: true }} 
             components={{
               event: renderEventContent,
-              toolbar: () => null, // Esto elimina completamente la barra de herramientas
+              toolbar: () => null,
             }}
-            style={{ minHeight: '1000px' }} // Aumentamos la altura del calendario
+            style={{ minHeight: '1000px' }} 
           />
           </div>
-          {/* Leyenda de Disponibilidad */}
-          
-          {/* Dialog for editing availability */}
           <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm" data-testid="availability-dialog">
             <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333', mb: 3 }}>
               Seleccionar Disponibilidad - {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}

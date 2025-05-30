@@ -4,6 +4,7 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import WarningIcon from '@mui/icons-material/Warning';
 import { JSX } from 'react';
+import { niveles } from '@/app/utils/UserUtils';
 
 type Arbitro = {
   id: string;
@@ -12,7 +13,7 @@ type Arbitro = {
   latitud: number;
   longitud: number;
   transporte?: boolean;
-  clubVinculadoId?: string; // Campo opcional
+  clubVinculadoId?: string; 
 };
 
 type Partido = {
@@ -36,7 +37,7 @@ type Categoria = {
   primerArbitro: string | null;
   segundoArbitro: string | null;
   anotador: string | null;
-  prioridad: number; // 1 = más prioritario ... 10 = menos prioritario
+  prioridad: number; // 1 = más prioritario ... 12 = menos prioritario
 };
 
 type Lugar = {
@@ -115,12 +116,12 @@ export class AsignadorArbitros {
     const estadoInicial: Estado = { asignaciones: {}, costo: 0 };
     const abiertos = new PriorityQueue({
       comparator: (a: Estado, b: Estado) => {
-        // Primero, priorizamos el estado que tenga más partidos realmente asignados
+        // Primero, se prioriza el estado que tenga más partidos realmente asignados
         const asignadosA = this.contarPartidosRealmenteAsignados(a.asignaciones);
         const asignadosB = this.contarPartidosRealmenteAsignados(b.asignaciones);
 
         if (asignadosB !== asignadosA) {
-          // Queremos primero el que asigne más partidos completos
+          // Primero el que asigne más partidos completos
           return asignadosB - asignadosA;
         }
         // Si empatan en la cantidad de partidos, el menor costo va primero
@@ -161,13 +162,13 @@ export class AsignadorArbitros {
   expandirEstado(estado: Estado): Estado[] {
     const nuevosEstados: Estado[] = [];
 
-    // Encontramos los partidos que aún no se han asignado
+    // Encuentra los partidos que aún no se han asignado
     const partidosSinAsignar = this.partidos.filter(p => !estado.asignaciones[p.id]);
 
     // Si no hay partidos sin asignar, no hay expansión posible
     if (partidosSinAsignar.length === 0) return [];
 
-    // Tomamos el primer partido sin asignar (NOTA: este orden viene tras el sort() en el constructor)
+    // Se coge el primer partido sin asignar
     const partidoSinAsignar = partidosSinAsignar[0];
     const categoria = this.categorias.find(c => c.id === partidoSinAsignar.categoriaId)!;
 
@@ -204,16 +205,12 @@ export class AsignadorArbitros {
     for (const a1 of [...opcionesArbitro1, null]) {
       for (const a2 of [...opcionesArbitro2, null]) {
         for (const an of [...opcionesAnotador, null]) {
-          // Si los tres son null, ni siquiera vale la pena intentar
-          // if (!a1 && !a2 && !an) continue;
-
           const arbitrosAsignados = [a1, a2, an].filter(a => a !== null) as Arbitro[];
           const ids = arbitrosAsignados.map(a => a.id);
-
           // Si hay repetidos, no es una combinación válida
           if (new Set(ids).size !== ids.length) continue;
 
-          // Comprobamos si todos pueden asistir (transporte, tiempos, etc.)
+          // Comprobamos si todos pueden asistir (transporte, tiempos...)
           if (!this.puedenAsistir(partidoSinAsignar, arbitrosAsignados)) continue;
 
           // Calculamos coste acumulado
@@ -251,7 +248,7 @@ export class AsignadorArbitros {
     // Ordenamos las combinaciones por el costo total (ascendente)
     combinacionesConCosto.sort((a, b) => a.costoTotal - b.costoTotal);
 
-    // Tomamos unas cuantas combinaciones más prometedoras, por ejemplo 5
+    // Cogemos las mejores 5 combinaciones
     for (const { combinacion, costoTotal } of combinacionesConCosto.slice(0, 5)) {
       const nuevoEstado: Estado = JSON.parse(JSON.stringify(estado));
       nuevoEstado.asignaciones[partidoSinAsignar.id] = {
@@ -303,16 +300,15 @@ export class AsignadorArbitros {
     const franja = this.obtenerFranjaHoraria(partido.hora);
     if (!franja) return false;
 
-    // Manejamos la fecha del partido
     const fechaPartido = moment(partido.fecha).format('YYYY-MM-DD');
 
-    // Construir momentos para ver si se solapan con otros partidos
+    // Construir fechas para ver si se solapan con otros partidos
     const construirMomento = (p: Partido) => {
       const fecha = moment(p.fecha).format('YYYY-MM-DD');
       return moment(`${fecha} ${p.hora}`, 'YYYY-MM-DD HH:mm:ss');
     };
 
-    // Revisamos si el árbitro ya está asignado a algún partido incompatible en ese mismo día
+    // Revisa si el árbitro ya está asignado a algún partido incompatible en ese mismo día
     for (const [partidoId, asignacion] of Object.entries(this.estadoActual?.asignaciones || {})) {
       const otroPartido = this.partidos.find(p => p.id === partidoId);
       if (!otroPartido) continue;
@@ -320,7 +316,7 @@ export class AsignadorArbitros {
       const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
       if (!yaAsignado) continue;
 
-      // Comprobamos solape temporal
+      // Comprueba solape temporal
       const duracion = AsignadorArbitros.DURACION_PARTIDO_MINUTOS;
 
       let momentoActual = construirMomento(partido);
@@ -369,7 +365,6 @@ export class AsignadorArbitros {
     const estado = disponibilidad[franja];
     if (estado === 3) return false;
 
-    // Si es 1 => con transporte, 2 => sin transporte
     arbitro.transporte = estado === 1;
     return true;
   }
@@ -380,7 +375,7 @@ export class AsignadorArbitros {
 
     const nombreCategoria = (categoria as any).nombre?.toUpperCase() || '';
 
-    // Ejemplo: categorías 'NACIONAL', 'SUPERLIGA' con mayor anticipación
+    // categorías 'NACIONAL', 'SUPERLIGA' con mayor anticipación
     if (nombreCategoria.includes("NACIONAL") || nombreCategoria.includes("SUPERLIGA")) {
       return AsignadorArbitros.ANTICIPACION_NACIONAL;
     }
@@ -495,17 +490,6 @@ export class AsignadorArbitros {
   }
 
   private nivelIndex(nivel: string): number {
-    const niveles = [
-      "Candidato Territorial I Pista",
-      "Nivel I Pista",
-      "Nivel I + Hab. Nivel II Pista",
-      "Nivel II Pista",
-      "Nivel II + Hab. Nacional C Pista",
-      "Nacional C Pista",
-      "Nacional B Pista",
-      "Nacional A Pista",
-      "Internacional Pista"
-    ];
     return niveles.indexOf(nivel);
   }
 

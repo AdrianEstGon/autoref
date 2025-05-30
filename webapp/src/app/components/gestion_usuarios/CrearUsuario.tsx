@@ -54,24 +54,24 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     esAdmin: ''
   });
 
-  const [clubes, setClubes] = useState<any[]>([]); // Estado para almacenar los clubes
+  const [clubes, setClubes] = useState<any[]>([]); 
 
   // Llamada a la API para obtener los clubes
   useEffect(() => {
     const fetchClubs = async () => {
       try {
-        const clubesData = await clubsService.getClubs(); // Obtener los clubes desde el servicio
+        const clubesData = await clubsService.getClubs(); 
         const sortedClubs = clubesData.sort((a: any, b: any) => {
           // Ordenar los clubes alfabéticamente por el nombre
           return a.nombre.localeCompare(b.nombre);
         });
-        setClubes(sortedClubs); // Guardar los clubes ordenados en el estado
+        setClubes(sortedClubs); 
       } catch (error) {
         toast.error("Error al cargar los clubes");
       }
     };
 
-    fetchClubs(); // Obtener los clubes cuando el componente se monta
+    fetchClubs();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -162,7 +162,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           onChange={(_, newValue) => {
             setNuevoUsuario(prevState => ({
               ...prevState,
-              clubVinculadoId: newValue?.id || null  // <- aquí cambia '' por null
+              clubVinculadoId: newValue?.id || null 
             }));
           }}
 
@@ -173,8 +173,6 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
         />
         </FormControl>
-
-        {/* Resto de campos */}
         <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={nuevoUsuario.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
         <TextField label="Licencia" fullWidth margin="normal" name="licencia" value={nuevoUsuario.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
         <TextField label="Código Postal" fullWidth margin="normal" name="codigoPostal" value={nuevoUsuario.codigoPostal} onChange={handleChange} error={!!errores.codigoPostal} helperText={errores.codigoPostal} />

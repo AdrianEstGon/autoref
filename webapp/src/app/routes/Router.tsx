@@ -58,10 +58,6 @@ const Router = () => {
                 <Route path="/gestionPartidos/modificarPartido" element={<ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />} />
                 <Route path="/detallesPartido/:id" element={<DetallePartido />} />
                 <Route path="/gestionDesignaciones/panelDesignaciones" element={<PanelDesignacionesView />} />
-
-                {/* Rutas privadas */}
-
-                {/* Rutas de las diferentes vistas de usuario */}
         
             </Routes>
         </HashRouter>

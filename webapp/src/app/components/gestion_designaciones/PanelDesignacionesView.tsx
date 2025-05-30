@@ -1,6 +1,6 @@
-import React, { useState, useEffect, JSX, useMemo, useCallback } from "react";
+import React, { useState, useEffect, JSX, useMemo } from "react";
 import { 
-  Container, Typography, Grid, Card, CardContent, Select, MenuItem, FormControl, InputLabel, TextField, Button,
+  Container, Typography, Grid, Card, CardContent, TextField, Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -9,8 +9,6 @@ import {
   FormControlLabel,
   Box,
   Chip,
-  Tooltip,
-  IconButton,
   Popover
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -30,8 +28,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { toast } from "react-toastify";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
-import { Pagination } from "@mui/material";
-import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros"; // Adjust the path as needed
+import { AsignadorArbitros } from "../../components/gestion_designaciones/AsignadorArbitros";
 import { AccessTime, AutoFixHigh, Cancel, CheckCircle, Info, Comment as CommentIcon, ChatBubbleOutline } from "@mui/icons-material";
 import { CircularProgress } from '@mui/material';
 
@@ -57,10 +54,6 @@ const DesignacionesView = () => {
 
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
   const [comentario, setComentario] = useState<string | null>(null);
-
-
-
-  // Estado para el diálogo de confirmación
   const [openDialog, setOpenDialog] = useState(false);
 
   type Designacion = {
@@ -86,7 +79,6 @@ const DesignacionesView = () => {
         setDisponibilidades(disponibilidadesLista);
         setEquipos(equiposLista); 
   
-        // Crear un mapa de disponibilidades para rápido acceso
         const disponibilidadMap = new Map();
         disponibilidadesLista.forEach((disp: { usuarioId: any; }) => {
           disponibilidadMap.set(disp.usuarioId, disp);
@@ -206,7 +198,7 @@ const DesignacionesView = () => {
     };
   
     cargarDatos();
-  }, [fechaInicio, fechaFin]);  // Asegúrate de que se recarguen los partidos cuando cambien las fechas
+  }, [fechaInicio, fechaFin]);  
   
   // Función que maneja la apertura del popover
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>, comentario: string) => {
@@ -300,8 +292,7 @@ const DesignacionesView = () => {
     if (hora >= 12 && hora < 15) return 'franja2';
     if (hora >= 15 && hora < 18) return 'franja3';
     if (hora >= 18 && hora < 21) return 'franja4';
-    
-    // Si no cae en ninguna franja, retornar vacío
+
     return '';
   };
   
@@ -356,14 +347,14 @@ const DesignacionesView = () => {
           }}
           PaperProps={{
             sx: {
-              backgroundColor: '#ffffff', // Fondo blanco para un look limpio
+              backgroundColor: '#ffffff', 
               mt: 1,
-              borderRadius: 4, // Bordes ligeramente redondeados
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', // Sombra sutil
+              borderRadius: 4,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', 
               padding: 2,
               maxWidth: 400,
               minWidth: 250,
-              color: '#333333', // Texto en gris oscuro para mejor legibilidad
+              color: '#333333', 
               fontFamily: 'Arial, sans-serif',
               fontSize: '0.875rem',
               lineHeight: 1.5,
@@ -400,7 +391,6 @@ const DesignacionesView = () => {
 
     const seleccionado = designaciones[partido.id]?.[arbitro];
 
-    // Obtener estado según el tipo
     let estado: number = 0;
     if (arbitro === "arbitro1") estado = partido.estadoArbitro1;
     if (arbitro === "arbitro2") estado = partido.estadoArbitro2;
@@ -564,7 +554,7 @@ const DesignacionesView = () => {
             await notificacionesService.crearNotificacion({
               usuarioId,
               mensaje,
-              fecha: fechaPartido.toLocaleString('sv-SE').replace(' ', 'T'), // formato ISO sin conversión a UTC
+              fecha: fechaPartido.toLocaleString('sv-SE').replace(' ', 'T'), 
             });            
           }
         };
@@ -593,11 +583,6 @@ const DesignacionesView = () => {
         setPartidosFiltrados((prev) =>
           prev.map((p) => (p.id === partido.id ? partidoActualizado : p))
         );
-
-
-        
-        
-  
       }));
   
       toast.success("Designaciones publicadas correctamente");
@@ -641,8 +626,6 @@ const DesignacionesView = () => {
 
   const asignarArbitrosAutomaticamente = () => {
     setAsignando(true); // Comienza el loading
-  
-    // Simula asincronía (si tu asignador es síncrono, usa setTimeout para ver el ícono de carga)
     setTimeout(() => {
       const partidosAAsignar = partidosFiltrados.filter(partido =>
         partidosSeleccionados.has(partido.id)
@@ -687,7 +670,7 @@ const DesignacionesView = () => {
       }
   
       setAsignando(false); // Finaliza el loading
-    }, 300); // Esto simula un delay mínimo para que se vea el spinner
+    }, 300); 
   };
   
   
@@ -701,7 +684,7 @@ const DesignacionesView = () => {
             Panel de Designaciones
           </Typography>
 
-         {/* FILTROS ENCUADRADOS */}
+         {/* FILTROS  */}
          <Card sx={{ backgroundColor: "#EDEDED", padding: "1rem", borderRadius: "12px", marginBottom: "2rem" }}>
             <CardContent>
               <Grid container spacing={2} alignItems="center">

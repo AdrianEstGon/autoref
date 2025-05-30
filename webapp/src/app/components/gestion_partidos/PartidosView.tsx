@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
-  IconButton, Button, Box, Tooltip, TablePagination, Dialog, DialogActions, DialogContent, 
-  DialogContentText, DialogTitle, Input, Typography as MuiTypography
+  Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  IconButton, Button, Box, TablePagination, Dialog, DialogActions, DialogContent, 
+  DialogContentText, DialogTitle, Typography as MuiTypography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -310,11 +310,11 @@ const PartidosView: React.FC = () => {
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'left', gap: 2, mt: 3 }}>
                       <Button variant="contained" color="primary" onClick={handleAdd} startIcon={<AddIcon />}>Agregar Partido</Button>
                       <Button variant="outlined" component="label" sx={{
-                          color: 'green',  // Cambia el color del texto
-                          borderColor: 'green',  // Cambia el color del borde
+                          color: 'green',  
+                          borderColor: 'green',  
                           '&:hover': {
-                            borderColor: 'green',  // Cambia el color del borde al pasar el mouse
-                            backgroundColor: 'rgba(0, 128, 0, 0.1)'  // Opción para agregar un fondo verde claro al hacer hover (opcional)
+                            borderColor: 'green', 
+                            backgroundColor: 'rgba(0, 128, 0, 0.1)'
                           }
                         }}>
                         <UploadFileIcon /> Importar partidos desde Excel

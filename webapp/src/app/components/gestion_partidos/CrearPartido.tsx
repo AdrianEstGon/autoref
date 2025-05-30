@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormHelperText } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import { Popper } from '@mui/material'; // Importa Popper
+import { Popper } from '@mui/material'; 
 import partidosService from '../../services/PartidoService';
 import polideportivosService from '../../services/PolideportivoService';
-import equiposService from '../../services/EquipoService'; // Agregado para obtener equipos
-import categoriasService from '../../services/CategoriaService'; // Agregado para obtener categorías
+import equiposService from '../../services/EquipoService'; 
+import categoriasService from '../../services/CategoriaService'; 
 import { toast } from 'react-toastify';
 import { validarPartido } from '../../utils/ValidacionesPartidos';
 
@@ -24,8 +24,8 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     equipoVisitanteId: '',
     fecha: '',
     hora: '',
-    lugarId: '', // ID del polideportivo
-    categoriaId: '', // Categoria seleccionada
+    lugarId: '',
+    categoriaId: '', 
     jornada: '',
     numeroPartido: '',
   });
@@ -42,7 +42,6 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
   });
 
   const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]); // Lista de polideportivos
-  const [equipos, setEquipos] = useState<{ id: string; nombre: string }[]>([]); // Lista de equipos
   const [categorias, setCategorias] = useState<{ id: string; nombre: string }[]>([]); // Lista de categorías
   const [equiposFiltrados, setEquiposFiltrados] = useState<{ id: string; nombre: string }[]>([]); // Equipos filtrados por categoría
 
@@ -64,18 +63,15 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     }
   }, [open]);
 
-  // Cuando se selecciona una categoría, filtramos los equipos
   useEffect(() => {
     if (nuevoPartido.categoriaId) {
       const fetchEquipos = async () => {
         try {
-          const equiposData = await equiposService.getEquiposPorCategoria(nuevoPartido.categoriaId); // Asumimos que tienes un endpoint que filtra los equipos por categoría
+          const equiposData = await equiposService.getEquiposPorCategoria(nuevoPartido.categoriaId); 
           setEquiposFiltrados(equiposData);
 
-          // Si no hay equipos para la categoría seleccionada, mostramos un toast informativo
           if (equiposData.length === 0) {
             toast.info('No hay equipos disponibles para esta categoría.');
-            // Limpiamos los equipos locales y visitantes ya que no hay equipos disponibles
             setNuevoPartido(prevState => ({
               ...prevState,
               equipoLocal: '',
@@ -154,8 +150,6 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
             )}
           />
         </FormControl>
-
-        {/* Resto del formulario con equipos filtrados por categoría */}
         <FormControl fullWidth margin="normal" error={!!errores.equipoLocalId}>
           <Autocomplete
             options={equiposFiltrados}
@@ -201,8 +195,6 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
             )}
           />
         </FormControl>
-
-        {/* Campos adicionales */}
         <TextField
           label="Fecha"
           type="date"

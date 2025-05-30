@@ -14,8 +14,8 @@ import {
 import NavigationBar from "../barra_navegacion/NavBar";
 import partidosService from "../../services/PartidoService";
 import moment from "moment";
-import { Person, Assignment, LocationOn, Event, WatchLater, Directions } from "@mui/icons-material";
-import { GoogleMap, LoadScript, Marker, DirectionsRenderer } from "@react-google-maps/api";
+import { Person, Event } from "@mui/icons-material";
+import { GoogleMap, Marker, DirectionsRenderer } from "@react-google-maps/api";
 
 const DetallesPartidoView = () => {
   const { id } = useParams();

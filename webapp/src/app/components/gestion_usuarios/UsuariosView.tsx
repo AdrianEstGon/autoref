@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   IconButton, Button, Box, Tooltip, TablePagination, Dialog, DialogActions, DialogContent, 
   DialogContentText, DialogTitle 
 } from '@mui/material';
@@ -27,6 +27,8 @@ interface Usuario {
 }
 
 const UsuariosView: React.FC = () => {
+  const SUPER_ADMIN_LICENCIA = 16409;
+
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [usuariosPaginados, setUsuariosPaginados] = useState<Usuario[]>([]);
   const [page, setPage] = useState(0);
@@ -44,12 +46,16 @@ const UsuariosView: React.FC = () => {
           a.primerApellido.localeCompare(b.primerApellido)
         );
 
-        sortedData.forEach((usuario: any) => {
-          usuario.esAdmin = usuario.roles.includes('Admin');
+        const superAdmin = sortedData.find((u: { licencia: number; }) => u.licencia === SUPER_ADMIN_LICENCIA);
+        const otherUsers = sortedData.filter((u: { licencia: number; }) => u.licencia !== SUPER_ADMIN_LICENCIA);
+        const finalSortedData = superAdmin ? [superAdmin, ...otherUsers] : otherUsers;
+
+        finalSortedData.forEach((usuario: any) => {
+          usuario.esAdmin = usuario.roles?.includes('Admin') || usuario.licencia === SUPER_ADMIN_LICENCIA;
         });
 
-        setUsuarios(sortedData);
-        setUsuariosPaginados(sortedData.slice(0, rowsPerPage));
+        setUsuarios(finalSortedData);
+        setUsuariosPaginados(finalSortedData.slice(0, rowsPerPage));
       } catch (error) {
         console.error('Error al obtener los usuarios:', error);
       }
@@ -68,8 +74,6 @@ const UsuariosView: React.FC = () => {
         await usuarioService.eliminarUsuario(usuarioToDelete);
         const updatedUsuarios = usuarios.filter(user => user.id !== usuarioToDelete);
         setUsuarios(updatedUsuarios);
-
-        // Actualizar la paginación
         const startIndex = page * rowsPerPage;
         setUsuariosPaginados(updatedUsuarios.slice(startIndex, startIndex + rowsPerPage));
 
@@ -141,7 +145,16 @@ const UsuariosView: React.FC = () => {
               </TableHead>
               <TableBody>
                 {usuariosPaginados.map((usuario) => (
-                  <TableRow key={usuario.id} sx={{ '&:hover': { backgroundColor: '#e8e8e8' }, transition: '0.3s' }}>
+                  <TableRow
+                    key={usuario.id}
+                    sx={{
+                      backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#fff3cd' : 'inherit',
+                      '&:hover': {
+                        backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#ffe8a1' : '#e8e8e8',
+                      },
+                      transition: '0.3s',
+                    }}
+                  >
                     <TableCell sx={{ textAlign: 'center' }}>{usuario.nombre}</TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>{usuario.primerApellido}</TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>{usuario.segundoApellido}</TableCell>
@@ -151,28 +164,41 @@ const UsuariosView: React.FC = () => {
                     <TableCell sx={{ textAlign: 'center' }}>{usuario.email}</TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>{usuario.licencia}</TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
-                      <Tooltip title="Modificar usuario" arrow>
-                        <IconButton color="primary" onClick={() => handleModify(usuario)}>
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Eliminar usuario" arrow>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleOpenDeleteDialog(usuario.id)}
-                          aria-label="eliminar usuario"
-                          data-testid="delete-user-button"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-
+                      {usuario.licencia !== SUPER_ADMIN_LICENCIA ? (
+                        <Tooltip title="Modificar usuario" arrow>
+                          <IconButton color="primary" onClick={() => handleModify(usuario)}>
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        // Solo mostrar el botón si el usuario logueado es el superadmin
+                        JSON.parse(localStorage.getItem('licencia') || 'null') === SUPER_ADMIN_LICENCIA && (
+                          <Tooltip title="Modificar usuario" arrow>
+                            <IconButton color="primary" onClick={() => handleModify(usuario)}>
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )
+                      )}
+                      {usuario.licencia !== SUPER_ADMIN_LICENCIA && (
+                        <Tooltip title="Eliminar usuario" arrow>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleOpenDeleteDialog(usuario.id)}
+                            aria-label="eliminar usuario"
+                            data-testid="delete-user-button"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+
           <Box 
             sx={{ 
               position: 'fixed', 
@@ -211,18 +237,17 @@ const UsuariosView: React.FC = () => {
               labelRowsPerPage="Filas por página"
               labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
               sx={{ mr: { xs: 0, sm: 4, md: 12 } }}
-              
             />
           </Box>
-
         </Container>
       </Box>
-  
-      {/* Diálogo de confirmación */}
+
       <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
-          <DialogContentText>¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.</DialogContentText>
+          <DialogContentText>
+            ¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDeleteDialog} color="error">Cancelar</Button>
@@ -232,5 +257,5 @@ const UsuariosView: React.FC = () => {
     </>
   );
 }
-  
-  export default UsuariosView;
+
+export default UsuariosView;

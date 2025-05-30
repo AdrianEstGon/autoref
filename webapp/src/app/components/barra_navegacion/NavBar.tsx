@@ -25,7 +25,7 @@ const NavigationBar = () => {
   const navigate = useNavigate();
   const [openNotifications, setOpenNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [slidingOutNotification, setSlidingOutNotification] = useState<string | null>(null); // Controla la notificación que se desliza
+  const [slidingOutNotification, setSlidingOutNotification] = useState<string | null>(null); 
   const [userLogged, setUserLogged] = useState<any | null>(null);
 
 useEffect(() => {
@@ -69,7 +69,7 @@ const hasSessionExpired = (dataUser: any) => {
         const ahora = new Date();
   
         // 1. Eliminar notificaciones antiguas (comparar fecha completa)
-        const todas = await notificacionesService.getNotificaciones(); // Método necesario
+        const todas = await notificacionesService.getNotificaciones(); 
         await Promise.all(todas.map(async (n: any) => {
           const fechaNoti = new Date(n.fecha);
           if (fechaNoti < ahora) {
@@ -311,6 +311,46 @@ const hasSessionExpired = (dataUser: any) => {
           </Box>
         </Toolbar>
       </AppBar>
+      <Drawer
+          anchor="left"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+        >
+          <Box
+            sx={{
+              width: 250,
+              p: 2,
+            }}
+            role="presentation"
+            onClick={handleDrawerToggle}
+            onKeyDown={handleDrawerToggle}
+          >
+            <List sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Button color="inherit" onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
+              <Button color="inherit" onClick={() => navigate('/miDisponibilidad')}>Disponibilidad</Button>
+              <Button color="inherit" onClick={() => navigate('/miHistorial')}>Mi Historial</Button>
+
+              {userRole === 'Admin' && (
+                <>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                    Panel de control
+                  </Typography>
+                  <Button onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>
+                    <PeopleIcon sx={{ mr: 1 }} /> Gestión de usuarios
+                  </Button>
+                  <Button onClick={() => handleNavigate('/gestionPartidos/partidosView')}>
+                    <SportsSoccerIcon sx={{ mr: 1 }} /> Gestión de partidos
+                  </Button>
+                  <Button onClick={() => handleNavigate('/gestionDesignaciones/panelDesignaciones')}>
+                    <AssignmentIcon sx={{ mr: 1 }} /> Gestión de designaciones
+                  </Button>
+                </>
+              )}
+            </List>
+          </Box>
+        </Drawer>
+
     </div>
   );
 };
