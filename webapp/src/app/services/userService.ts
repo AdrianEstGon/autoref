@@ -1,6 +1,5 @@
 import axios from 'axios';
 import API_URL from '@/config';
-import { get } from 'http';
 
 const login = async (email: string, password: string) => {
   try {
@@ -111,16 +110,15 @@ const changePassword = async ({ OldPassword, NewPassword }: { OldPassword: strin
       getAuthHeaders()
     );
 
-    return response; // Retorna la respuesta de la API
+    return response; 
   } catch (error: any) {
     console.error("Error al cambiar la contraseña:", error);
 
-    // Aquí manejamos el error y lo mostramos en el frontend
     if (error.response && error.response.data.message === "La contraseña actual no es correcta") {
       throw new Error("La contraseña actual no es correcta");
     }
 
-    throw error; // Lanza el error para que lo puedas manejar en el frontend
+    throw error; 
   }
 };
 
@@ -132,7 +130,7 @@ const uploadProfilePicture = async (file: File) => {
   }
 
   const formData = new FormData();
-  formData.append('file', file, file.name);  // 'file' es el nombre del parámetro que espera el backend
+  formData.append('file', file, file.name);  
 
   try {
     const response = await axios.put(
@@ -140,12 +138,12 @@ const uploadProfilePicture = async (file: File) => {
       formData,
       {
         headers: {
-          'Authorization': `Bearer ${token}`, // Si es necesario
-          'Content-Type': 'multipart/form-data', // Esto se maneja automáticamente por FormData
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'multipart/form-data',
         },
       }
     );
-    return response.data; // Retorna la respuesta para su uso posterior
+    return response.data; 
   } catch (error) {
     console.error("Error al subir la foto de perfil:", error);
     throw new Error('Error al subir la foto de perfil');
@@ -156,11 +154,10 @@ const uploadProfilePicture = async (file: File) => {
 const getProfilePicture = async (userId: string) => {
   try {
     const response = await axios.get(`${API_URL}/Usuarios/profile-picture/${userId}`, {
-      ...getAuthHeaders(), // Usamos getAuthHeaders para obtener las cabeceras de autenticación
+      ...getAuthHeaders(), 
     });
 
-    // Asumimos que el backend ahora devuelve la URL de la imagen de Cloudinary
-    return response.data.fotoPerfil;  // La URL de la foto debería estar en 'fotoPerfil'
+    return response.data.fotoPerfil; 
   } catch (error) {
     console.error('Error al obtener la foto de perfil:', error);
     throw error;

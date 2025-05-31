@@ -36,7 +36,7 @@ const getPartidoById = async (id: any) => {
 const getPartidosByUserId = async (userId: any) => {
   try {
     const response = await axios.get(`${API_URL}/Partidos/Usuario/${userId}`, getAuthHeaders());
-    return response.data; // Retorna la lista de partidos del usuario
+    return response.data; 
   } catch (error) {
     console.error(`Error al obtener los partidos del usuario con ID ${userId}:`, error);
     throw error;

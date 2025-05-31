@@ -36,16 +36,6 @@ const getEquiposPorCategoria = async (categoriaId: string) => {
     }
 };
 
-// Obtener equipo por nombre
-const getEquipoByName = async (name: string) => {
-    try {
-        const response = await axios.get(`${API_URL}/Equipos/name/${name}`, getAuthHeaders());
-        return response.data;
-    } catch (error) {
-        console.error(`Error obteniendo equipo con nombre ${name}:`, error);
-        throw error;
-    }
-};
 
 // Obtener equipo por nombre y categoria
 const getEquipoByNameAndCategory = async (name: string, categoria: string) => {
@@ -70,4 +60,4 @@ const getEquipoById = async (id: string) => {
     }
 };
 
-export default { getEquipos, getEquiposPorCategoria, getEquipoByName, getEquipoById, getEquipoByNameAndCategory };
+export default { getEquipos, getEquiposPorCategoria, getEquipoById, getEquipoByNameAndCategory };

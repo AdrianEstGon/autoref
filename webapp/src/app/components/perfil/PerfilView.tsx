@@ -117,7 +117,6 @@ const PerfilView = () => {
         const usuarioId = localStorage.getItem("userId");
         if (usuarioId) {
           await userService.uploadProfilePicture(e.target.files[0]);
-          // setPerfil({ ...perfil, fotoPerfil: fotoURL }); // NO actualizar aquí perfil directamente
           setFotoPreview(fotoURL);  // Actualizamos la preview localmente
           localStorage.setItem("fotoPerfil", fotoURL);
           toast.success("Foto de perfil actualizada con éxito");
@@ -209,19 +208,19 @@ const PerfilView = () => {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "80px", // Ajuste para evitar el scroll en dispositivos pequeños
+        paddingBottom: "80px", 
       }}
     >
       <NavBar />
       <Container
-  maxWidth="lg" // Cambiado para un ancho más grande
+  maxWidth="lg" 
   sx={{
     minHeight: "calc(100vh - 64px)", 
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     py: 5,
-    overflow: "hidden", // Esto ayuda a evitar el scroll
+    overflow: "hidden", 
   }}
 >
   <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#f9f9f9", width: "100%" }}>
