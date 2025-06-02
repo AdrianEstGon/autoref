@@ -339,7 +339,7 @@ const PartidosView: React.FC = () => {
           <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
             <DialogTitle>Eliminar Partido</DialogTitle>
             <DialogContent>
-              <DialogContentText>¿Estás seguro de que deseas eliminar este partido?</DialogContentText>
+              <DialogContentText>¿Estás seguro de que deseas eliminar este partido? Esta acción no se puede deshacer</DialogContentText>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
