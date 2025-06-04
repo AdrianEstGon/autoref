@@ -4,6 +4,7 @@ import DisponibilidadView from '../app/components/disponibilidad/DisponibilidadV
 import disponibilidadService from '../app/services/DisponibilidadService';
 import { BrowserRouter } from 'react-router-dom';
 import moment from 'moment';
+import dayjs from 'dayjs';
 
 jest.mock('../app/services/DisponibilidadService', () => ({
   getDisponibilidadByUserAndDate: jest.fn(),
@@ -22,6 +23,7 @@ jest.mock('react-toastify', () => ({
 
 describe('DisponibilidadView', () => {
   const mockDisponibilidad = {
+    fecha: dayjs().add(1, 'month').format('YYYY-MM-DD'),
     franja1: 1,
     franja2: 2,
     franja3: 0,

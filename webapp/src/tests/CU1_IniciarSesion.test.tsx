@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Login from '../app/components/login/Login';
+import Login from '../app/components/login/LoginView';
 import { BrowserRouter } from 'react-router-dom';
 import userService from '../app/services/UserService';
 
@@ -100,7 +100,7 @@ describe('Login Component', () => {
     const submitButton = screen.getByRole('button', { name: /Iniciar sesión/i });
 
     await userEvent.type(emailInput, 'user@example.com');
-    await userEvent.type(passwordInput, 'correctpassword');
+    await userEvent.type(passwordInput, '@Correctpassword1');
     await userEvent.click(submitButton);
 
     await waitFor(() => {

@@ -75,7 +75,7 @@ describe('PerfilView - Visualizar datos personales', () => {
     expect(screen.getByDisplayValue('Ana')).toBeInTheDocument();
     expect(screen.getByDisplayValue('García')).toBeInTheDocument();
     expect(screen.getByDisplayValue('López')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('20-05-1985')).toBeInTheDocument(); // fecha transformada
+    expect(screen.getByDisplayValue('20-05-1985')).toBeInTheDocument(); 
     expect(screen.getByDisplayValue('Calle Falsa 123')).toBeInTheDocument();
     expect(screen.getByDisplayValue('España')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Asturias')).toBeInTheDocument();

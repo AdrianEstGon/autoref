@@ -122,7 +122,7 @@ describe('PerfilView - Modificar Contraseña', () => {
     fireEvent.click(screen.getByRole('button', { name: /modificar contraseña/i }));
 
     fireEvent.change(screen.getByLabelText(/contraseña actual/i), { target: { value: 'OldPass123!' } });
-    fireEvent.change(screen.getByLabelText(/^nueva contraseña$/i), { target: { value: 'short' } }); // Muy corta
+    fireEvent.change(screen.getByLabelText(/^nueva contraseña$/i), { target: { value: 'short' } }); 
     fireEvent.change(screen.getByLabelText(/confirmar nueva contraseña/i), { target: { value: 'short' } });
 
     fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }));

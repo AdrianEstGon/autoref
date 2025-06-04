@@ -41,7 +41,7 @@ describe('Tests de la disponibilidad', () => {
       </MemoryRouter>
     );
 
-    const testDate = new Date('2025-07-10');
+    const testDate = new Date('2025-10-10');
     await act(async () => {
       testRef.current?.handleSelectSlot?.({ start: testDate });
     });
@@ -121,7 +121,7 @@ describe('Tests de la disponibilidad', () => {
       </MemoryRouter>
     );
 
-    const testDate = new Date('2025-07-10');
+    const testDate = new Date('2025-10-10');
     await act(async () => {
       testRef.current?.handleSelectSlot?.({ start: testDate });
     });
