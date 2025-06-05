@@ -143,101 +143,151 @@ describe('Carga inicial de partidos', () => {
       </BrowserRouter>
     );
 
-    expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
-    expect(screen.queryByText(/Águilas - Halcones/)).toBeInTheDocument();
-    expect(screen.queryByText(/Perros - Lobos/)).not.toBeInTheDocument();
-  });
-
-  it('muestra los partidos del Polideportivo Sur tras aplicar el filtro', async () => {
-    render(
-      <BrowserRouter>
-        <DesignacionesView />
-      </BrowserRouter>
-    );
-
-    await seleccionarOpcionAutocomplete(/Lugar/, 'Polideportivo Sur');
-
-    const filtrarButton = screen.getByText(/Aplicar Filtro/);
-    await userEvent.click(filtrarButton);
-
-    expect(await screen.findByText(/Águilas - Halcones/)).toBeInTheDocument();
-    expect(screen.queryByText(/Tigres - Leones/)).not.toBeInTheDocument();
-  });
-
-  it('muestra los partidos de la categoría U18 tras aplicar el filtro', async () => {
-    render(
-      <BrowserRouter>
-        <DesignacionesView />
-      </BrowserRouter>
-    );
-
-    await seleccionarOpcionAutocomplete(/Categoría/, 'U18');
-
-    const filtrarButton = screen.getByText(/Aplicar Filtro/);
-    await userEvent.click(filtrarButton);
-
-    expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
-    expect(screen.queryByText(/Águilas - Halcones/)).not.toBeInTheDocument();
-  });
-
-  it('muestra los partidos de los próximos 10 días tras aplicar el filtro', async () => {
-    render(
-      <BrowserRouter>
-        <DesignacionesView />
-      </BrowserRouter>
-    );
-
-    const hoy = moment();
-    const enDiezDias = moment().add(10, 'days');
-
-    const fechaInicioInput = await screen.findByLabelText(/Fecha Inicio/);
-    fireEvent.change(fechaInicioInput, { target: { value: hoy.format('DD/MM/YYYY') } });
-    fireEvent.blur(fechaInicioInput);
-
-    const fechaFinInput = await screen.findByLabelText(/Fecha Fin/);
-    fireEvent.change(fechaFinInput, { target: { value: enDiezDias.format('DD/MM/YYYY') } });
-    fireEvent.blur(fechaFinInput);
-
-    const aplicarFiltroButton = screen.getByRole('button', { name: /Aplicar Filtro/i });
-    await userEvent.click(aplicarFiltroButton);
-
+    // Partidos que deberían aparecer
     expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
     expect(screen.getByText(/Águilas - Halcones/)).toBeInTheDocument();
-    expect(screen.getByText(/Búhos - Gatos/)).toBeInTheDocument();
-    expect(screen.getByText(/Perros - Lobos/)).toBeInTheDocument();
-    expect(screen.getByText(/Osos - Zorros/)).toBeInTheDocument();
+
+    // Partidos que no deberían aparecer
+    expect(screen.queryByText(/Búhos - Gatos/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Perros - Lobos/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Osos - Zorros/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Tigres - Zorros/)).not.toBeInTheDocument();
   });
 
-  it('muestra solo los partidos que coinciden con todos los filtros combinados', async () => {
-    render(
-      <BrowserRouter>
-        <DesignacionesView />
-      </BrowserRouter>
-    );
 
+it('muestra los partidos del Polideportivo Sur tras aplicar el filtro', async () => {
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
     const hoy = moment();
-    const en9Dias = moment().add(9, 'days');
+    const en30Dias = moment().add(30, 'days');
 
     const fechaInicioInput = await screen.findByLabelText(/Fecha Inicio/);
     fireEvent.change(fechaInicioInput, { target: { value: hoy.format('DD/MM/YYYY') } });
     fireEvent.blur(fechaInicioInput);
 
     const fechaFinInput = await screen.findByLabelText(/Fecha Fin/);
-    fireEvent.change(fechaFinInput, { target: { value: en9Dias.format('DD/MM/YYYY') } });
+    fireEvent.change(fechaFinInput, { target: { value: en30Dias.format('DD/MM/YYYY') } });
     fireEvent.blur(fechaFinInput);
 
-    await seleccionarOpcionAutocomplete(/Lugar/, 'Polideportivo Norte');
-    await seleccionarOpcionAutocomplete(/Categoría/, 'U18');
 
-    const aplicarFiltroButton = screen.getByRole('button', { name: /Aplicar Filtro/i });
-    await userEvent.click(aplicarFiltroButton);
+  await seleccionarOpcionAutocomplete(/Lugar/, 'Polideportivo Sur');
 
-    expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
-    expect(screen.queryByText(/Búhos - Gatos/)).toBeInTheDocument();
+  const filtrarButton = screen.getByText(/Aplicar Filtro/);
+  await userEvent.click(filtrarButton);
 
-    expect(screen.queryByText(/Águilas - Halcones/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Perros - Lobos/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Osos - Zorros/)).not.toBeInTheDocument();
-  });
+  // Partidos que deberían aparecer
+  expect(await screen.findByText(/Águilas - Halcones/)).toBeInTheDocument();
+  expect(screen.getByText(/Perros - Lobos/)).toBeInTheDocument();
+  expect(screen.getByText(/Tigres - Zorros/)).toBeInTheDocument();
+
+  // Partidos que no deberían aparecer
+  expect(screen.queryByText(/Tigres - Leones/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Búhos - Gatos/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Osos - Zorros/)).not.toBeInTheDocument();
+});
+
+it('muestra los partidos de la categoría U18 tras aplicar el filtro', async () => {
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
+
+    const hoy = moment();
+    const en30Dias = moment().add(30, 'days');
+
+    const fechaInicioInput = await screen.findByLabelText(/Fecha Inicio/);
+    fireEvent.change(fechaInicioInput, { target: { value: hoy.format('DD/MM/YYYY') } });
+    fireEvent.blur(fechaInicioInput);
+
+    const fechaFinInput = await screen.findByLabelText(/Fecha Fin/);
+    fireEvent.change(fechaFinInput, { target: { value: en30Dias.format('DD/MM/YYYY') } });
+    fireEvent.blur(fechaFinInput);
+
+  await seleccionarOpcionAutocomplete(/Categoría/, 'U18');
+
+  const filtrarButton = screen.getByText(/Aplicar Filtro/);
+  await userEvent.click(filtrarButton);
+
+  // Partidos que deberían aparecer
+  expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
+  expect(screen.getByText(/Búhos - Gatos/)).toBeInTheDocument();
+  expect(screen.getByText(/Osos - Zorros/)).toBeInTheDocument();
+
+  // Partidos que no deberían aparecer
+  expect(screen.queryByText(/Águilas - Halcones/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Perros - Lobos/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Tigres - Zorros/)).not.toBeInTheDocument();
+});
+
+
+  it('muestra los partidos de los próximos 10 días tras aplicar el filtro', async () => {
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
+
+  const hoy = moment();
+  const enDiezDias = moment().add(10, 'days');
+
+  const fechaInicioInput = await screen.findByLabelText(/Fecha Inicio/);
+  fireEvent.change(fechaInicioInput, { target: { value: hoy.format('DD/MM/YYYY') } });
+  fireEvent.blur(fechaInicioInput);
+
+  const fechaFinInput = await screen.findByLabelText(/Fecha Fin/);
+  fireEvent.change(fechaFinInput, { target: { value: enDiezDias.format('DD/MM/YYYY') } });
+  fireEvent.blur(fechaFinInput);
+
+  const aplicarFiltroButton = screen.getByRole('button', { name: /Aplicar Filtro/i });
+  await userEvent.click(aplicarFiltroButton);
+
+  // Partidos que deberían aparecer
+  expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
+  expect(screen.getByText(/Águilas - Halcones/)).toBeInTheDocument();
+  expect(screen.getByText(/Búhos - Gatos/)).toBeInTheDocument();
+  expect(screen.getByText(/Perros - Lobos/)).toBeInTheDocument();
+  expect(screen.getByText(/Osos - Zorros/)).toBeInTheDocument();
+
+  // Partidos que no deberían aparecer
+  expect(screen.queryByText(/Tigres - Zorros/)).not.toBeInTheDocument();
+});
+
+ it('muestra solo los partidos que coinciden con todos los filtros combinados', async () => {
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
+
+  const hoy = moment();
+  const en9Dias = moment().add(9, 'days');
+
+  const fechaInicioInput = await screen.findByLabelText(/Fecha Inicio/);
+  fireEvent.change(fechaInicioInput, { target: { value: hoy.format('DD/MM/YYYY') } });
+  fireEvent.blur(fechaInicioInput);
+
+  const fechaFinInput = await screen.findByLabelText(/Fecha Fin/);
+  fireEvent.change(fechaFinInput, { target: { value: en9Dias.format('DD/MM/YYYY') } });
+  fireEvent.blur(fechaFinInput);
+
+  await seleccionarOpcionAutocomplete(/Lugar/, 'Polideportivo Norte');
+  await seleccionarOpcionAutocomplete(/Categoría/, 'U18');
+
+  const aplicarFiltroButton = screen.getByRole('button', { name: /Aplicar Filtro/i });
+  await userEvent.click(aplicarFiltroButton);
+
+  // Partidos que deberían aparecer
+  expect(await screen.findByText(/Tigres - Leones/)).toBeInTheDocument();
+  expect(screen.getByText(/Búhos - Gatos/)).toBeInTheDocument();
+
+  // Partidos que no deberían aparecer
+  expect(screen.queryByText(/Águilas - Halcones/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Perros - Lobos/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Osos - Zorros/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/Tigres - Zorros/)).not.toBeInTheDocument();
+});
 });

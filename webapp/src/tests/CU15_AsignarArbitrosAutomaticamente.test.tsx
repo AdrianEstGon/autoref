@@ -8,9 +8,9 @@ const usuariosBase = [
   {
     id: "user1",
     userName: "arbitro1@mail.com",
-    nombre: "Arbitro Uno",
-    primerApellido: "Uno",
-    segundoApellido: "A",
+    nombre: "Pedro",
+    primerApellido: "Gómez",
+    segundoApellido: "López",
     fechaNacimiento: "1990-01-01",
     latitud: 43.36,
     longitud: -5.84,
@@ -22,9 +22,9 @@ const usuariosBase = [
   {
     id: "user2",
     userName: "arbitro2@mail.com",
-    nombre: "Arbitro Dos",
-    primerApellido: "Dos",
-    segundoApellido: "B",
+    nombre: "Juan",
+    primerApellido: "Pérez",
+    segundoApellido: "Martínez",
     fechaNacimiento: "1992-02-02",
     latitud: 43.37,
     longitud: -5.85,
@@ -36,9 +36,9 @@ const usuariosBase = [
   {
     id: "user3",
     userName: "arbitro3@mail.com",
-    nombre: "Arbitro Tres",
-    primerApellido: "Tres",
-    segundoApellido: "C",
+    nombre: "Luis",
+    primerApellido: "Fernández",
+    segundoApellido: "García",
     fechaNacimiento: "1985-03-03",
     latitud: 43.38,
     longitud: -5.86,
@@ -184,9 +184,9 @@ test('asigna árbitros correctamente en múltiples partidos que se disputan simu
 
   const nuevasDesignaciones = asignador.asignarArbitros();
 
-  expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Arbitro Uno");
+  expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Pedro");
   expect(nuevasDesignaciones!["partido1"].arbitro2?.nombre).toBe("Incompleto");
-  expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Arbitro Tres");
+  expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Luis");
   expect(nuevasDesignaciones!["partido2"].arbitro2?.nombre).toBe("Incompleto");
 });
 
@@ -214,10 +214,10 @@ test('asigna árbitros correctamente en múltiples partidos que se disputan en d
 
   const nuevasDesignaciones = asignador.asignarArbitros();
 
-  expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Arbitro Uno");
-  expect(nuevasDesignaciones!["partido1"].arbitro2?.nombre).toBe("Arbitro Tres");
-  expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Arbitro Tres");
-  expect(nuevasDesignaciones!["partido2"].arbitro2?.nombre).toBe("Arbitro Dos");
+   expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Pedro");
+  expect(nuevasDesignaciones!["partido1"].arbitro2?.nombre).toBe("Luis");
+  expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Luis");
+  expect(nuevasDesignaciones!["partido2"].arbitro2?.nombre).toBe("Juan");
 });
 
 test('no asigna árbitro sin disponibilidad', () => {
@@ -251,7 +251,7 @@ test('no asigna árbitro sin disponibilidad', () => {
 
   const nuevasDesignaciones = asignador.asignarArbitros();
 
-  expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).not.toBe("Arbitro Uno"); // porque no tiene disponibilidad
+   expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).not.toBe("Pedro"); // porque no tiene disponibilidad
 });
 // Test: no asignar árbitro con nivel insuficiente para primer árbitro en categoría
 test('no asigna árbitro con nivel insuficiente para primer árbitro en categoría', () => {
@@ -276,7 +276,7 @@ test('no asigna árbitro con nivel insuficiente para primer árbitro en categor�
   const nuevasDesignaciones1 = asignador1.asignarArbitros();
 
   // user1 debería ser primer árbitro porque su nivel es suficiente
-  expect(nuevasDesignaciones1!["partido1"].arbitro1?.nombre).toBe("Arbitro Uno");
+  expect(nuevasDesignaciones1!["partido1"].arbitro1?.nombre).toBe("Pedro");
 
   // Forzar nivel bajo en user1 
   usuarios.find(u => u.id === "user1")!.nivel = "Nivel I";
@@ -294,7 +294,7 @@ test('no asigna árbitro con nivel insuficiente para primer árbitro en categor�
   const nuevasDesignaciones = asignador.asignarArbitros();
 
   // user1 no debería ser primer árbitro porque su nivel es insuficiente
-  expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).not.toBe("Arbitro Uno");
+   expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
 });
 
 // Test: asignación no debe repetir árbitro en partidos que se solapan en fecha y hora
@@ -323,11 +323,11 @@ test('no asigna el mismo árbitro en partidos simultáneos', () => {
     const nuevasDesignaciones = asignador.asignarArbitros();
     console.dir(nuevasDesignaciones, { depth: null });
 
-    expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Arbitro Uno");
+    expect(nuevasDesignaciones!["partido1"].arbitro1?.nombre).toBe("Pedro");
     expect(nuevasDesignaciones!["partido1"].arbitro2?.nombre).toBe("Incompleto");
     expect(nuevasDesignaciones!["partido1"].anotador).toBeUndefined();
 
-    expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Arbitro Tres");
+    expect(nuevasDesignaciones!["partido2"].arbitro1?.nombre).toBe("Luis");
     expect(nuevasDesignaciones!["partido2"].arbitro2?.nombre).toBe("Incompleto");
     expect(nuevasDesignaciones!["partido2"].anotador).toBeUndefined();
  
@@ -357,13 +357,13 @@ describe("AsignadorArbitros Base Choice", () => {
 
   test("no asigna árbitro sin disponibilidad", () => {
     const disponibilidades = cloneDeep(disponibilidadesBase);
-    disponibilidades[0].franja1 = 0;
-    disponibilidades[0].franja2 = 0;
-    disponibilidades[0].franja3 = 0;
-    disponibilidades[0].franja4 = 0;
+    disponibilidades[0].franja1 = 3;
+    disponibilidades[0].franja2 = 3;
+    disponibilidades[0].franja3 = 3;
+    disponibilidades[0].franja4 = 3;
     const asignador = new AsignadorArbitros(cloneDeep(usuariosBase), disponibilidades, cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
     const resultado = asignador.asignarArbitros();
-    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Arbitro Uno");
+    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
   });
 
   test("no asigna árbitro con nivel insuficiente", () => {
@@ -371,7 +371,7 @@ describe("AsignadorArbitros Base Choice", () => {
     usuarios[0].nivel = "Nivel I";
     const asignador = new AsignadorArbitros(usuarios, cloneDeep(disponibilidadesBase), cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
     const resultado = asignador.asignarArbitros();
-    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Arbitro Uno");
+    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
   });
 
   test("asigna sin transporte pero vive <10km", () => {
@@ -380,7 +380,7 @@ describe("AsignadorArbitros Base Choice", () => {
     const asignador = new AsignadorArbitros(usuarios, cloneDeep(disponibilidadesBase), cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
     expect(asignador.asignarArbitros()).not.toBeNull();
     // Verifica que se asigna un árbitro sin transporte pero con cercanía
-    expect(asignador.asignarArbitros()!["partido1"].arbitro1?.nombre).toBe("Arbitro Uno");
+    expect(asignador.asignarArbitros()!["partido1"].arbitro1?.nombre).toBe("Pedro");
   });
 
   test("no asigna si sin transporte y sin cercanía", () => {
@@ -390,7 +390,7 @@ describe("AsignadorArbitros Base Choice", () => {
     usuarios[0].longitud = -3;
     const asignador = new AsignadorArbitros(usuarios, cloneDeep(disponibilidadesBase), cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
     const resultado = asignador.asignarArbitros();
-    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Arbitro Uno");
+    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
   });
 
   test("no asigna si partidos solapan", () => {
@@ -400,7 +400,6 @@ describe("AsignadorArbitros Base Choice", () => {
     const resultado = asignador.asignarArbitros();
     const nombres = [resultado!["partido1"].arbitro1?.nombre, resultado!["partido2"].arbitro1?.nombre];
     expect(new Set(nombres).size).toBeGreaterThan(1);
-    // Verifica que los árbitros asignados son diferentes
     
   });
 

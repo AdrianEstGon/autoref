@@ -101,6 +101,8 @@ describe('Mis Designaciones - Árbitro', () => {
     await waitFor(() => {
       expect(partidosService.actualizarPartido).toHaveBeenCalled();
     });
+    //El estado del árbitro 1 debería cambiar a 1 (aceptado)
+    expect(mockPartido.estadoArbitro1).toBe(1);
 
     expect(await screen.findByText('Aceptado')).toBeInTheDocument();
   });
@@ -123,6 +125,8 @@ describe('Mis Designaciones - Árbitro', () => {
     await waitFor(() => {
       expect(partidosService.actualizarPartido).toHaveBeenCalled();
     });
+    //El estado del árbitro 1 debería cambiar a 2 (rechazado)
+    expect(mockPartido.estadoArbitro1).toBe(2);
 
     expect(await screen.findByText('Rechazado')).toBeInTheDocument();
   });

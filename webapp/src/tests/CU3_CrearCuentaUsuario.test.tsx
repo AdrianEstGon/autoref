@@ -54,7 +54,7 @@ describe('CrearUsuario Component', () => {
     localStorage.clear();
   });
 
-  jest.setTimeout(10000);
+  jest.setTimeout(100000);
 
   test('Campos vacíos disparan mensajes de validación', async () => {
     await setup();

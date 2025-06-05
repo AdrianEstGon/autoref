@@ -250,4 +250,68 @@ describe('DesignacionesView', () => {
       expect(screen.getByDisplayValue(/Carlos Díaz Martínez/)).toBeInTheDocument();
     });
   });
+  it('no muestra un árbitro no disponible en la franja horaria del partido', async () => {
+  jest.spyOn(usuariosService, 'getUsuarios').mockResolvedValue([
+    { id: 'u1', nombre: 'Juan', primerApellido: 'Pérez', segundoApellido: 'González' },
+    { id: 'u2', nombre: 'Lucía', primerApellido: 'Ramírez', segundoApellido: 'López' },
+    { id: 'u3', nombre: 'Carlos', primerApellido: 'Díaz', segundoApellido: 'Martínez' },
+    { id: 'u4', nombre: 'Mario', primerApellido: 'Sánchez', segundoApellido: 'López' }, // Nuevo usuario
+  ]);
+
+  jest.spyOn(disponibilidadService, 'getDisponibilidades').mockResolvedValue([
+    {
+      usuarioId: 'u1',
+      fecha: moment().format('YYYY-MM-DD'),
+      franja1: 1,
+      franja2: 1,
+      franja3: 1,
+      franja4: 1,
+    },
+    {
+      usuarioId: 'u2',
+      fecha: moment().format('YYYY-MM-DD'),
+      franja1: 1,
+      franja2: 1,
+      franja3: 1,
+      franja4: 1,
+    },
+    {
+      usuarioId: 'u3',
+      fecha: moment().format('YYYY-MM-DD'),
+      franja1: 1,
+      franja2: 1,
+      franja3: 1,
+      franja4: 1,
+    },
+    {
+      usuarioId: 'u4', // Mario no disponible en franja 1
+      fecha: moment().format('YYYY-MM-DD'),
+      franja1: 3,
+      franja2: 1,
+      franja3: 1,
+      franja4: 1,
+    },
+  ]);
+
+  render(
+    <BrowserRouter>
+      <DesignacionesView />
+    </BrowserRouter>
+  );
+
+  await waitFor(() => {
+    expect(screen.getByText(/Equipo A - Equipo B/i)).toBeInTheDocument();
+  });
+
+  const selects = await screen.findAllByTestId('mock-autocomplete');
+  const arbitro1Select = selects[0];
+
+  // ✅ Mario (u4) no debería aparecer porque no está disponible en franja1
+  expect(arbitro1Select).toBeInTheDocument();
+  expect(arbitro1Select).toHaveTextContent('Juan Pérez González');
+  expect(arbitro1Select).toHaveTextContent('Lucía Ramírez López');
+  expect(arbitro1Select).toHaveTextContent('Carlos Díaz Martínez');
+  expect(arbitro1Select).not.toHaveTextContent('Mario Sánchez López');
+});
+
 });
