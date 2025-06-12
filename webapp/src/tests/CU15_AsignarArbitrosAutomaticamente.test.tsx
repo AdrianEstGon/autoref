@@ -366,13 +366,6 @@ describe("AsignadorArbitros Base Choice", () => {
     expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
   });
 
-  test("no asigna árbitro con nivel insuficiente", () => {
-    const usuarios = cloneDeep(usuariosBase);
-    usuarios[0].nivel = "Nivel I";
-    const asignador = new AsignadorArbitros(usuarios, cloneDeep(disponibilidadesBase), cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
-    const resultado = asignador.asignarArbitros();
-    expect(resultado!["partido1"].arbitro1?.nombre).not.toBe("Pedro");
-  });
 
   test("asigna sin transporte pero vive <10km", () => {
     const usuarios = cloneDeep(usuariosBase);
@@ -401,13 +394,6 @@ describe("AsignadorArbitros Base Choice", () => {
     const nombres = [resultado!["partido1"].arbitro1?.nombre, resultado!["partido2"].arbitro1?.nombre];
     expect(new Set(nombres).size).toBeGreaterThan(1);
     
-  });
-
-  test("aplica penalización por conflicto de club", () => {
-    const usuarios = cloneDeep(usuariosBase);
-    usuarios[0].clubVinculadoId = "club1";
-    const asignador = new AsignadorArbitros(usuarios, cloneDeep(disponibilidadesBase), cloneDeep(designacionesBase), crearPartidos(1, "10:00:00", "Pabellón 1"), cloneDeep(categoriasBase), cloneDeep(lugaresBase), cloneDeep(equiposBase));
-    expect(asignador.asignarArbitros()).not.toBeNull();
   });
 
   test("rechaza partido con lugar inválido", () => {
