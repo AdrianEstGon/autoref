@@ -73,7 +73,6 @@ export class AsignadorArbitros {
   static DISTANCIA_CAMINANDO_MAX_KM = 10;
   static MINUTOS_VEHICULO_LOCAL = 1.2;
   static MULTIPLICADOR_PRIORIDAD_CATEGORIAS = 5;
-  static MULTIPLICADOR_PRIORIDAD_CATEGORIAS_ARBITROS = 2;
 
   usuarios: Arbitro[];
   disponibilidades: any[];
@@ -185,10 +184,7 @@ export class AsignadorArbitros {
       ? arbitrosDisponibles.filter(a => this.nivelIndex(a.nivel) >= this.nivelIndex(categoria.anotador!))
       : [];
 
-    const combinacionesConCosto: {
-      combinacion: [Arbitro | null, Arbitro | null, Arbitro | null];
-      costoTotal: number;
-    }[] = [];
+    
 
     // Árbitro de relleno para el "incompleto"
     const arbitroIncompleto: Arbitro = {
@@ -201,6 +197,11 @@ export class AsignadorArbitros {
     };
 
     const penalizacionIncompleto = AsignadorArbitros.PENALIZACION_INCOMPLETO_BASE;
+
+    const combinacionesConCosto: {
+      combinacion: [Arbitro | null, Arbitro | null, Arbitro | null];
+      costoTotal: number;
+    }[] = [];
 
     for (const a1 of [...opcionesArbitro1, null]) {
       for (const a2 of [...opcionesArbitro2, null]) {
@@ -215,7 +216,7 @@ export class AsignadorArbitros {
 
           // Calculamos coste acumulado
           let costoTotal = arbitrosAsignados.reduce(
-            (acc, arbitro) => acc + this.calcularCosto(estado, arbitro, partidoSinAsignar),
+            (acc, arbitro) => acc + this.calcularCosto( arbitro, partidoSinAsignar),
             0
           );
 
@@ -289,85 +290,69 @@ export class AsignadorArbitros {
     return this.usuarios.filter(usuario => this.cumpleCondiciones(usuario, partido));
   }
 
-  private cumpleCondiciones(arbitro: Arbitro, partido: Partido): boolean {
-    const ubicacionPartido = this.lugares.find(l => l.nombre === partido.lugar);
-    if (!ubicacionPartido) return false;
+ private cumpleCondiciones(arbitro: Arbitro, partido: Partido): boolean {
+  if (!this.validarUbicacionYCategoria(partido)) return false;
+  if (!this.verificarSolapes(arbitro, partido)) return false;
+  if (!this.validarDisponibilidad(arbitro, partido)) return false;
+  return true;
+}
 
-    const categoria = this.categorias.find(cat => cat.id === partido.categoriaId);
-    if (!categoria) return false;
+private validarUbicacionYCategoria(partido: Partido): boolean {
+  const ubicacion = this.lugares.find(l => l.nombre === partido.lugar);
+  const categoria = this.categorias.find(c => c.id === partido.categoriaId);
+  return !!ubicacion && !!categoria;
+}
 
-    // Determina franja horaria (depende de la hora del partido)
-    const franja = this.obtenerFranjaHoraria(partido.hora);
-    if (!franja) return false;
+private verificarSolapes(arbitro: Arbitro, partido: Partido): boolean {
+  const construirMomento = (p: Partido) =>
+    moment(`${moment(p.fecha).format('YYYY-MM-DD')} ${p.hora}`, 'YYYY-MM-DD HH:mm:ss');
 
-    const fechaPartido = moment(partido.fecha).format('YYYY-MM-DD');
+  for (const [partidoId, asignacion] of Object.entries(this.estadoActual?.asignaciones || {})) {
+    const otroPartido = this.partidos.find(p => p.id === partidoId);
+    if (!otroPartido) continue;
 
-    // Construir fechas para ver si se solapan con otros partidos
-    const construirMomento = (p: Partido) => {
-      const fecha = moment(p.fecha).format('YYYY-MM-DD');
-      return moment(`${fecha} ${p.hora}`, 'YYYY-MM-DD HH:mm:ss');
-    };
+    const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
+    if (!yaAsignado) continue;
 
-    // Revisa si el árbitro ya está asignado a algún partido incompatible en ese mismo día
-    for (const [partidoId, asignacion] of Object.entries(this.estadoActual?.asignaciones || {})) {
-      const otroPartido = this.partidos.find(p => p.id === partidoId);
-      if (!otroPartido) continue;
+    const momento1 = construirMomento(partido);
+    const momento2 = construirMomento(otroPartido);
+    const [primero, segundo] = momento1.isBefore(momento2)
+      ? [partido, otroPartido]
+      : [otroPartido, partido];
 
-      const yaAsignado = Object.values(asignacion).some(a => a?.id === arbitro.id);
-      if (!yaAsignado) continue;
+    const [momentoPrimero, momentoSegundo] = [construirMomento(primero), construirMomento(segundo)];
+    const anticipacion1 = this.obtenerAnticipacion(primero);
+    const anticipacion2 = this.obtenerAnticipacion(segundo);
+    const tiempoTransporte = this.estimarTiempoTransporte(arbitro, primero, segundo);
 
-      // Comprueba solape temporal
-      const duracion = AsignadorArbitros.DURACION_PARTIDO_MINUTOS;
+    const inicio1 = momentoPrimero.clone().subtract(anticipacion1, 'minutes');
+    const fin1 = inicio1.clone().add(AsignadorArbitros.DURACION_PARTIDO_MINUTOS + anticipacion1, 'minutes');
+    const inicio2 = momentoSegundo.clone().subtract(anticipacion2 + tiempoTransporte, 'minutes');
 
-      let momentoActual = construirMomento(partido);
-      let momentoOtro = construirMomento(otroPartido);
-
-      let primero: Partido, segundo: Partido;
-      let momentoPrimero: moment.Moment, momentoSegundo: moment.Moment;
-
-      if (momentoActual.isBefore(momentoOtro)) {
-        primero = partido;
-        segundo = otroPartido;
-        momentoPrimero = momentoActual;
-        momentoSegundo = momentoOtro;
-      } else {
-        primero = otroPartido;
-        segundo = partido;
-        momentoPrimero = momentoOtro;
-        momentoSegundo = momentoActual;
-      }
-
-      const anticipacionPrimero = this.obtenerAnticipacion(primero);
-      const anticipacionSegundo = this.obtenerAnticipacion(segundo);
-      const tiempoTransporte = this.estimarTiempoTransporte(arbitro, primero, segundo);
-
-      // Cálculo de rangos de tiempo (inicio y fin)
-      const inicioPrimero = momentoPrimero.clone().subtract(anticipacionPrimero, 'minutes');
-      const finPrimero = inicioPrimero.clone().add(duracion + anticipacionPrimero, 'minutes');
-
-      const inicioSegundo = momentoSegundo.clone().subtract(anticipacionSegundo + tiempoTransporte, 'minutes');
-      const finSegundo = inicioSegundo.clone().add(duracion + anticipacionSegundo + tiempoTransporte, 'minutes');
-
-      // Si se solapan, no puede arbitrar
-      if (finPrimero.isAfter(inicioSegundo)) {
-        return false;
-      }
-    }
-
-    // Comprobamos si ese día y franja horaria el árbitro tiene disponibilidad
-    const disponibilidad = this.disponibilidades.find(d =>
-      d.usuarioId === arbitro.id &&
-      moment(d.fecha).format('YYYY-MM-DD') === fechaPartido
-    );
-    if (!disponibilidad || !disponibilidad[franja]) return false;
-
-    // Disponibilidad = 3 => No disponible, 2 => Disponible sin transporte, 1 => Disponible con transporte
-    const estado = disponibilidad[franja];
-    if (estado === 3) return false;
-
-    arbitro.transporte = estado === 1;
-    return true;
+    if (fin1.isAfter(inicio2)) return false;
   }
+
+  return true;
+}
+
+private validarDisponibilidad(arbitro: Arbitro, partido: Partido): boolean {
+  const franja = this.obtenerFranjaHoraria(partido.hora);
+  if (!franja) return false;
+
+  const fecha = moment(partido.fecha).format('YYYY-MM-DD');
+  const disponibilidad = this.disponibilidades.find(
+    d => d.usuarioId === arbitro.id && moment(d.fecha).format('YYYY-MM-DD') === fecha
+  );
+
+  if (!disponibilidad || !disponibilidad[franja]) return false;
+
+  const estado = disponibilidad[franja];
+  if (estado === 3) return false;
+
+  arbitro.transporte = estado === 1;
+  return true;
+}
+
 
   private obtenerAnticipacion(partido: Partido): number {
     const categoria = this.categorias.find(c => c.id === partido.categoriaId);
@@ -381,7 +366,7 @@ export class AsignadorArbitros {
     }
 
     // Si no es nacional, 30 min de anticipación
-    return 30;
+    return AsignadorArbitros.ANTICIPACION_OTROS;
   }
 
   private obtenerFranjaHoraria(horaStr: string): string {
@@ -396,7 +381,7 @@ export class AsignadorArbitros {
     return '';
   }
 
-  private calcularCosto(estado: Estado, arbitro: Arbitro, partido: Partido): number {
+  private calcularCosto(arbitro: Arbitro, partido: Partido): number {
     const ubicacionPartido = this.lugares.find(l => l.nombre === partido.lugar);
     if (!ubicacionPartido) return Infinity;
 

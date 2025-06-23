@@ -50,6 +50,7 @@ const DesignacionesView = () => {
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
   const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<string>>(new Set());
+  
   const [asignando, setAsignando] = useState(false);
 
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
@@ -74,8 +75,10 @@ const DesignacionesView = () => {
   
         setPartidos(partidosLista);
         setUsuarios(usuariosLista);
-        setCategorias(categoriasLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar categorías alfabéticamente
-        setLugares(lugaresLista.sort((a: { nombre: string; }, b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar polideportivos alfabéticamente
+        setCategorias(categoriasLista.sort((a: { nombre: string; }, 
+          b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar categorías alfabéticamente
+        setLugares(lugaresLista.sort((a: { nombre: string; }, 
+          b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar polideportivos alfabéticamente
         setDisponibilidades(disponibilidadesLista);
         setEquipos(equiposLista); 
   
