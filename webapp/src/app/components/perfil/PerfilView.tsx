@@ -18,6 +18,8 @@ import {
   Tooltip,
   CircularProgress,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import InputAdornment from "@mui/material/InputAdornment";
 import { PhotoCamera } from "@mui/icons-material";
 import NavBar from "../barra_navegacion/NavBar";
 import userService from "../../services/UserService";
@@ -56,6 +58,11 @@ const PerfilView = () => {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [clubNombre, setClubNombre] = useState("");
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   useEffect(() => {
     const obtenerPerfil = async () => {
@@ -409,34 +416,61 @@ const PerfilView = () => {
           <TextField
             fullWidth
             label="Contraseña Actual"
-            type="password"
+            type={showOldPassword ? "text" : "password"}
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
             error={Boolean(oldPasswordError)}
             helperText={oldPasswordError}
             variant="outlined"
             sx={{ mb: 2, mt: 2 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                    {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             fullWidth
             label="Nueva Contraseña"
-            type="password"
+            type={showNewPassword ? "text" : "password"}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             error={Boolean(newPasswordError)}
             helperText={newPasswordError}
             variant="outlined"
             sx={{ mb: 2 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             fullWidth
             label="Confirmar Nueva Contraseña"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             error={Boolean(confirmPasswordError)}
             helperText={confirmPasswordError}
             variant="outlined"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </DialogContent>
         <DialogActions>

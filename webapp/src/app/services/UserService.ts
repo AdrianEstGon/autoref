@@ -106,6 +106,7 @@ const changePassword = async ({ OldPassword, NewPassword }: { OldPassword: strin
       {
         OldPassword,
         NewPassword,
+        UserId: userId,
       },
       getAuthHeaders()
     );
