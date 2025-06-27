@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormControlLabel, Checkbox, Autocomplete, Popper } from '@mui/material';
 import authService from '../../services/UserService';
-import clubsService from '../../services/ClubService'; // Importamos el servicio de clubes
+import clubsService from '../../services/ClubService';
 import { toast } from 'react-toastify';
 import { niveles } from '../../utils/UserUtils';
 import { validaciones } from '../../utils/ValidacionesUsuarios';
