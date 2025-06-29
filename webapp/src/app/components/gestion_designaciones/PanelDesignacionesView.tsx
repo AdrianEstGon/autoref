@@ -502,13 +502,12 @@ const DesignacionesView = () => {
   const handleConfirmar = async () => {
     try {
       await Promise.all(
-        partidosFiltrados.filter(p => partidosSeleccionados.has(p.id.toString()))
-          .map(async (partido) => {
+        partidosFiltrados.map(async (partido) => {
         const designacion = designaciones[partido.id];
         if (!designacion) return;
-  
+
         const { arbitro1, arbitro2, anotador } = designacion;
-  
+
         const getUsuarioId = (usuario: any) =>
           usuario?.id && usuariosPorId.has(usuario.id)
             ? usuariosPorId.get(usuario.id)!.id

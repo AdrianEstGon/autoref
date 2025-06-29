@@ -449,7 +449,7 @@ private validarDisponibilidad(arbitro: Arbitro, partido: Partido): boolean {
 
       const compañeroConTransporte = compañeros.some(comp => comp.transporte);
 
-      // 2. Verifica si hay otros árbitros con transporte cerca del polideportivo "origen"
+      // 2. Verifica si hay otros árbitros con transporte cerca del arbitro que hay que llevar
       const alguienCercaConTransporte = this.usuarios.some(a =>
         a.id !== arbitro.id &&
         a.transporte &&
