@@ -15,4 +15,4 @@ jobs:
           server: win8133.site4now.net
           username: voleyasturias-001
           password: Carcaba_51
-          target-path: webautoref
+          remote-dir: webautoref
