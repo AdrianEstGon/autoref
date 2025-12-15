@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   Container,
@@ -15,9 +15,9 @@ import NavigationBar from "../barra_navegacion/NavBar";
 import partidosService from "../../services/PartidoService";
 import moment from "moment";
 import { Person, Event } from "@mui/icons-material";
-import { GoogleMap, Marker, DirectionsRenderer } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 
-const DetallesPartidoView = () => {
+const DetallesPartidoView = React.memo(() => {
   const { id } = useParams();
   const [partido, setPartido] = useState<{
     numeroPartido: string;
@@ -36,14 +36,16 @@ const DetallesPartidoView = () => {
     anotadorLicencia: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
-  const center = partido?.lugar
-    ? {
-        lat: partido.lugar.latitud,
-        lng: partido.lugar.longitud,
-      }
-    : { lat: 0, lng: 0 };
+  const center = useMemo(() => 
+    partido?.lugar
+      ? {
+          lat: partido.lugar.latitud,
+          lng: partido.lugar.longitud,
+        }
+      : { lat: 0, lng: 0 },
+    [partido?.lugar]
+  );
 
   useEffect(() => {
     const cargarDetallesPartido = async () => {
@@ -167,7 +169,6 @@ const DetallesPartidoView = () => {
                 zoom={15}
               >
                 <Marker position={center} />
-                {directions && <DirectionsRenderer directions={directions} />}
               </GoogleMap>
             </Box>
           )}
@@ -191,6 +192,8 @@ const DetallesPartidoView = () => {
       </Container>
     </Box>
   );
-};
+});
+
+DetallesPartidoView.displayName = 'DetallesPartidoView';
 
 export default DetallesPartidoView;

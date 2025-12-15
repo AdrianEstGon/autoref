@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControlLabel, Checkbox, SelectChangeEvent, Autocomplete, TextFieldVariants, FilledTextFieldProps, OutlinedTextFieldProps, StandardTextFieldProps } from '@mui/material';
 import authService from '../../services/UserService'; 
@@ -6,31 +6,7 @@ import clubsService from '../../services/ClubService';
 import { validaciones } from '../../utils/ValidacionesUsuarios';
 import { toast } from 'react-toastify';
 import { niveles } from '../../utils/UserUtils';
-
-interface ModificarUsuarioProps {
-  open: boolean;
-  onClose: () => void;
-  onUpdate: () => void;
-  usuario: {
-    id: string;
-    nombre: string;
-    primerApellido: string;
-    segundoApellido: string;
-    fechaNacimiento: string;
-    nivel: string;
-    clubVinculadoId: string;
-    licencia: string;
-    email: string;
-    username: string;
-    password: string;
-    direccion: string;
-    pais: string;
-    region: string;
-    ciudad: string;
-    codigoPostal: string;
-    esAdmin: boolean;
-  };
-}
+import type { ModificarUsuarioProps, Club, ValidationErrors } from '../../types';
 
 const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUpdate }) => {
   const navigate = useNavigate();
@@ -56,7 +32,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     codigoPostal: '',
     esAdmin: ''
   });
-  const [clubes, setClubes] = useState<any[]>([]);
+  const [clubes, setClubes] = useState<Club[]>([]);
 
   useEffect(() => {
     if (usuario) {
@@ -75,7 +51,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     fetchClubs();
   }, [usuario]);
 
-  const handleChange = (
+  const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
@@ -103,17 +79,17 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
         [name]: value
       }));
     }
-  };
+  }, [clubes]);
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setUsuarioEditado((prevState: any) => ({
       ...prevState,
       esAdmin: e.target.checked
     }));
-  };
+  }, []);
 
-  const handleSave = async () => {
-    let erroresTemp = { ...errores };
+  const handleSave = useCallback(async () => {
+    const erroresTemp = { ...errores };
     let isValid = true;
 
     // Validaciones
@@ -142,11 +118,11 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
     }
-  };
+  }, [usuarioEditado, errores, usuario, onUpdate, onClose, navigate]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     navigate('/gestionUsuarios/usuariosView');
-  };
+  }, [navigate]);
 
   return (
     <Dialog open={open} onClose={handleCancel}>

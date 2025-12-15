@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Container,
   Typography,
@@ -10,44 +10,11 @@ import {
 } from "@mui/material";
 import NavigationBar from "../barra_navegacion/NavBar";
 import moment from "moment";
-import partidosService from "../../services/PartidoService";
 import { Link } from "react-router-dom";
+import { usePartidosUsuario } from "../../hooks/usePartidosUsuario";
 
-const HistorialDesignacionesView = () => {
-  const [partidos, setPartidos] = useState<any[]>([]);
-
-  useEffect(() => {
-    const cargarPartidosDesignados = async () => {
-      try {
-        const usuarioId = localStorage.getItem("userId");
-        if (!usuarioId) return;
-  
-        const partidosDesignados = await partidosService.getPartidosByUserId(usuarioId);
-  
-        if (Array.isArray(partidosDesignados)) {
-          const partidosPasados = partidosDesignados.filter((partido) => {
-            const fechaCompleta = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss");
-            return fechaCompleta.isBefore(moment());
-          });
-  
-          const partidosOrdenados = partidosPasados.sort((a, b) => {
-            const fechaA = moment(`${a.fecha} ${a.hora}`, "YYYY-MM-DD HH:mm:ss");
-            const fechaB = moment(`${b.fecha} ${b.hora}`, "YYYY-MM-DD HH:mm:ss");
-            return fechaA.diff(fechaB);
-          });
-  
-          setPartidos(partidosOrdenados);
-        } else {
-          setPartidos([]);
-        }
-      } catch (error) {
-        console.error("Error al cargar los partidos designados:", error);
-        setPartidos([]);
-      }
-    };
-  
-    cargarPartidosDesignados();
-  }, []);
+const HistorialDesignacionesView = React.memo(() => {
+  const { partidos } = usePartidosUsuario({ filterType: 'past' });
   
 
   return (
@@ -172,6 +139,8 @@ const HistorialDesignacionesView = () => {
       </Container>
     </Box>
   );
-}  
+});
+
+HistorialDesignacionesView.displayName = 'HistorialDesignacionesView';
 
 export default HistorialDesignacionesView;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormControlLabel, Checkbox, Autocomplete, Popper } from '@mui/material';
 import authService from '../../services/UserService';
@@ -6,12 +6,7 @@ import clubsService from '../../services/ClubService';
 import { toast } from 'react-toastify';
 import { niveles } from '../../utils/UserUtils';
 import { validaciones } from '../../utils/ValidacionesUsuarios';
-
-interface CrearUsuarioProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: (usuario: any) => void;
-}
+import type { CrearUsuarioProps, Club, ValidationErrors } from '../../types';
 
 const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) => {
   const navigate = useNavigate();
@@ -54,43 +49,44 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     esAdmin: ''
   });
 
-  const [clubes, setClubes] = useState<any[]>([]); 
+  const [clubes, setClubes] = useState<Club[]>([]); 
 
   // Llamada a la API para obtener los clubes
   useEffect(() => {
     const fetchClubs = async () => {
       try {
         const clubesData = await clubsService.getClubs(); 
-        const sortedClubs = clubesData.sort((a: any, b: any) => {
-          // Ordenar los clubes alfabéticamente por el nombre
-          return a.nombre.localeCompare(b.nombre);
-        });
+        const sortedClubs = clubesData.sort((a: any, b: any) => 
+          a.nombre.localeCompare(b.nombre)
+        );
         setClubes(sortedClubs); 
       } catch (error) {
         toast.error("Error al cargar los clubes");
       }
     };
 
-    fetchClubs();
-  }, []);
+    if (open) {
+      fetchClubs();
+    }
+  }, [open]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNuevoUsuario(prevState => ({
       ...prevState,
       [name]: value
     }));
-  };
+  }, []);
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNuevoUsuario(prevState => ({
       ...prevState,
       esAdmin: e.target.checked
     }));
-  };
+  }, []);
 
-  const handleSave = async () => {
-    let erroresTemp = { ...errores };
+  const handleSave = useCallback(async () => {
+    const erroresTemp = { ...errores };
     let isValid = true;
 
     // Validaciones
@@ -115,14 +111,13 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         const mensaje = mensajeBackend || error.message || 'Error desconocido';
         toast.error(mensaje);
       }
-
     }
-  };
+  }, [nuevoUsuario, errores, onClose, navigate]);
 
-  const handleCancel = () => {
-  onClose();
-  navigate('/gestionUsuarios/usuariosView');
-};
+  const handleCancel = useCallback(() => {
+    onClose();
+    navigate('/gestionUsuarios/usuariosView');
+  }, [onClose, navigate]);
 
 
   return (

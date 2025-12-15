@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Container,
   Typography,
@@ -22,9 +22,10 @@ import partidosService from "../../services/PartidoService";
 import { Link } from "react-router-dom";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { usePartidosUsuario } from "../../hooks/usePartidosUsuario";
 
-const DesignacionesView = () => {
-  const [partidos, setPartidos] = useState<any[]>([]);
+const DesignacionesView = React.memo(() => {
+  const { partidos, setPartidos } = usePartidosUsuario({ filterType: 'future' });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPartidoId, setSelectedPartidoId] = useState<string | null>(null);
   const [selectedEstado, setSelectedEstado] = useState<number | null>(null);
@@ -36,40 +37,21 @@ const DesignacionesView = () => {
     setUsuarioId(id);
   }, []);
 
-  useEffect(() => {
-    const cargarPartidosDesignados = async () => {
-      try {
-        const usuarioId = localStorage.getItem("userId");
-        if (!usuarioId) return;
+  // Helper function para obtener el estado actual del usuario en un partido
+  const getEstadoActual = useCallback((partido: any) => {
+    if (!usuarioId) return null;
 
-        const partidosDesignados = await partidosService.getPartidosByUserId(usuarioId);
+    if (partido.arbitro1Id === usuarioId) {
+      return partido.estadoArbitro1;
+    } else if (partido.arbitro2Id === usuarioId) {
+      return partido.estadoArbitro2;
+    } else if (partido.anotadorId === usuarioId) {
+      return partido.estadoAnotador;
+    }
+    return null;
+  }, [usuarioId]);
 
-        if (Array.isArray(partidosDesignados)) {
-          const partidosFuturos = partidosDesignados.filter((partido) => {
-            const fechaCompleta = moment(`${partido.fecha} ${partido.hora}`, "YYYY-MM-DD HH:mm:ss");
-            return fechaCompleta.isAfter(moment());
-          });
-
-          const partidosOrdenados = partidosFuturos.sort((a, b) => {
-            const fechaA = moment(`${a.fecha} ${a.hora}`, "YYYY-MM-DD HH:mm:ss");
-            const fechaB = moment(`${b.fecha} ${b.hora}`, "YYYY-MM-DD HH:mm:ss");
-            return fechaA.valueOf() - fechaB.valueOf();
-          });
-
-          setPartidos(partidosOrdenados);
-        } else {
-          setPartidos([]);
-        }
-      } catch (error) {
-        console.error("Error al cargar los partidos designados:", error);
-        setPartidos([]);
-      }
-    };
-
-    cargarPartidosDesignados();
-  }, []);
-
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     if (!selectedPartidoId || selectedEstado === null || !usuarioId) return;
 
     try {
@@ -102,19 +84,19 @@ const DesignacionesView = () => {
       setSelectedPartidoId(null);
       setSelectedEstado(null);
     }
-  };
+  }, [selectedPartidoId, selectedEstado, usuarioId, partidos]);
 
-  const handleOpenDialog = (partidoId: string, estado: number) => {
+  const handleOpenDialog = useCallback((partidoId: string, estado: number) => {
     setSelectedPartidoId(partidoId);
     setSelectedEstado(estado);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setDialogOpen(false);
     setSelectedPartidoId(null);
     setSelectedEstado(null);
-  };
+  }, []);
 
   return (
     <Box sx={{ backgroundColor: "#eafaff", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -160,17 +142,9 @@ const DesignacionesView = () => {
 
                       <Box sx={{ flex: 1, backgroundColor: "#f0f4f8", borderLeft: "2px solid #d0d0d0", borderRadius: "0 12px 12px 0", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 1, paddingY: 1 }}>
                         {(() => {
-                          if (!usuarioId) return null;
-
-                          let estadoActual = null;
-
-                          if (partido.arbitro1Id === usuarioId) {
-                            estadoActual = partido.estadoArbitro1;
-                          } else if (partido.arbitro2Id === usuarioId) {
-                            estadoActual = partido.estadoArbitro2;
-                          } else if (partido.anotadorId === usuarioId) {
-                            estadoActual = partido.estadoAnotador;
-                          }
+                          const estadoActual = getEstadoActual(partido);
+                          
+                          if (estadoActual === null) return null;
 
                           if (estadoActual === 0) {
                             return (
@@ -240,6 +214,8 @@ const DesignacionesView = () => {
       </Dialog>
     </Box>
   );
-};
+});
+
+DesignacionesView.displayName = 'DesignacionesView';
 
 export default DesignacionesView;

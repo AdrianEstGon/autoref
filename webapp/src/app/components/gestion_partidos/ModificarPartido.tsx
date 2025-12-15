@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl } from '@mui/material';
-import { Autocomplete, Popper } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, Autocomplete, Popper } from '@mui/material';
 import partidosService from '../../services/PartidoService';
 import polideportivosService from '../../services/PolideportivoService';
 import equiposService from '../../services/EquipoService';
@@ -27,18 +26,14 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
   const [categorias, setCategorias] = useState<{ id: string; nombre: string }[]>([]);
 
   useEffect(() => {
-    if (partido) {
-      setPartidoModificado({ ...partido });
-    }
-  }, [partido]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
-        const polideportivosData = await polideportivosService.getPolideportivos();
+        const [polideportivosData, categoriasData] = await Promise.all([
+          polideportivosService.getPolideportivos(),
+          categoriasService.getCategorias()
+        ]);
+        
         setPolideportivos(polideportivosData);
-
-        const categoriasData = await categoriasService.getCategorias();
         setCategorias(categoriasData);
 
         if (partido) {
@@ -49,7 +44,9 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
       }
     };
 
-    fetchData();
+    if (open) {
+      fetchData();
+    }
   }, [open, partido]);
 
   useEffect(() => {
@@ -71,16 +68,16 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
     }
   }, [partidoModificado?.categoriaId]);
 
-  const handleChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = e.target;
     setPartidoModificado((prevState: any) => ({
       ...prevState,
       [name as string]: value,
     }));
-  };
+  }, []);
 
-  const handleSave = async () => {
-    let erroresTemp: {
+  const handleSave = useCallback(async () => {
+    const erroresTemp: {
       equipoLocalId: string;
       equipoVisitanteId: string;
       fecha: string;
@@ -115,11 +112,11 @@ const ModificarPartido: React.FC<ModificarPartidoProps> = ({ open, onClose, onUp
         toast.error(`Error: ${error.message}`);
       }
     }
-  };
+  }, [partidoModificado, onUpdate, onClose, navigate]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     navigate('/gestionPartidos/partidosView');
-  };
+  }, [navigate]);
 
   if (!partidoModificado) return null;
 

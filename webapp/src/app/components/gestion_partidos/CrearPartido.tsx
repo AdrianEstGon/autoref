@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl } from '@mui/material';
-import { Autocomplete } from '@mui/material';
-import { Popper } from '@mui/material'; 
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, Autocomplete, Popper } from '@mui/material';
 import partidosService from '../../services/PartidoService';
 import polideportivosService from '../../services/PolideportivoService';
 import equiposService from '../../services/EquipoService'; 
 import categoriasService from '../../services/CategoriaService'; 
 import { toast } from 'react-toastify';
 import { validarPartido } from '../../utils/ValidacionesPartidos';
-
-interface CrearPartidoProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: (partido: any) => void;
-}
+import type { CrearPartidoProps, Polideportivo, Categoria, Equipo, ValidationErrors } from '../../types';
 
 const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) => {
   const navigate = useNavigate();
@@ -41,9 +34,9 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     numeroPartido: '',
   });
 
-  const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]); // Lista de polideportivos
-  const [categorias, setCategorias] = useState<{ id: string; nombre: string }[]>([]); // Lista de categorías
-  const [equiposFiltrados, setEquiposFiltrados] = useState<{ id: string; nombre: string }[]>([]); // Equipos filtrados por categoría
+  const [polideportivos, setPolideportivos] = useState<Polideportivo[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [equiposFiltrados, setEquiposFiltrados] = useState<Equipo[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,16 +80,16 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
     }
   }, [nuevoPartido.categoriaId]);
 
-  const handleChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const { name, value } = e.target;
     setNuevoPartido(prevState => ({
       ...prevState,
       [name as string]: value,
     }));
-  };
+  }, []);
 
-  const handleSave = async () => {
-    let erroresTemp = { ...errores };
+  const handleSave = useCallback(async () => {
+    const erroresTemp = { ...errores };
     let isValid = true;
 
     isValid = validarPartido(nuevoPartido, erroresTemp, isValid);
@@ -112,11 +105,11 @@ const CrearPartido: React.FC<CrearPartidoProps> = ({ open, onClose, onSave }) =>
         toast.error(`Error: ${error.message}`);
       }
     }
-  };
+  }, [nuevoPartido, errores, onClose, navigate]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     navigate('/gestionPartidos/partidosView');
-  };
+  }, [navigate]);
 
   return (
     <Dialog
