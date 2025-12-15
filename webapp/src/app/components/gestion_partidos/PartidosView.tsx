@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   IconButton, Button, Box, TablePagination, Dialog, DialogActions, DialogContent, 
-  DialogContentText, DialogTitle, Typography as MuiTypography
+  DialogContentText, DialogTitle, Typography, Chip, Tooltip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -245,45 +245,169 @@ const PartidosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ backgroundColor: '#eafaff', minHeight: '100vh', pt: 3, pb: 3 }}>
-        <Container sx={{ backgroundColor: '#eafaff', borderRadius: 2, minWidth: '90%' }}>
-          <TableContainer component={Paper}>
+      <Box 
+        sx={{ 
+          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+          minHeight: '100vh', 
+          pt: 4, 
+          pb: 12,
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          {/* Header moderno */}
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 700,
+                color: '#1e293b',
+                mb: 1,
+              }}
+            >
+              ⚽ Gestión de Partidos
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: '#64748b',
+              }}
+            >
+              Administra los partidos y sus horarios
+            </Typography>
+          </Box>
+
+          <TableContainer 
+            component={Paper} 
+            elevation={0}
+            sx={{ 
+              borderRadius: '16px',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+            }}
+          >
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell colSpan={8} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fafafa' }}>
-                    Gestión de Partidos
-                  </TableCell>
-                </TableRow>
-                <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Fecha</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Hora</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lugar</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Equipo Local</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Equipo Visitante</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Categoría</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Jornada</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Acciones</TableCell>
-
+                <TableRow 
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                  }}
+                >
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Fecha</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Hora</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Lugar</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Equipo Local</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Equipo Visitante</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Categoría</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Jornada</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {partidos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(partido => (
-                  <TableRow key={partido.id ?? `temp-${Math.random()}`}>
-                    <TableCell align="center">{formatDate(partido.fecha)}</TableCell>
-                    <TableCell align="center">{formatTime(partido.hora)}</TableCell>
-                    <TableCell align="center">{partido.lugar || '-'}</TableCell>
-                    <TableCell align="center">{partido.equipoLocal}</TableCell>
-                    <TableCell align="center">{partido.equipoVisitante}</TableCell>
-                    <TableCell align="center">{partido.categoria}</TableCell>
-                    <TableCell align="center">{partido.jornada}</TableCell>
-                    <TableCell align="center">
-                      <IconButton onClick={() => handleModify(partido)} color="primary">
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton onClick={() => { setPartidoToDelete(partido.id); setOpenConfirmDialog(true); }} color="error">
-                        <DeleteIcon />
-                      </IconButton>
+                {partidos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((partido, index) => (
+                  <TableRow 
+                    key={partido.id ?? `temp-${Math.random()}`}
+                    sx={{
+                      backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc',
+                      '&:hover': {
+                        backgroundColor: 'rgba(139, 92, 246, 0.05)',
+                        transform: 'scale(1.001)',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Chip 
+                        label={formatDate(partido.fecha)}
+                        size="small"
+                        sx={{
+                          bgcolor: '#f0f9ff',
+                          color: '#0369a1',
+                          fontWeight: 500,
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" fontWeight={600} color="#64748b">
+                        {formatTime(partido.hora)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2">
+                        {partido.lugar || '-'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {partido.equipoLocal}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {partido.equipoVisitante}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Chip 
+                        label={partido.categoria}
+                        size="small"
+                        sx={{
+                          bgcolor: '#f3e8ff',
+                          color: '#6b21a8',
+                          fontWeight: 500,
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Chip 
+                        label={`J${partido.jornada}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: '#cbd5e1',
+                          color: '#64748b',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2, textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                        <Tooltip title="Modificar partido" arrow>
+                          <IconButton 
+                            size="small"
+                            onClick={() => handleModify(partido)}
+                            sx={{
+                              bgcolor: '#f3e8ff',
+                              color: '#8b5cf6',
+                              '&:hover': {
+                                bgcolor: '#e9d5ff',
+                                transform: 'scale(1.1)',
+                              },
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Eliminar partido" arrow>
+                          <IconButton 
+                            size="small"
+                            onClick={() => { setPartidoToDelete(partido.id); setOpenConfirmDialog(true); }}
+                            sx={{
+                              bgcolor: '#fef2f2',
+                              color: '#ef4444',
+                              '&:hover': {
+                                bgcolor: '#fee2e2',
+                                transform: 'scale(1.1)',
+                              },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -291,59 +415,149 @@ const PartidosView: React.FC = () => {
             </Table>
           </TableContainer>
           <Box 
-                      sx={{ 
-                        position: 'fixed', 
-                        bottom: 0, 
-                        left: 0, 
-                        width: '100%', 
-                        backgroundColor: '#eafaff', 
-                        borderTop: '1px solid #ccc', 
-                        py: 2, 
-                        px: { xs: 2, sm: 4, md: 8 }, 
-                        display: 'flex', 
-                        flexDirection: { xs: 'column', sm: 'row' }, 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        zIndex: 10,
-                      }}
-                    >
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'left', gap: 2, mt: 3 }}>
-                      <Button variant="contained" color="primary" onClick={handleAdd} startIcon={<AddIcon />}>Agregar Partido</Button>
-                      <Button variant="outlined" component="label" sx={{
-                          color: 'green',  
-                          borderColor: 'green',  
-                          '&:hover': {
-                            borderColor: 'green', 
-                            backgroundColor: 'rgba(0, 128, 0, 0.1)'
-                          }
-                        }}>
-                        <UploadFileIcon /> Importar partidos desde Excel
-                        <input type="file" id="upload-file" accept=".xlsx, .xls" onChange={handleFileUpload} hidden />
-                      </Button>
-                    </Box>
+            sx={{ 
+              position: 'fixed', 
+              bottom: 0, 
+              left: 0, 
+              right: 0,
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderTop: '1px solid #e2e8f0', 
+              py: 2, 
+              px: { xs: 2, sm: 4, md: 8 }, 
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' }, 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              zIndex: 10,
+              boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
+            }}
+          >
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: { xs: 2, sm: 0 } }}>
+              <Button 
+                variant="contained"
+                onClick={handleAdd} 
+                startIcon={<AddIcon />}
+                sx={{ 
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                  px: 3,
+                  py: 1.2,
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                    boxShadow: '0 6px 16px rgba(139, 92, 246, 0.4)',
+                    transform: 'translateY(-1px)',
+                  },
+                  transition: 'all 0.2s',
+                }}
+              >
+                Agregar Partido
+              </Button>
+              <Button 
+                variant="outlined" 
+                component="label"
+                startIcon={<UploadFileIcon />}
+                sx={{
+                  borderColor: '#10b981',
+                  color: '#10b981',
+                  borderWidth: '2px',
+                  px: 3,
+                  py: 1.2,
+                  borderRadius: '10px',
+                  '&:hover': {
+                    borderColor: '#059669', 
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderWidth: '2px',
+                  },
+                }}
+              >
+                Importar desde Excel
+                <input type="file" id="upload-file" accept=".xlsx, .xls" onChange={handleFileUpload} hidden />
+              </Button>
+            </Box>
 
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      component="div"
-                      count={partidos.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                      labelRowsPerPage="Filas por página"
-                      labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-                      sx={{ mr: { xs: 0, sm: 4, md: 12 } }}
-                    />
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={partidos.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+              sx={{
+                '& .MuiTablePagination-select': {
+                  borderRadius: '8px',
+                  bgcolor: '#f8fafc',
+                },
+                '& .MuiIconButton-root': {
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: '#f1f5f9',
+                  },
+                },
+              }}
+            />
           </Box>
 
-          <Dialog open={openConfirmDialog} onClose={() => setOpenConfirmDialog(false)}>
-            <DialogTitle>Eliminar Partido</DialogTitle>
+          <Dialog 
+            open={openConfirmDialog} 
+            onClose={() => setOpenConfirmDialog(false)}
+            PaperProps={{
+              sx: {
+                borderRadius: '16px',
+                p: 1,
+              },
+            }}
+          >
+            <DialogTitle sx={{ 
+              fontWeight: 700, 
+              fontSize: '1.25rem',
+              color: '#1e293b',
+            }}>
+              ⚠️ Eliminar Partido
+            </DialogTitle>
             <DialogContent>
-              <DialogContentText>¿Estás seguro de que deseas eliminar este partido? Esta acción no se puede deshacer</DialogContentText>
+              <DialogContentText sx={{ color: '#64748b', fontSize: '1rem' }}>
+                ¿Estás seguro de que deseas eliminar este partido? Esta acción no se puede deshacer.
+              </DialogContentText>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-              <Button onClick={handleDelete} color="error">Eliminar</Button>
+            <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+              <Button 
+                onClick={() => setOpenConfirmDialog(false)}
+                variant="outlined"
+                sx={{
+                  borderRadius: '10px',
+                  px: 3,
+                  borderColor: '#e2e8f0',
+                  color: '#64748b',
+                  '&:hover': {
+                    borderColor: '#cbd5e1',
+                    bgcolor: '#f8fafc',
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleDelete}
+                variant="contained"
+                sx={{
+                  borderRadius: '10px',
+                  px: 3,
+                  bgcolor: '#ef4444',
+                  '&:hover': {
+                    bgcolor: '#dc2626',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+                  },
+                  transition: 'all 0.2s',
+                }}
+              >
+                Eliminar
+              </Button>
             </DialogActions>
           </Dialog>
         </Container>

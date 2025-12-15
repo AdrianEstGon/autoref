@@ -8,6 +8,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useTheme } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Badge } from '@mui/material';
@@ -197,115 +198,260 @@ const hasSessionExpired = (dataUser: any) => {
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
-            <IconButton color="inherit" onClick={() => setOpenNotifications(true)} sx={{ mr: 2 }}>
-              <Badge badgeContent={notifications.length} color="error">
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', gap: 1 }}>
+            <IconButton 
+              color="inherit" 
+              onClick={() => setOpenNotifications(true)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                },
+              }}
+            >
+              <Badge 
+                badgeContent={notifications.length} 
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    minWidth: 20,
+                    height: 20,
+                  },
+                }}
+              >
                 <NotificationsIcon />
               </Badge>
             </IconButton>
 
-            <Drawer anchor="right" open={openNotifications} onClose={() => setOpenNotifications(false)}>
+            <Drawer 
+              anchor="right" 
+              open={openNotifications} 
+              onClose={() => setOpenNotifications(false)}
+              PaperProps={{
+                sx: {
+                  width: isMobile ? '100vw' : 420,
+                  background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
+                },
+              }}
+            >
               <Box
                 sx={{
-                  width: isMobile ? '100vw' : 400,
-                  p: 2,
+                  p: 3,
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  backgroundColor: '#f9fafb',
                 }}
               >
-                <Typography variant="h5" fontWeight="600" gutterBottom>
-                  Notificaciones
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h5" fontWeight="700" sx={{ color: '#1e293b' }}>
+                    🔔 Notificaciones
+                  </Typography>
+                  <IconButton 
+                    onClick={() => setOpenNotifications(false)} 
+                    size="small"
+                    sx={{
+                      bgcolor: '#f1f5f9',
+                      '&:hover': { bgcolor: '#e2e8f0' },
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
 
-                <Divider sx={{ mb: 2 }} />
+                <Divider sx={{ mb: 2, borderColor: '#e2e8f0' }} />
 
-                <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 1 }}>
                   {notifications.length > 0 ? (
                     <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       {notifications.map((notification) => (
                         <Card
-                          variant="outlined"
                           key={notification.id}
+                          elevation={0}
                           sx={{
-                            backgroundColor: '#ffffff',
-                            borderRadius: 2,
-                            boxShadow: 1,
+                            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                            borderRadius: '12px',
+                            border: '1px solid #e2e8f0',
                             position: 'relative',
-                            transition: 'transform 0.5s ease-out', // Animación suave
-                            transform: slidingOutNotification === notification.id ? 'translateX(100%)' : 'translateX(0)', // Deslizar la tarjeta hacia la derecha
-                            overflow: 'hidden', // Para evitar que el contenido se desborde
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            transform: slidingOutNotification === notification.id 
+                              ? 'translateX(100%)' 
+                              : 'translateX(0)',
+                            opacity: slidingOutNotification === notification.id ? 0 : 1,
+                            overflow: 'hidden',
+                            '&:hover': {
+                              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)',
+                              borderColor: '#2563eb',
+                            },
                           }}
                         >
-                          <CardContent sx={{ p: 2, pb: 6 }}>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                mb: 1,
-                                fontStyle: 'italic',
-                                color: 'text.secondary',
-                                fontWeight: '400',
-                                lineHeight: 1.5,
-                              }}
-                            >
-                              {notification.mensaje}
-                            </Typography>
+                          <CardContent sx={{ p: 2.5, pb: 7 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  bgcolor: '#2563eb',
+                                  mt: 1,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: '#475569',
+                                  lineHeight: 1.6,
+                                  fontSize: '0.9rem',
+                                }}
+                              >
+                                {notification.mensaje}
+                              </Typography>
+                            </Box>
                           </CardContent>
 
                           <Box
                             sx={{
                               position: 'absolute',
-                              bottom: 16,
-                              right: 16,
+                              bottom: 12,
+                              right: 12,
                               display: 'flex',
                               alignItems: 'center',
-                              zIndex: 1000,
                             }}
                           >
-                            <Tooltip title="Marcar como leída">
-                              <Button
-                                variant="outlined"
-                                color="success"
+                            <Tooltip title="Marcar como leída" arrow>
+                              <IconButton
                                 size="small"
                                 onClick={() => marcarComoLeida(notification.id)}
-                                sx={{ display: 'flex', alignItems: 'center' }}
+                                sx={{
+                                  bgcolor: '#10b981',
+                                  color: 'white',
+                                  '&:hover': {
+                                    bgcolor: '#059669',
+                                    transform: 'scale(1.05)',
+                                  },
+                                  transition: 'all 0.2s',
+                                }}
                               >
-                                <CheckCircleIcon sx={{ marginRight: 1 }} />
-                                Marcar como leída
-                              </Button>
+                                <CheckCircleIcon fontSize="small" />
+                              </IconButton>
                             </Tooltip>
                           </Box>
                         </Card>
                       ))}
                     </List>
                   ) : (
-                    <Typography variant="body2" textAlign="center" sx={{ mt: 4 }}>
-                      No hay notificaciones disponibles.
-                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        py: 8,
+                      }}
+                    >
+                      <NotificationsIcon sx={{ fontSize: 64, color: '#cbd5e1', mb: 2 }} />
+                      <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500 }}>
+                        No hay notificaciones
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mt: 0.5 }}>
+                        Estás al día con todo
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               </Box>
             </Drawer>
 
-            <Button title="Mi perfil" color="inherit" sx={{ display: 'flex', alignItems: 'center' }} onClick={handleMenuPanelPerfilClick}>
-              {profilePhoto ? (
-                <Avatar src={profilePhoto} sx={{ width: 32, height: 32, mr: 1 }} />
-              ) : (
-                <AccountCircleIcon sx={{ mr: 1 }} />
-              )}
-            </Button>
+            <Tooltip title="Mi perfil" arrow>
+              <IconButton 
+                onClick={handleMenuPanelPerfilClick}
+                sx={{
+                  p: 0.5,
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                }}
+              >
+                {profilePhoto ? (
+                  <Avatar 
+                    src={profilePhoto} 
+                    sx={{ 
+                      width: 36, 
+                      height: 36,
+                      border: '2px solid white',
+                    }} 
+                  />
+                ) : (
+                  <Avatar 
+                    sx={{ 
+                      width: 36, 
+                      height: 36,
+                      bgcolor: '#8b5cf6',
+                      border: '2px solid white',
+                    }}
+                  >
+                    <AccountCircleIcon />
+                  </Avatar>
+                )}
+              </IconButton>
+            </Tooltip>
 
             <Menu
               anchorEl={anchorElPanelPerfil}
               open={Boolean(anchorElPanelPerfil)}
               onClose={handleClosePanelMenuPerfil}
+              PaperProps={{
+                elevation: 3,
+                sx: {
+                  mt: 1.5,
+                  borderRadius: '12px',
+                  minWidth: 200,
+                  overflow: 'visible',
+                  '&::before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                  },
+                  '& .MuiMenuItem-root': {
+                    borderRadius: '8px',
+                    mx: 1,
+                    my: 0.5,
+                    '&:hover': {
+                      bgcolor: 'rgba(37, 99, 235, 0.08)',
+                    },
+                  },
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               <MenuItem onClick={() => handleNavigate('/miPerfil')}>
-                <AccountCircleIcon sx={{ mr: 1 }} /> Mi perfil
+                <AccountCircleIcon sx={{ mr: 1.5, color: '#2563eb' }} /> 
+                Mi perfil
               </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ExitToAppIcon sx={{ mr: 1, color: 'red' }} /> Cerrar sesión
+              <Divider sx={{ my: 0.5 }} />
+              <MenuItem 
+                onClick={handleLogout}
+                sx={{
+                  color: '#ef4444',
+                  '&:hover': {
+                    bgcolor: 'rgba(239, 68, 68, 0.08)',
+                  },
+                }}
+              >
+                <ExitToAppIcon sx={{ mr: 1.5 }} /> 
+                Cerrar sesión
               </MenuItem>
             </Menu>
           </Box>
@@ -315,35 +461,149 @@ const hasSessionExpired = (dataUser: any) => {
           anchor="left"
           open={mobileOpen}
           onClose={handleDrawerToggle}
+          PaperProps={{
+            sx: {
+              background: 'linear-gradient(180deg, #2563eb 0%, #1e40af 100%)',
+              color: 'white',
+              width: 280,
+            },
+          }}
         >
           <Box
             sx={{
-              width: 250,
-              p: 2,
+              p: 3,
             }}
             role="presentation"
             onClick={handleDrawerToggle}
             onKeyDown={handleDrawerToggle}
           >
-            <List sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Button color="inherit" onClick={() => navigate('/misDesignaciones')}>Mis Designaciones</Button>
-              <Button color="inherit" onClick={() => navigate('/miDisponibilidad')}>Disponibilidad</Button>
-              <Button color="inherit" onClick={() => navigate('/miHistorial')}>Mi Historial</Button>
+            {/* Header del drawer */}
+            <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  component="img"
+                  src="/logo.png"
+                  alt="AutoRef"
+                  sx={{
+                    height: 40,
+                    width: 40,
+                    filter: 'brightness(0) invert(1)',
+                  }}
+                />
+                <Typography variant="h6" fontWeight="700">
+                  AutoRef
+                </Typography>
+              </Box>
+            </Box>
+
+            <List sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Button 
+                fullWidth
+                color="inherit" 
+                onClick={() => navigate('/misDesignaciones')}
+                sx={{
+                  justifyContent: 'flex-start',
+                  borderRadius: '10px',
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  },
+                }}
+              >
+                Mis Designaciones
+              </Button>
+              <Button 
+                fullWidth
+                color="inherit" 
+                onClick={() => navigate('/miDisponibilidad')}
+                sx={{
+                  justifyContent: 'flex-start',
+                  borderRadius: '10px',
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  },
+                }}
+              >
+                Disponibilidad
+              </Button>
+              <Button 
+                fullWidth
+                color="inherit" 
+                onClick={() => navigate('/miHistorial')}
+                sx={{
+                  justifyContent: 'flex-start',
+                  borderRadius: '10px',
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.15)',
+                  },
+                }}
+              >
+                Mi Historial
+              </Button>
 
               {userRole === 'Admin' && (
                 <>
-                  <Divider sx={{ my: 1 }} />
-                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+                  <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.2)' }} />
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight="600" 
+                    sx={{ 
+                      mb: 1, 
+                      px: 2,
+                      textTransform: 'uppercase',
+                      fontSize: '0.75rem',
+                      letterSpacing: '0.1em',
+                      opacity: 0.8,
+                    }}
+                  >
                     Panel de control
                   </Typography>
-                  <Button onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}>
-                    <PeopleIcon sx={{ mr: 1 }} /> Gestión de usuarios
+                  <Button 
+                    fullWidth
+                    color="inherit"
+                    onClick={() => handleNavigate('/gestionUsuarios/usuariosView')}
+                    sx={{
+                      justifyContent: 'flex-start',
+                      borderRadius: '10px',
+                      py: 1.5,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.15)',
+                      },
+                    }}
+                  >
+                    <PeopleIcon sx={{ mr: 1.5 }} /> Gestión de usuarios
                   </Button>
-                  <Button onClick={() => handleNavigate('/gestionPartidos/partidosView')}>
-                    <SportsSoccerIcon sx={{ mr: 1 }} /> Gestión de partidos
+                  <Button 
+                    fullWidth
+                    color="inherit"
+                    onClick={() => handleNavigate('/gestionPartidos/partidosView')}
+                    sx={{
+                      justifyContent: 'flex-start',
+                      borderRadius: '10px',
+                      py: 1.5,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.15)',
+                      },
+                    }}
+                  >
+                    <SportsSoccerIcon sx={{ mr: 1.5 }} /> Gestión de partidos
                   </Button>
-                  <Button onClick={() => handleNavigate('/gestionDesignaciones/panelDesignaciones')}>
-                    <AssignmentIcon sx={{ mr: 1 }} /> Gestión de designaciones
+                  <Button 
+                    fullWidth
+                    color="inherit"
+                    onClick={() => handleNavigate('/gestionDesignaciones/panelDesignaciones')}
+                    sx={{
+                      justifyContent: 'flex-start',
+                      borderRadius: '10px',
+                      py: 1.5,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.15)',
+                      },
+                    }}
+                  >
+                    <AssignmentIcon sx={{ mr: 1.5 }} /> Gestión de designaciones
                   </Button>
                 </>
               )}

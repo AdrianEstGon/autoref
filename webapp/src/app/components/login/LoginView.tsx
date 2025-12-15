@@ -115,67 +115,190 @@ function LoginView() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundImage: 'url(/fondo4.jpeg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/fondo4.jpeg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.15,
+          },
         }}
       >
         <CssBaseline />
+        {/* Círculos decorativos animados */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '-10%',
+            right: '-5%',
+            width: '500px',
+            height: '500px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            animation: 'float 6s ease-in-out infinite',
+            '@keyframes float': {
+              '0%, 100%': { transform: 'translate(0, 0)' },
+              '50%': { transform: 'translate(-20px, 20px)' },
+            },
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '-10%',
+            left: '-5%',
+            width: '400px',
+            height: '400px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
+        />
+
         <Grid
           item
-          xs={12}
-          sm={10}
-          md={10}
-          lg={8}
-          sx={{ display: 'flex', justifyContent: 'center' }}
+          xs={11}
+          sm={8}
+          md={5}
+          lg={4}
+          sx={{ display: 'flex', justifyContent: 'center', zIndex: 1 }}
         >
           <Grid
             item
             xs={12}
-            sm={8}
-            md={5}
             component={Paper}
-            elevation={6}
-            square
+            elevation={24}
             sx={{
-              padding: 4,
-              borderRadius: 4,
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)'
+              padding: 5,
+              borderRadius: '24px',
+              backgroundColor: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+              },
             }}
           >
             <div><Toaster /></div>
             <Box
               sx={{
-                my: 8,
-                mx: 4,
+                my: 4,
+                mx: 2,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
               }}
             >
-              {logo && <img src={logo} alt="Logo de AutoRef" />}
-              <Avatar sx={{ m: 1, bgcolor: 'blue' }} />
-              <Typography component="h1" variant="h5">
-                Iniciar sesión
-              </Typography>
-              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              {/* Logo mejorado */}
+              <Box
+                sx={{
+                  mb: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                {logo && (
+                  <Box
+                    component="img"
+                    src={logo}
+                    alt="Logo de AutoRef"
+                    sx={{
+                      height: 80,
+                      width: 'auto',
+                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))',
+                    }}
+                  />
+                )}
+                <Box>
+                  <Typography 
+                    component="h1" 
+                    variant="h4" 
+                    sx={{ 
+                      fontWeight: 700,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Bienvenido
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#64748b',
+                      textAlign: 'center',
+                      mt: 0.5,
+                    }}
+                  >
+                    Ingresa a tu cuenta para continuar
+                  </Typography>
+                </Box>
+              </Box>
+              <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
                 <TextField
                   margin="normal"
                   required
                   fullWidth
                   id="login"
                   data-testid="login"
-                  label="Email"
+                  label="Correo electrónico"
                   name="email"
                   value={email}
                   autoComplete="email"
                   onChange={handleEmailChange}
                   autoFocus
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: '#f1f5f9',
+                      },
+                      '&.Mui-focused': {
+                        bgcolor: 'white',
+                      },
+                    },
+                  }}
                 />
-                <FormControl variant="outlined" fullWidth>
+                <FormControl 
+                  variant="outlined" 
+                  fullWidth 
+                  sx={{ 
+                    mt: 2,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: '#f1f5f9',
+                      },
+                      '&.Mui-focused': {
+                        bgcolor: 'white',
+                      },
+                    },
+                  }}
+                >
                   <InputLabel htmlFor="outlined-adornment-password">Contraseña *</InputLabel>
                   <OutlinedInput
                     name="password"
@@ -192,6 +315,12 @@ function LoginView() {
                           onClick={handleClickShowPassword}
                           onMouseDown={handleMouseDownPassword}
                           edge="end"
+                          sx={{
+                            color: '#64748b',
+                            '&:hover': {
+                              color: '#2563eb',
+                            },
+                          }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -199,19 +328,52 @@ function LoginView() {
                     }
                   />
                 </FormControl>
+
                 {isChecking && (
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px' }}>
-                    <CircularProgress />
-                    <Typography variant="body2">
-                      Se están comprobando las credenciales...
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      mt: 3,
+                      p: 2,
+                      borderRadius: '12px',
+                      bgcolor: '#f8fafc',
+                    }}
+                  >
+                    <CircularProgress size={24} />
+                    <Typography variant="body2" sx={{ color: '#64748b' }}>
+                      Verificando credenciales...
                     </Typography>
-                  </div>
+                  </Box>
                 )}
+
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
+                  disabled={isChecking}
+                  sx={{ 
+                    mt: 4, 
+                    mb: 2,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
+                      boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:disabled': {
+                      background: '#cbd5e1',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                 >
                   Iniciar sesión
                 </Button>

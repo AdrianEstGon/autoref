@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   IconButton, Button, Box, Tooltip, TablePagination, Dialog, DialogActions, DialogContent, 
-  DialogContentText, DialogTitle 
+  DialogContentText, DialogTitle, Typography, Chip
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -121,77 +121,201 @@ const UsuariosView: React.FC = () => {
   return (
     <>
       <NavBar />
-      <Box sx={{ backgroundColor: '#eafaff', minHeight: '100vh', pt: 3, pb: 3 }}>
-        <Container sx={{ backgroundColor: '#eafaff', borderRadius: 2, minWidth: '90%' }}>
-          <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2, backgroundColor: '#fafafa' }}>
+      <Box 
+        sx={{ 
+          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+          minHeight: '100vh', 
+          pt: 4, 
+          pb: 12,
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          {/* Header moderno */}
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 700,
+                color: '#1e293b',
+                mb: 1,
+              }}
+            >
+              👥 Gestión de Usuarios
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: '#64748b',
+              }}
+            >
+              Administra los árbitros y usuarios del sistema
+            </Typography>
+          </Box>
+
+          <TableContainer 
+            component={Paper} 
+            elevation={0}
+            sx={{ 
+              borderRadius: '16px',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+            }}
+          >
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell colSpan={9} sx={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center' }}>
-                    Gestión de Usuarios
-                  </TableCell>
-                </TableRow>
-                <TableRow sx={{ backgroundColor: '#f0f0f0', color: '#333' }}>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Nombre</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Primer apellido</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Segundo apellido</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Nivel</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Fecha de Nacimiento</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Club Vinculado</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Correo Electrónico</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Número de Licencia</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Acciones</TableCell>
+                <TableRow 
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                  }}
+                >
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Nombre</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Primer apellido</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Segundo apellido</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Nivel</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Fecha Nac.</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Club</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Email</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Licencia</TableCell>
+                  <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem', textAlign: 'center' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {usuariosPaginados.map((usuario) => (
+                {usuariosPaginados.map((usuario, index) => (
                   <TableRow
                     key={usuario.id}
                     sx={{
-                      backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#fff3cd' : 'inherit',
+                      backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA 
+                        ? 'rgba(251, 191, 36, 0.1)' 
+                        : index % 2 === 0 ? '#ffffff' : '#f8fafc',
+                      borderLeft: usuario.licencia === SUPER_ADMIN_LICENCIA 
+                        ? '4px solid #f59e0b' 
+                        : '4px solid transparent',
                       '&:hover': {
-                        backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#ffe8a1' : '#e8e8e8',
+                        backgroundColor: usuario.licencia === SUPER_ADMIN_LICENCIA 
+                          ? 'rgba(251, 191, 36, 0.2)' 
+                          : 'rgba(37, 99, 235, 0.05)',
+                        transform: 'scale(1.001)',
                       },
-                      transition: '0.3s',
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.nombre}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.primerApellido}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.segundoApellido}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.nivel}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{formatDate(usuario.fechaNacimiento)}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.clubVinculado}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.email}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>{usuario.licencia}</TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
-                      {usuario.licencia !== SUPER_ADMIN_LICENCIA ? (
-                        <Tooltip title="Modificar usuario" arrow>
-                          <IconButton color="primary" onClick={() => handleModify(usuario)}>
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ) : (
-                        // Solo mostrar el botón si el usuario logueado es el superadmin
-                        JSON.parse(localStorage.getItem('licencia') || 'null') === SUPER_ADMIN_LICENCIA && (
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {usuario.nombre}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2">
+                        {usuario.primerApellido}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2">
+                        {usuario.segundoApellido}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Chip 
+                        label={usuario.nivel} 
+                        size="small" 
+                        sx={{
+                          bgcolor: '#e0e7ff',
+                          color: '#3730a3',
+                          fontWeight: 500,
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(usuario.fechaNacimiento)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2">
+                        {usuario.clubVinculado}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                        {usuario.email}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2 }}>
+                      <Chip 
+                        label={usuario.licencia}
+                        size="small"
+                        variant={usuario.licencia === SUPER_ADMIN_LICENCIA ? "filled" : "outlined"}
+                        sx={{
+                          bgcolor: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#fbbf24' : 'transparent',
+                          color: usuario.licencia === SUPER_ADMIN_LICENCIA ? '#78350f' : '#64748b',
+                          borderColor: '#cbd5e1',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2, px: 2, textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                        {usuario.licencia !== SUPER_ADMIN_LICENCIA ? (
                           <Tooltip title="Modificar usuario" arrow>
-                            <IconButton color="primary" onClick={() => handleModify(usuario)}>
-                              <EditIcon />
+                            <IconButton 
+                              size="small"
+                              onClick={() => handleModify(usuario)}
+                              sx={{
+                                bgcolor: '#eff6ff',
+                                color: '#2563eb',
+                                '&:hover': {
+                                  bgcolor: '#dbeafe',
+                                  transform: 'scale(1.1)',
+                                },
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                        )
-                      )}
-                      {usuario.licencia !== SUPER_ADMIN_LICENCIA && (
-                        <Tooltip title="Eliminar usuario" arrow>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleOpenDeleteDialog(usuario.id)}
-                            aria-label="eliminar usuario"
-                            data-testid="delete-user-button"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
+                        ) : (
+                          JSON.parse(localStorage.getItem('licencia') || 'null') === SUPER_ADMIN_LICENCIA && (
+                            <Tooltip title="Modificar usuario" arrow>
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleModify(usuario)}
+                                sx={{
+                                  bgcolor: '#eff6ff',
+                                  color: '#2563eb',
+                                  '&:hover': {
+                                    bgcolor: '#dbeafe',
+                                    transform: 'scale(1.1)',
+                                  },
+                                }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )
+                        )}
+                        {usuario.licencia !== SUPER_ADMIN_LICENCIA && (
+                          <Tooltip title="Eliminar usuario" arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDeleteDialog(usuario.id)}
+                              aria-label="eliminar usuario"
+                              data-testid="delete-user-button"
+                              sx={{
+                                bgcolor: '#fef2f2',
+                                color: '#ef4444',
+                                '&:hover': {
+                                  bgcolor: '#fee2e2',
+                                  transform: 'scale(1.1)',
+                                },
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -204,9 +328,10 @@ const UsuariosView: React.FC = () => {
               position: 'fixed', 
               bottom: 0, 
               left: 0, 
-              width: '100%', 
-              backgroundColor: '#eafaff', 
-              borderTop: '1px solid #ccc', 
+              right: 0,
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderTop: '1px solid #e2e8f0', 
               py: 2, 
               px: { xs: 2, sm: 4, md: 8 }, 
               display: 'flex', 
@@ -214,14 +339,27 @@ const UsuariosView: React.FC = () => {
               justifyContent: 'space-between', 
               alignItems: 'center',
               zIndex: 10,
+              boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
             }}
           >
             <Button 
               variant="contained" 
-              color="primary" 
               startIcon={<AddIcon />} 
               onClick={handleAdd}
-              sx={{ mb: { xs: 1, sm: 0 } }}
+              sx={{ 
+                mb: { xs: 1, sm: 0 },
+                background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                px: 3,
+                py: 1.2,
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
+                  boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
+                  transform: 'translateY(-1px)',
+                },
+                transition: 'all 0.2s',
+              }}
             >
               Agregar Usuario
             </Button>
@@ -236,22 +374,79 @@ const UsuariosView: React.FC = () => {
               onRowsPerPageChange={handleChangeRowsPerPage}
               labelRowsPerPage="Filas por página"
               labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-              sx={{ mr: { xs: 0, sm: 4, md: 12 } }}
+              sx={{
+                '& .MuiTablePagination-select': {
+                  borderRadius: '8px',
+                  bgcolor: '#f8fafc',
+                },
+                '& .MuiIconButton-root': {
+                  borderRadius: '8px',
+                  '&:hover': {
+                    bgcolor: '#f1f5f9',
+                  },
+                },
+              }}
             />
           </Box>
         </Container>
       </Box>
 
-      <Dialog open={openConfirmDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+      <Dialog 
+        open={openConfirmDialog} 
+        onClose={handleCloseDeleteDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            p: 1,
+          },
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontWeight: 700, 
+          fontSize: '1.25rem',
+          color: '#1e293b',
+        }}>
+          ⚠️ Confirmar Eliminación
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            ¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.
+          <DialogContentText sx={{ color: '#64748b', fontSize: '1rem' }}>
+            ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="error">Cancelar</Button>
-          <Button onClick={handleDelete} color="primary">Eliminar</Button>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button 
+            onClick={handleCloseDeleteDialog}
+            variant="outlined"
+            sx={{
+              borderRadius: '10px',
+              px: 3,
+              borderColor: '#e2e8f0',
+              color: '#64748b',
+              '&:hover': {
+                borderColor: '#cbd5e1',
+                bgcolor: '#f8fafc',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleDelete}
+            variant="contained"
+            sx={{
+              borderRadius: '10px',
+              px: 3,
+              bgcolor: '#ef4444',
+              '&:hover': {
+                bgcolor: '#dc2626',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+              },
+              transition: 'all 0.2s',
+            }}
+          >
+            Eliminar
+          </Button>
         </DialogActions>
       </Dialog>
     </>

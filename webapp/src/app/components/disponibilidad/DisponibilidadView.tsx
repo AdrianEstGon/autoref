@@ -243,30 +243,60 @@ const DisponibilidadView = forwardRef((_props, ref) => {
 
 
   const renderLegend = () => (
-    <Box sx={{ mt: 2, textAlign: 'center' }}>
-      <Grid container spacing={2} justifyContent="center" sx={{ mt: 1 }}>
+    <Box sx={{ mb: 3, textAlign: 'center' }}>
+      <Grid container spacing={2} justifyContent="center">
         <Grid item>
-          <Box display="flex" alignItems="center">
-            <IconButton color="primary">
-              <DirectionsCarIcon />
-            </IconButton>
-            <Typography variant="body2" color="#333">Disponible con transporte</Typography>
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            sx={{
+              bgcolor: '#dbeafe',
+              px: 2,
+              py: 1,
+              borderRadius: '10px',
+              border: '1px solid #93c5fd',
+            }}
+          >
+            <DirectionsCarIcon sx={{ color: '#2563eb', mr: 1 }} />
+            <Typography variant="body2" fontWeight={500} color="#2563eb">
+              Con transporte
+            </Typography>
           </Box>
         </Grid>
         <Grid item>
-          <Box display="flex" alignItems="center">
-            <IconButton color="success">
-              <DirectionsWalkIcon />
-            </IconButton>
-            <Typography variant="body2" color="#333">Disponible sin transporte</Typography>
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            sx={{
+              bgcolor: '#d1fae5',
+              px: 2,
+              py: 1,
+              borderRadius: '10px',
+              border: '1px solid #6ee7b7',
+            }}
+          >
+            <DirectionsWalkIcon sx={{ color: '#059669', mr: 1 }} />
+            <Typography variant="body2" fontWeight={500} color="#059669">
+              Sin transporte
+            </Typography>
           </Box>
         </Grid>
         <Grid item>
-          <Box display="flex" alignItems="center">
-            <IconButton color="error">
-              <DoNotDisturbIcon />
-            </IconButton>
-            <Typography variant="body2" color="#333">No disponible</Typography>
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            sx={{
+              bgcolor: '#fee2e2',
+              px: 2,
+              py: 1,
+              borderRadius: '10px',
+              border: '1px solid #fca5a5',
+            }}
+          >
+            <DoNotDisturbIcon sx={{ color: '#dc2626', mr: 1 }} />
+            <Typography variant="body2" fontWeight={500} color="#dc2626">
+              No disponible
+            </Typography>
           </Box>
         </Grid>
       </Grid>
@@ -323,7 +353,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
   return (
     <Box
       sx={{
-        backgroundColor: '#eafaff',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -331,40 +361,107 @@ const DisponibilidadView = forwardRef((_props, ref) => {
     >
       <NavigationBar />
       <Container 
-      sx={{ 
-        flexGrow: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center',
-        paddingBottom: '2rem', 
-        minHeight: '100vh', 
-      }}
-    >
-        <Paper 
-            elevation={3} 
+        maxWidth="xl"
+        sx={{ 
+          flexGrow: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          paddingBottom: '2rem', 
+          minHeight: '100vh',
+          pt: 4,
+          px: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
+        {/* Header moderno */}
+        <Box sx={{ mb: 4, width: '100%', maxWidth: '1200px' }}>
+          <Typography 
+            variant="h4" 
             sx={{ 
-              padding: 3, 
-              backgroundColor: "#f9f9f9", 
-              color: '#333', 
-              borderRadius: '12px', 
-              width: '100%', 
-              maxWidth: '1200px',
-              display: 'flex', 
-              flexDirection: 'column',
-              flex: 1, 
-              height: '100%', 
-              marginTop: '2rem',
+              fontWeight: 700,
+              color: '#1e293b',
+              mb: 1,
+              textAlign: 'center',
             }}
           >
-          <Typography variant="h4" textAlign="center" color="#333" sx={{ fontWeight: 'bold' }}>
-            Mi Disponibilidad
+            📅 Mi Disponibilidad
           </Typography>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <IconButton onClick={() => setCurrentDate(moment(currentDate).subtract(1, "months").toDate())} color="primary" aria-label="Mes anterior">
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: '#64748b',
+              textAlign: 'center',
+            }}
+          >
+            Gestiona tu disponibilidad para los partidos
+          </Typography>
+        </Box>
+
+        <Paper 
+          elevation={0}
+          sx={{ 
+            padding: { xs: 2, sm: 3 },
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+            borderRadius: '20px', 
+            width: '100%', 
+            maxWidth: '1200px',
+            display: 'flex', 
+            flexDirection: 'column',
+            flex: 1, 
+            height: '100%',
+            backgroundColor: '#ffffff',
+          }}
+        >
+          {/* Controles de navegación del mes */}
+          <Box 
+            display="flex" 
+            justifyContent="space-between" 
+            alignItems="center" 
+            mb={3}
+            sx={{
+              bgcolor: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              p: 2,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            }}
+          >
+            <IconButton 
+              onClick={() => setCurrentDate(moment(currentDate).subtract(1, "months").toDate())}
+              aria-label="Mes anterior"
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.3)',
+                  transform: 'scale(1.1)',
+                },
+              }}
+            >
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h6">{moment(currentDate).format("MMMM YYYY")}</Typography>
-            <IconButton onClick={() => setCurrentDate(moment(currentDate).add(1, "months").toDate())} color="primary" aria-label="Mes siguiente">
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 700,
+                color: 'white',
+                textTransform: 'capitalize',
+              }}
+            >
+              {moment(currentDate).format("MMMM YYYY")}
+            </Typography>
+            <IconButton 
+              onClick={() => setCurrentDate(moment(currentDate).add(1, "months").toDate())}
+              aria-label="Mes siguiente"
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.3)',
+                  transform: 'scale(1.1)',
+                },
+              }}
+            >
               <ArrowForwardIcon />
             </IconButton>
           </Box>
@@ -391,11 +488,32 @@ const DisponibilidadView = forwardRef((_props, ref) => {
             style={{ minHeight: '1000px' }} 
           />
           </div>
-          <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm" data-testid="availability-dialog">
-            <DialogTitle sx={{ backgroundColor: '#F0F4F8', color: '#333', mb: 3 }}>
-              Seleccionar Disponibilidad - {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}
+          <Dialog 
+            open={openDialog} 
+            onClose={handleCloseDialog} 
+            fullWidth 
+            maxWidth="sm" 
+            data-testid="availability-dialog"
+            PaperProps={{
+              sx: {
+                borderRadius: '20px',
+                p: 1,
+              },
+            }}
+          >
+            <DialogTitle sx={{ 
+              fontWeight: 700, 
+              fontSize: '1.25rem',
+              color: '#1e293b',
+              textAlign: 'center',
+              pt: 3,
+            }}>
+              📅 Seleccionar Disponibilidad
+              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 400, mt: 0.5 }}>
+                {selectedDate && moment(selectedDate).format('DD/MM/YYYY')}
+              </Typography>
             </DialogTitle>
-            <DialogContent sx={{ backgroundColor: '#FFFFFF', color: '#333' }}>
+            <DialogContent sx={{ px: 4, pt: 2 }}>
               {['Franja1', 'Franja2', 'Franja3', 'Franja4'].map((franja, index) => {
                 const franjaLabel = `Franja ${index + 1}: ${["9:00-12:00", "12:00-15:00", "15:00-18:00", "18:00-22:00"][index]}`;
                 return (
@@ -461,13 +579,52 @@ const DisponibilidadView = forwardRef((_props, ref) => {
                 variant="outlined"
                 value={availability.comments || ''}
                 onChange={(e) => setAvailability({ ...availability, comments: e.target.value })}
-                sx={{ backgroundColor: '#FFFFFF' }}
+                sx={{ 
+                  mt: 2,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                    '&:hover fieldset': {
+                      borderColor: '#10b981',
+                    },
+                  },
+                }}
                 inputProps={{ maxLength: 200 }}
               />
             </DialogContent>
-            <DialogActions sx={{ backgroundColor: '#F0F4F8' }}>
-              <Button onClick={handleCloseDialog} color="error">Cancelar</Button>
-              <Button onClick={handleSave} color="primary">Guardar</Button>
+            <DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
+              <Button 
+                onClick={handleCloseDialog}
+                variant="outlined"
+                sx={{
+                  borderRadius: '10px',
+                  px: 3,
+                  borderColor: '#e2e8f0',
+                  color: '#64748b',
+                  '&:hover': {
+                    borderColor: '#cbd5e1',
+                    bgcolor: '#f8fafc',
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSave}
+                variant="contained"
+                sx={{
+                  borderRadius: '10px',
+                  px: 3,
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                  },
+                  transition: 'all 0.2s',
+                }}
+              >
+                Guardar
+              </Button>
             </DialogActions>
           </Dialog>
 

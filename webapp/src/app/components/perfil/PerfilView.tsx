@@ -211,43 +211,111 @@ const PerfilView = () => {
   return (
     <Box
       sx={{
-        backgroundColor: '#eafaff',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        paddingBottom: "80px", 
+        paddingBottom: "40px", 
       }}
     >
       <NavBar />
       <Container
-  maxWidth="lg" 
-  sx={{
-    minHeight: "calc(100vh - 64px)", 
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    py: 5,
-    overflow: "hidden", 
-  }}
->
-  <Card sx={{ borderRadius: 3, boxShadow: 6, backgroundColor: "#f9f9f9", width: "100%" }}>
-    <CardHeader
-      title={<Typography variant="h4" fontWeight={600}>Perfil</Typography>}
-      sx={{ textAlign: "center", pb: 0 }}
-    />
-    <CardContent>
+        maxWidth="lg" 
+        sx={{
+          minHeight: "calc(100vh - 64px)", 
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 5,
+          px: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
+        <Card 
+          elevation={0}
+          sx={{ 
+            borderRadius: '24px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            backgroundColor: "#ffffff",
+            width: "100%",
+            overflow: 'visible',
+          }}
+        >
+          {/* Header con gradiente */}
+          <Box
+            sx={{
+              background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+              pt: 6,
+              pb: 8,
+              px: 3,
+              borderRadius: '24px 24px 0 0',
+              position: 'relative',
+            }}
+          >
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                color: 'white',
+                fontWeight: 700,
+                textAlign: 'center',
+              }}
+            >
+              👤 Mi Perfil
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)',
+                textAlign: 'center',
+                mt: 1,
+              }}
+            >
+              Información personal y configuración
+            </Typography>
+          </Box>
+
+          <CardContent sx={{ mt: -4, position: 'relative', zIndex: 1 }}>
       <Grid container spacing={3} justifyContent="center">
+        {/* Avatar mejorado */}
         <Grid item xs={12} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
-          <Avatar
-            src={fotoPreview || perfil.fotoPerfil} // <-- mostrar fotoPreview si existe, sino la original
-            sx={{ width: 120, height: 120, boxShadow: 3 }}
-          />
-          <Tooltip title="Modificar foto de perfil">
-            <IconButton color="primary" component="label" sx={{ mt: 2 }} disabled={isUploadingPhoto}>
-              <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
-              {isUploadingPhoto ? <CircularProgress size={24} /> : <PhotoCamera fontSize="large" />}
-            </IconButton>
-          </Tooltip>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              src={fotoPreview || perfil.fotoPerfil}
+              sx={{ 
+                width: 140, 
+                height: 140, 
+                border: '5px solid white',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+              }}
+            />
+            <Tooltip title="Modificar foto de perfil" arrow>
+              <IconButton 
+                component="label"
+                disabled={isUploadingPhoto}
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 0,
+                  bgcolor: '#2563eb',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+                  '&:hover': {
+                    bgcolor: '#1e40af',
+                    transform: 'scale(1.1)',
+                  },
+                  transition: 'all 0.2s',
+                }}
+              >
+                <input hidden accept="image/*" type="file" onChange={manejarCambioFoto} />
+                {isUploadingPhoto ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <PhotoCamera />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+          {isUploadingPhoto && (
+            <Typography variant="caption" sx={{ mt: 2, color: '#64748b' }}>
+              Subiendo foto...
+            </Typography>
+          )}
         </Grid>
         
         {/* Los campos del perfil */}
@@ -256,9 +324,30 @@ const PerfilView = () => {
             fullWidth
             label="Nombre"
             value={perfil.nombre}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '& .MuiFilledInput-input': {
+                  py: 2,
+                },
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -266,9 +355,27 @@ const PerfilView = () => {
             fullWidth
             label="Primer Apellido"
             value={perfil.primerApellido}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -276,9 +383,27 @@ const PerfilView = () => {
             fullWidth
             label="Segundo Apellido"
             value={perfil.segundoApellido}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -286,9 +411,27 @@ const PerfilView = () => {
             fullWidth
             label="Fecha de Nacimiento"
             value={perfil.fechaNacimiento}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -296,9 +439,27 @@ const PerfilView = () => {
             fullWidth
             label="Dirección"
             value={perfil.direccion}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -306,9 +467,27 @@ const PerfilView = () => {
             fullWidth
             label="País"
             value={perfil.pais}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -316,9 +495,27 @@ const PerfilView = () => {
             fullWidth
             label="Región"
             value={perfil.region}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -326,9 +523,27 @@ const PerfilView = () => {
             fullWidth
             label="Ciudad"
             value={perfil.ciudad}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -336,9 +551,27 @@ const PerfilView = () => {
             fullWidth
             label="Código Postal"
             value={perfil.codigoPostal}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -346,9 +579,27 @@ const PerfilView = () => {
             fullWidth
             label="Nivel"
             value={perfil.nivel}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -356,9 +607,27 @@ const PerfilView = () => {
             fullWidth
             label="Club Vinculado"
             value={clubNombre}
-            InputProps={{ readOnly: true }}
+            InputProps={{ 
+              readOnly: true,
+              sx: {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+              }
+            }}
             variant="filled"
-            sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
+            sx={{ 
+              '& .MuiFilledInput-root': {
+                borderRadius: '12px',
+                bgcolor: '#f8fafc',
+                '&:before, &:after': {
+                  display: 'none',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#64748b',
+                fontWeight: 500,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -385,8 +654,7 @@ const PerfilView = () => {
         {/* Botón de Modificar Contraseña junto a los últimos campos */}
         <Grid item xs={12} md={6}>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="contained"
             onClick={() => {
               // Limpiar todos los campos y errores antes de abrir el diálogo
               setOldPassword("");
@@ -398,11 +666,23 @@ const PerfilView = () => {
               setPasswordError("");
               setOpenDialog(true);
             }}
-            sx={{ mt: 3, width: "100%" }}
+            sx={{ 
+              mt: 3, 
+              width: "100%",
+              background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+              py: 1.5,
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
+                boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
+                transform: 'translateY(-1px)',
+              },
+              transition: 'all 0.2s',
+            }}
           >
-            Modificar Contraseña
+            🔒 Modificar Contraseña
           </Button>
-
         </Grid>
       </Grid>
     </CardContent>
@@ -410,9 +690,27 @@ const PerfilView = () => {
 </Container>
 
       {/* Diálogo de cambiar contraseña */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Modificar Contraseña</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={openDialog} 
+        onClose={() => setOpenDialog(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            p: 1,
+            minWidth: '450px',
+          },
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontWeight: 700, 
+          fontSize: '1.5rem',
+          color: '#1e293b',
+          textAlign: 'center',
+          pt: 3,
+        }}>
+          🔒 Modificar Contraseña
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, pt: 3 }}>
           <TextField
             fullWidth
             label="Contraseña Actual"
@@ -422,7 +720,15 @@ const PerfilView = () => {
             error={Boolean(oldPasswordError)}
             helperText={oldPasswordError}
             variant="outlined"
-            sx={{ mb: 2, mt: 2 }}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: '#2563eb',
+                },
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -442,7 +748,15 @@ const PerfilView = () => {
             error={Boolean(newPasswordError)}
             helperText={newPasswordError}
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: '#2563eb',
+                },
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -462,6 +776,15 @@ const PerfilView = () => {
             error={Boolean(confirmPasswordError)}
             helperText={confirmPasswordError}
             variant="outlined"
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: '#2563eb',
+                },
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -473,11 +796,38 @@ const PerfilView = () => {
             }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="error">
+        <DialogActions sx={{ px: 4, pb: 3, gap: 1 }}>
+          <Button 
+            onClick={() => setOpenDialog(false)}
+            variant="outlined"
+            sx={{
+              borderRadius: '10px',
+              px: 3,
+              borderColor: '#e2e8f0',
+              color: '#64748b',
+              '&:hover': {
+                borderColor: '#cbd5e1',
+                bgcolor: '#f8fafc',
+              },
+            }}
+          >
             Cancelar
           </Button>
-          <Button onClick={handlePasswordChange} color="primary">
+          <Button 
+            variant="contained"
+            onClick={handlePasswordChange}
+            sx={{
+              borderRadius: '10px',
+              px: 3,
+              background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+              },
+              transition: 'all 0.2s',
+            }}
+          >
             Guardar
           </Button>
         </DialogActions>
