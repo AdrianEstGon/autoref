@@ -1,3 +1,4 @@
-//const API_URL = 'https://7b5ec380-243e-46df-b58c-27bb9bd7b812-dev.e1-eu-north-azure.choreoapis.dev/autoref/backend/v1.0/api';
-const API_URL = 'http://voleyasturias-001-site3.jtempurl.com/api';
+// Configuración de la API - usa variable de entorno o fallback a localhost
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:10000/api';
+
 export default API_URL;

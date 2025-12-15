@@ -1,0 +1,49 @@
+# ===== GENERAL =====
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.log
+*.suo
+*.user
+
+# ===== BACKEND (.NET) =====
+backend/bin/
+backend/obj/
+backend/.vs/
+backend/.vscode/
+backend/*.user
+backend/.env
+
+# ===== FRONTEND (Next.js) =====
+webapp/node_modules/
+webapp/.next/
+webapp/out/
+webapp/build/
+webapp/.env.local
+webapp/.env.development.local
+webapp/.env.test.local
+webapp/.env.production.local
+webapp/npm-debug.log*
+webapp/yarn-debug.log*
+webapp/yarn-error.log*
+
+# ===== NODE_MODULES GLOBAL =====
+node_modules/
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+Thumbs.db
+desktop.ini
+
+# ===== TESTING =====
+coverage/
+.nyc_output/

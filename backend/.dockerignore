@@ -1,0 +1,17 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/.env
+**/env.example
+**/README.md
+**/DEPLOYMENT_GUIDE.md
+**/*.md
+**/.DS_Store
+**/node_modules
+**/npm-debug.log
+**/*.user
+**/*.suo
+
