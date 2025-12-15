@@ -44,7 +44,7 @@
     "@types/jest": "^29.5.14",
     "@types/js-priority-queue": "^0.0.9",
     "@types/moment": "^2.13.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.27",
     "@types/react": "^19",
     "@types/react-big-calendar": "^1.16.1",
     "@types/react-dom": "^19",
