@@ -115,7 +115,7 @@ function LoginView() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -193,7 +193,7 @@ function LoginView() {
                 left: 0,
                 right: 0,
                 height: '5px',
-                background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(90deg, #4A90E2 0%, #2C5F8D 100%)',
               },
             }}
           >
@@ -230,20 +230,20 @@ function LoginView() {
                   />
                 )}
                 <Box>
-                  <Typography 
-                    component="h1" 
-                    variant="h4" 
-                    sx={{ 
-                      fontWeight: 700,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Bienvenido
-                  </Typography>
+                <Typography 
+                  component="h1" 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    textAlign: 'center',
+                  }}
+                >
+                  Bienvenido
+                </Typography>
                   <Typography 
                     variant="body2" 
                     sx={{ 
@@ -318,7 +318,7 @@ function LoginView() {
                           sx={{
                             color: '#64748b',
                             '&:hover': {
-                              color: '#2563eb',
+                              color: '#4A90E2',
                             },
                           }}
                         >
@@ -359,14 +359,14 @@ function LoginView() {
                     mb: 2,
                     py: 1.5,
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                     fontSize: '1rem',
                     fontWeight: 600,
                     textTransform: 'none',
-                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                    boxShadow: '0 4px 12px rgba(74, 144, 226, 0.4)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
-                      boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+                      background: 'linear-gradient(135deg, #2C5F8D 0%, #1e3a5f 100%)',
+                      boxShadow: '0 6px 20px rgba(74, 144, 226, 0.6)',
                       transform: 'translateY(-2px)',
                     },
                     '&:disabled': {

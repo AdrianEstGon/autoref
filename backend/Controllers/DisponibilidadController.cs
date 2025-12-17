@@ -87,13 +87,24 @@ namespace AutoRef_API.Controllers
             return Ok(disponibilidad);
         }
 
+        [HttpGet("usuario/{usuarioId}/rango")]
+        public async Task<IActionResult> GetDisponibilidadesByUserAndRange(Guid usuarioId, [FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
+        {
+            var disponibilidades = await _context.Disponibilidades
+                .Where(d => d.UsuarioId == usuarioId && d.Fecha.Date >= fechaInicio.Date && d.Fecha.Date <= fechaFin.Date)
+                .OrderBy(d => d.Fecha)
+                .ToListAsync();
+
+            return Ok(disponibilidades);
+        }
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostDisponibilidad([FromBody] DisponibilidadModel disponibilidadModel)
         {
             if (disponibilidadModel == null)
             {
-                return BadRequest(new { message = "Datos de disponibilidad inválidos." });
+                return BadRequest(new { message = "Datos de disponibilidad invï¿½lidos." });
             }
 
             var disponibilidad = new Disponibilidad
@@ -110,7 +121,7 @@ namespace AutoRef_API.Controllers
             _context.Disponibilidades.Add(disponibilidad);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Disponibilidad creada con éxito.", disponibilidad });
+            return Ok(new { message = "Disponibilidad creada con ï¿½xito.", disponibilidad });
         }
 
         [Authorize]
@@ -119,7 +130,7 @@ namespace AutoRef_API.Controllers
         {
             if (disponibilidadModel == null)
             {
-                return BadRequest(new { message = "Datos de disponibilidad inválidos o ID incorrecto." });
+                return BadRequest(new { message = "Datos de disponibilidad invï¿½lidos o ID incorrecto." });
             }
 
             var disponibilidadExistente = await _context.Disponibilidades.FindAsync(id);
@@ -138,12 +149,28 @@ namespace AutoRef_API.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Disponibilidad actualizada con éxito.", disponibilidadExistente });
+                return Ok(new { message = "Disponibilidad actualizada con ï¿½xito.", disponibilidadExistente });
             }
             catch (DbUpdateConcurrencyException)
             {
                 return StatusCode(500, new { message = "Error al actualizar la disponibilidad." });
             }
+        }
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDisponibilidad(Guid id)
+        {
+            var disponibilidad = await _context.Disponibilidades.FindAsync(id);
+            if (disponibilidad == null)
+            {
+                return NotFound(new { message = "Disponibilidad no encontrada." });
+            }
+
+            _context.Disponibilidades.Remove(disponibilidad);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Disponibilidad eliminada con Ã©xito." });
         }
 
     }

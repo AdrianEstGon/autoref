@@ -16,6 +16,8 @@ import {
   Avatar,
   Divider,
   alpha,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import moment from "moment";
 import "moment/locale/es";
@@ -42,6 +44,7 @@ const DesignacionesView = React.memo(() => {
   const [selectedEstado, setSelectedEstado] = useState<number | null>(null);
   const [disabledButtons, setDisabledButtons] = useState<Record<string, boolean>>({});
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -114,6 +117,15 @@ const DesignacionesView = React.memo(() => {
     return { bg: "#F0F6FA", text: "#5B7C99", label: "Pendiente" };
   };
 
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  // Filtrar partidos según la pestaña seleccionada
+  const partidosFiltrados = tabValue === 0 
+    ? partidos.filter((p) => getEstadoActual(p) === 1) // Confirmados (aceptados)
+    : partidos.filter((p) => getEstadoActual(p) === 0); // Propuestos (pendientes)
+
   return (
     <Box>
       {/* Header */}
@@ -148,7 +160,7 @@ const DesignacionesView = React.memo(() => {
         <Card sx={{ background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)", color: "white" }}>
           <CardContent>
             <Typography variant="h3" fontWeight={700}>{partidos.length}</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Partidos pendientes</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>Total partidos</Typography>
           </CardContent>
         </Card>
         <Card sx={{ background: "linear-gradient(135deg, #5B7C99 0%, #3A5166 100%)", color: "white" }}>
@@ -156,7 +168,7 @@ const DesignacionesView = React.memo(() => {
             <Typography variant="h3" fontWeight={700}>
               {partidos.filter((p) => getEstadoActual(p) === 1).length}
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Aceptados</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>Confirmados</Typography>
           </CardContent>
         </Card>
         <Card sx={{ background: "linear-gradient(135deg, #7BA7D9 0%, #5B7C99 100%)", color: "white" }}>
@@ -164,15 +176,41 @@ const DesignacionesView = React.memo(() => {
             <Typography variant="h3" fontWeight={700}>
               {partidos.filter((p) => getEstadoActual(p) === 0).length}
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Por confirmar</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>Propuestos</Typography>
           </CardContent>
         </Card>
       </Box>
 
+      {/* Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange}
+          sx={{
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              minWidth: 180,
+            },
+            '& .Mui-selected': {
+              color: '#2C5F8D',
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#2C5F8D',
+              height: 3,
+            },
+          }}
+        >
+          <Tab label="Partidos Confirmados" />
+          <Tab label="Partidos Propuestos" />
+        </Tabs>
+      </Box>
+
       {/* Partidos List */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {partidos.length > 0 ? (
-          partidos.map((partido) => {
+        {partidosFiltrados.length > 0 ? (
+          partidosFiltrados.map((partido) => {
             const estadoActual = getEstadoActual(partido);
             const estadoInfo = getEstadoColor(estadoActual);
             const rolUsuario = getRolUsuario(partido);
@@ -371,10 +409,12 @@ const DesignacionesView = React.memo(() => {
                 <SportsVolleyballIcon sx={{ fontSize: 60, color: "#94a3b8" }} />
               </Box>
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                No tienes partidos designados
+                {tabValue === 0 ? 'No tienes partidos confirmados' : 'No tienes partidos propuestos'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Cuando te asignen un partido, aparecerá aquí
+                {tabValue === 0 
+                  ? 'Los partidos que aceptes aparecerán aquí' 
+                  : 'Cuando te asignen un partido, aparecerá aquí'}
               </Typography>
             </CardContent>
           </Card>

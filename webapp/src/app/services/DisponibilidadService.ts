@@ -42,6 +42,22 @@ const getDisponibilidadByUserAndDate = async (usuarioId: string, fecha: string) 
       throw new Error(error.response?.data?.message || 'No se pudo obtener la disponibilidad.');
     }
   };
+
+const getDisponibilidadesByUserAndRange = async (usuarioId: string, fechaInicio: string, fechaFin: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/Disponibilidad/usuario/${usuarioId}/rango`, {
+      ...getAuthHeaders(),
+      params: {
+        fechaInicio,
+        fechaFin
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error al obtener disponibilidades del usuario ${usuarioId}:`, error);
+    throw new Error(error.response?.data?.message || 'No se pudieron obtener las disponibilidades.');
+  }
+};
   
 
 const crearDisponibilidad = async (disponibilidad: any) => {
@@ -80,5 +96,6 @@ export default {
   crearDisponibilidad, 
   actualizarDisponibilidad, 
   eliminarDisponibilidad, 
-  getDisponibilidadByUserAndDate 
+  getDisponibilidadByUserAndDate,
+  getDisponibilidadesByUserAndRange
 };

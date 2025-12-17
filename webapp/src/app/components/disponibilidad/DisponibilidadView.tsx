@@ -2,7 +2,7 @@ import React, { useState, useEffect, JSX, useImperativeHandle, forwardRef } from
 import {
   Typography, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
   TextField, IconButton, Grid, useMediaQuery, useTheme, Card,
-  Autocomplete, Chip
+  Autocomplete, Chip, Tooltip
 } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -14,6 +14,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
+import DeleteIcon from "@mui/icons-material/Delete";
 import disponibilidadService from "../../services/DisponibilidadService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -30,6 +31,8 @@ type CustomEvent = {
   availability: number;
   color?: string;
   icon?: JSX.Element;
+  disponibilidadId?: string;
+  fecha?: string;
 };
 
 const DisponibilidadView = forwardRef((_props, ref) => {
@@ -53,26 +56,35 @@ const DisponibilidadView = forwardRef((_props, ref) => {
     try {
       const disponibilidad = await disponibilidadService.getDisponibilidadByUserAndDate(usuarioId, formattedDate);
 
-      if (disponibilidad) {
+      // Si existe disponibilidad y tiene id, cargar los valores
+      if (disponibilidad && disponibilidad.id) {
         setAvailability({
-          Franja1: disponibilidad.franja1 || '',
-          Franja2: disponibilidad.franja2 || '',
-          Franja3: disponibilidad.franja3 || '',
-          Franja4: disponibilidad.franja4 || '',
+          Franja1: disponibilidad.franja1 || 0,
+          Franja2: disponibilidad.franja2 || 0,
+          Franja3: disponibilidad.franja3 || 0,
+          Franja4: disponibilidad.franja4 || 0,
           comments: disponibilidad.comentarios || ''
         });
       } else {
+        // Si no existe, valores vacíos (0)
         setAvailability({
-          Franja1: '',
-          Franja2: '',
-          Franja3: '',
-          Franja4: '',
+          Franja1: 0,
+          Franja2: 0,
+          Franja3: 0,
+          Franja4: 0,
           comments: ''
         });
       }
     } catch (error) {
       console.error("Error al cargar disponibilidad:", error);
-      toast.error("Ocurrió un error al cargar la disponibilidad"); 
+      // Si hay error, inicializar con valores vacíos
+      setAvailability({
+        Franja1: 0,
+        Franja2: 0,
+        Franja3: 0,
+        Franja4: 0,
+        comments: ''
+      });
     }
   };
 
@@ -83,18 +95,32 @@ const DisponibilidadView = forwardRef((_props, ref) => {
       return;
     }
   
-    const startOfMonth = moment(month).startOf("month");
-    const endOfMonth = moment(month).endOf("month");
+    const startOfMonth = moment(month).startOf("month").format("YYYY-MM-DD");
+    const endOfMonth = moment(month).endOf("month").format("YYYY-MM-DD");
     const events: CustomEvent[] = [];
   
     try {
-      for (let day = startOfMonth; day.isSameOrBefore(endOfMonth, "day"); day.add(1, "days")) {
-        const formattedDate = day.format("YYYY-MM-DD");
-        const disponibilidad = await disponibilidadService.getDisponibilidadByUserAndDate(usuarioId, formattedDate);
+      // Una sola petición para todo el mes
+      const disponibilidades = await disponibilidadService.getDisponibilidadesByUserAndRange(usuarioId, startOfMonth, endOfMonth);
+      
+      // Crear un mapa para búsqueda rápida por fecha
+      const disponibilidadMap = new Map();
+      disponibilidades.forEach((disp: any) => {
+        const fechaKey = moment(disp.fecha).format("YYYY-MM-DD");
+        disponibilidadMap.set(fechaKey, disp);
+      });
+
+      // Recorrer el mes y crear eventos
+      for (let day = moment(month).startOf("month"); day.isSameOrBefore(moment(month).endOf("month"), "day"); day.add(1, "days")) {
+        const fechaKey = day.format("YYYY-MM-DD");
+        const disponibilidad = disponibilidadMap.get(fechaKey);
+        
+        if (!disponibilidad) continue;
+
         const date = day.toDate();
   
-        const dayEvents: CustomEvent[] = ["Franja1", "Franja2", "Franja3", "Franja4"].map((franja, index) => {
-          const availability = disponibilidad?.[franja.toLowerCase()] || 0;
+        const dayEvents: CustomEvent[] = ["franja1", "franja2", "franja3", "franja4"].map((franja, index) => {
+          const availability = disponibilidad[franja] || 0;
           if (availability === 0) {
             return null; 
           }
@@ -103,8 +129,10 @@ const DisponibilidadView = forwardRef((_props, ref) => {
             title: ["09:00 - 12:00", "12:00 - 15:00", "15:00 - 18:00", "18:00 - 22:00"][index],
             start: moment(date).hour(9 + index * 3).minute(0).toDate(),
             end: moment(date).hour(12 + index * 3).minute(0).toDate(),
-            resource: franja,
+            resource: `Franja${index + 1}`,
             availability,
+            disponibilidadId: disponibilidad.id,
+            fecha: fechaKey,
           };
         }).filter(event => event !== null);
   
@@ -144,69 +172,75 @@ const DisponibilidadView = forwardRef((_props, ref) => {
   
     const formattedDate = moment(selectedDate).format("YYYY-MM-DD");
   
+    // Asegurar que los valores sean números (1, 2, 3) o 0
     const disponibilidadData = {
       usuarioId,
       fecha: formattedDate,
-      franja1: availability.Franja1 || 0,
-      franja2: availability.Franja2 || 0,
-      franja3: availability.Franja3 || 0,
-      franja4: availability.Franja4 || 0,
+      franja1: typeof availability.Franja1 === 'number' ? availability.Franja1 : 0,
+      franja2: typeof availability.Franja2 === 'number' ? availability.Franja2 : 0,
+      franja3: typeof availability.Franja3 === 'number' ? availability.Franja3 : 0,
+      franja4: typeof availability.Franja4 === 'number' ? availability.Franja4 : 0,
       comentarios: availability.comments || "",
     };
   
     try {
       const disponibilidadExistente = await disponibilidadService.getDisponibilidadByUserAndDate(usuarioId, formattedDate);
   
-      if (disponibilidadExistente && disponibilidadExistente.disponibilidad !== null) { // If availability exists
+      if (disponibilidadExistente && disponibilidadExistente.id) {
+        // Si existe, actualizamos
         await disponibilidadService.actualizarDisponibilidad({
-          ...disponibilidadExistente,
+          id: disponibilidadExistente.id,
           ...disponibilidadData,
         });
-        toast.success("Disponibilidad actualizada con éxito"); // Show success toast
+        toast.success("Disponibilidad actualizada con éxito");
       } else {
+        // Si no existe, creamos
         await disponibilidadService.crearDisponibilidad(disponibilidadData);
-        toast.success("Disponibilidad creada con éxito"); // Show success toast
+        toast.success("Disponibilidad creada con éxito");
       }
   
-      // Actualizar la disponibilidad en el estado de forma directa
-      setAvailability(prevAvailability => ({
-        ...prevAvailability,
-        Franja1: disponibilidadData.franja1,
-        Franja2: disponibilidadData.franja2,
-        Franja3: disponibilidadData.franja3,
-        Franja4: disponibilidadData.franja4,
-        comments: disponibilidadData.comentarios
-      }));
-  
+      // Recargar el calendario con los datos actualizados
       await loadAvailabilityForMonth(currentDate);
   
-      setOpenDialog(false); 
+      // Cerrar el diálogo
+      setOpenDialog(false);
+      setSelectedDate(null);
     } catch (error) {
       console.error("Error al guardar disponibilidad:", error);
-      toast.error("Ocurrió un error al guardar la disponibilidad"); 
+      toast.error("Ocurrió un error al guardar la disponibilidad");
     }
   };
 
   const eventStyleGetter = (event: CustomEvent) => {
     let backgroundColor = 'white';
+    let borderColor = '#e5e7eb';
+    
     if (event.availability === 1) {
-      backgroundColor = '#c6eefe';
+      // Con transporte - Azul
+      backgroundColor = '#dbeafe';
+      borderColor = '#93c5fd';
     } else if (event.availability === 2) {
-      backgroundColor = '#d8ffcd';
+      // Sin transporte - Verde
+      backgroundColor = '#d1fae5';
+      borderColor = '#6ee7b7';
     } else if (event.availability === 3) {
-      backgroundColor = '#ffc8c1';
+      // No disponible - Rojo
+      backgroundColor = '#fee2e2';
+      borderColor = '#fca5a5';
     }
 
     return {
       style: {
         backgroundColor,
+        border: `1px solid ${borderColor}`,
         borderRadius: '8px', 
-        color: 'black',
+        color: '#1e293b',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         height: '40px', 
-        fontSize: '14px',
+        fontSize: '13px',
+        fontWeight: 500,
         fontFamily: 'Arial, sans-serif', 
         padding: '5px', 
         overflow: 'hidden',
@@ -229,14 +263,49 @@ const DisponibilidadView = forwardRef((_props, ref) => {
     };
   };
 
-    const renderEventContent = ({ event }: { event: CustomEvent }) => {
+  const renderEventContent = ({ event }: { event: CustomEvent }) => {
     const testId = `event-${moment(event.start).format('YYYYMMDD')}-${event.resource}`;
-    console.log("Rendering event with testId:", testId);
 
     return (
-      <div data-testid={testId} style={{ display: "flex", alignItems: "center" }}>
-        {event.icon && <div style={{ marginRight: "4px" }}>{event.icon}</div>}
-        <span>{event.title}</span>
+      <div 
+        data-testid={testId} 
+        style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+          width: "100%",
+          position: "relative",
+          padding: "0 4px",
+        }}
+        className="calendar-event-content"
+      >
+        <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
+          {event.icon && <div style={{ marginRight: "4px", display: "flex" }}>{event.icon}</div>}
+          <span style={{ fontSize: "13px" }}>{event.title}</span>
+        </div>
+        <Tooltip title="Eliminar" arrow>
+          <IconButton
+            size="small"
+            onClick={(e) => handleDeleteFranja(event, e)}
+            className="delete-event-btn"
+            sx={{
+              padding: "2px",
+              minWidth: "24px",
+              width: "24px",
+              height: "24px",
+              opacity: 0,
+              transition: "opacity 0.2s",
+              '&:hover': {
+                bgcolor: 'rgba(239, 68, 68, 0.1)',
+              },
+              '.calendar-event-content:hover &': {
+                opacity: 1,
+              },
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: 16, color: '#ef4444' }} />
+          </IconButton>
+        </Tooltip>
       </div>
     );
   };
@@ -338,6 +407,66 @@ const DisponibilidadView = forwardRef((_props, ref) => {
     setAvailability({ ...availability, [franja]: value });
   };
 
+  const handleDeleteFranja = async (event: CustomEvent, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se abra el diálogo de edición
+    
+    if (!event.disponibilidadId || !event.fecha) return;
+    
+    const usuarioId = localStorage.getItem("userId");
+    if (!usuarioId) {
+      toast.error("Error: Usuario no identificado");
+      return;
+    }
+
+    try {
+      // Cargar la disponibilidad completa
+      const disponibilidad = await disponibilidadService.getDisponibilidadByUserAndDate(usuarioId, event.fecha);
+      
+      if (!disponibilidad || !disponibilidad.id) {
+        toast.error("No se encontró la disponibilidad");
+        return;
+      }
+
+      // Determinar qué franja eliminar (poner a 0)
+      const franjaKey = event.resource.toLowerCase(); // "Franja1" -> "franja1"
+      const disponibilidadActualizada: any = {
+        id: disponibilidad.id,
+        usuarioId,
+        fecha: event.fecha,
+        franja1: disponibilidad.franja1,
+        franja2: disponibilidad.franja2,
+        franja3: disponibilidad.franja3,
+        franja4: disponibilidad.franja4,
+        comentarios: disponibilidad.comentarios || "",
+      };
+
+      // Poner la franja seleccionada a 0
+      disponibilidadActualizada[franjaKey] = 0;
+
+      // Verificar si todas las franjas están a 0
+      const todasVacias = disponibilidadActualizada.franja1 === 0 && 
+                         disponibilidadActualizada.franja2 === 0 && 
+                         disponibilidadActualizada.franja3 === 0 && 
+                         disponibilidadActualizada.franja4 === 0;
+
+      if (todasVacias) {
+        // Si todas las franjas están vacías, eliminar el registro completo
+        await disponibilidadService.eliminarDisponibilidad(disponibilidad.id);
+        toast.success("Disponibilidad eliminada");
+      } else {
+        // Si quedan otras franjas, solo actualizar
+        await disponibilidadService.actualizarDisponibilidad(disponibilidadActualizada);
+        toast.success("Franja eliminada");
+      }
+
+      // Recargar el calendario
+      await loadAvailabilityForMonth(currentDate);
+    } catch (error) {
+      console.error("Error al eliminar franja:", error);
+      toast.error("Error al eliminar la disponibilidad");
+    }
+  };
+
   useEffect(() => {
     loadAvailabilityForMonth(currentDate);
   }, [currentDate]);
@@ -381,15 +510,6 @@ const DisponibilidadView = forwardRef((_props, ref) => {
 
       <Card sx={{ p: 3, borderRadius: '16px' }}>
         <Box sx={{ mb: 3 }}>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: '#64748b',
-              textAlign: 'center',
-            }}
-          >
-            Gestiona tu disponibilidad para los partidos
-          </Typography>
         </Box>
 
         <Box 
@@ -525,7 +645,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
                               { label: 'No disponible', value: 3 },
                             ].find((opt) => opt.value === availability[franja]) || null
                           }
-                          onChange={(_, newValue) => handleChange(franja, newValue ? newValue.value : '')}
+                          onChange={(_, newValue) => handleChange(franja, newValue ? newValue.value : 0)}
                           renderInput={(params) => (
                             <TextField
                               {...params}
