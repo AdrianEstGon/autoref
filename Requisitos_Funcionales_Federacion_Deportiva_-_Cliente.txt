@@ -1,0 +1,191 @@
+   Documento de Requisitos Funcionales – Aplicación de
+           Gestión de Federación Deportiva
+                                 Fecha: 16/12/2025 | Versión: 1.0
+
+
+1. Introducción
+Este documento describe, en lenguaje sencillo y orientado a negocio, las funcionalidades que
+debe tener una aplicación integral de gestión para una Federación Deportiva. El objetivo es
+disponer de una plataforma única que simplifique el trabajo diario de la federación, los clubes y
+los árbitros, y que ofrezca información clara al público.
+
+
+2. Objetivos
+• Centralizar la gestión de personas, clubes, equipos, competiciones y partidos.
+
+• Facilitar inscripciones y validaciones de forma guiada y sin errores.
+
+• Planificar calendarios y asignar horarios de manera ordenada y con reglas claras.
+
+• Designar árbitros con visibilidad sobre su disponibilidad y nivel.
+
+• Registrar resultados y generar informes de partido fiables.
+
+• Gestionar licencias y seguros (mutualidad) de forma transparente.
+
+• Simplificar pagos y facturación con procesos claros y trazables.
+
+• Publicar en la web calendario, resultados y clasificaciones de forma atractiva y accesible.
+
+
+3. Alcance
+La aplicación cubrirá el ciclo completo de una temporada: creación de competiciones,
+inscripción de equipos y personas, validación de documentación, generación de calendarios,
+fijación de horarios, designaciones arbitrales, registro de actas y resultados, gestión de licencias
+y mutualidad, pagos y facturación, y comunicación pública de la información relevante.
+
+
+4. Roles y perfiles de usuario
+• Federación: Configura temporadas y competiciones, valida equipos y licencias, supervisa
+resultados y gestiona facturación.
+
+• Comité de Árbitros: Organiza designaciones, revisa disponibilidad y niveles, aprueba
+liquidaciones.
+• Club: Inscribe equipos y jugadores, fija horarios como local, solicita cambios y sube
+documentación.
+
+• Árbitro: Informa disponibilidad, acepta designaciones, cumplimenta acta y presenta
+liquidaciones.
+
+• Público (Web): Consulta calendarios, resultados y clasificaciones.
+
+
+5. Funcionalidades de la aplicación (explicadas)
+
+5.1 Gestión de personas
+• Alta sencilla de personas (jugadores, técnicos, árbitros) con datos básicos y contacto.
+
+• Asignación de rol según su función (club, árbitro, federación, etc.).
+
+• Gestión de licencias por temporada y por modalidad (si el deporte tiene varias).
+
+• Habilitación de jugadores para competir en categorías superiores cuando corresponda.
+
+5.2 Gestión de clubes y equipos
+• Alta de clubes con sus datos fiscales y responsables.
+
+• Creación de equipos por competición y categoría, controlando número mínimo y máximo de
+jugadores.
+
+• Generación y descarga de documentos oficiales (autorizaciones, licencias) desde la propia
+aplicación.
+
+5.3 Competiciones y calendarios
+• Creación de competiciones por temporada con categorías y modalidad (si aplica).
+
+• Apertura de inscripciones con fechas y cuotas definidas por la federación.
+
+• Generación de calendarios y jornadas (liga regular, fases finales).
+
+• Reglas de puntos y desempates configurables por competición.
+
+5.4 Horarios y cambios de partido
+• El equipo local fija fecha, hora y lugar del partido en una ventana de tiempo establecida por la
+federación.
+
+• Solicitud de cambios (fecha/hora/lugar) con un flujo de aceptación entre clubes y validación
+final por la federación.
+
+• Alertas y notificaciones automáticas a las partes implicadas cuando hay cambios confirmados.
+5.5 Designación de árbitros
+• Cada árbitro marca su disponibilidad por días (con comentarios si es necesario).
+
+• El Comité asigna partidos cuando ya tienen fecha y hora; las designaciones se notifican al
+árbitro.
+
+• El árbitro acepta o rechaza; el sistema registra el motivo y actualiza el estado.
+
+• Listados ordenables y filtrables por competición, categoría, nivel y zona/localidad.
+
+5.6 Acta electrónica y resultados
+• Acta en la propia aplicación para registrar participantes, incidencias y marcador durante el
+partido.
+
+• Cierre del partido con confirmación para evitar errores.
+
+• Generación de un informe imprimible del partido con datos completos (participantes,
+resultados por periodos/sets, observaciones).
+
+• Publicación de resultados y clasificaciones en el portal web público.
+
+5.7 Licencias y mutualidad
+• Solicitud y validación de licencias por niveles/categorías según reglas de la federación.
+
+• Gestión de mutualidad (seguro deportivo): preparación de listados y exportaciones al formato
+requerido por la aseguradora.
+
+5.8 Pagos, liquidaciones y facturación
+• Liquidaciones de árbitros por día o por partido (arbitrajes, desplazamientos, dietas y otros
+gastos).
+
+• Ordenes de pago periódicas y exportación de remesas bancarias (formato del banco).
+
+• Facturación a clubes y entidades con estados (emitida, pendiente, pagada).
+
+5.9 Portal web público
+• Calendarios, resultados y clasificaciones accesibles al público.
+
+• Búsqueda de partidos entre fechas y por categorías.
+
+• Espacio de noticias y comunicaciones oficiales de la federación.
+
+5.10 Comunicación y notificaciones
+• Notificaciones por correo y dentro de la aplicación para: validaciones, cambios de horario,
+nuevas designaciones y publicación de resultados.
+• Panel de avisos para recordar tareas pendientes (por ejemplo, resultados por cargar o pagos
+por revisar).
+
+
+6. Requisitos de calidad (explicados sin tecnicismos)
+• Seguridad de datos personales y cumplimiento de normativa de protección de datos.
+
+• Facilidad de uso: pantallas claras, procesos guiados, mensajes de ayuda.
+
+• Disponibilidad: el sistema debe estar operativo de forma estable, especialmente en fines de
+semana.
+
+• Accesibilidad: la web pública debe poder usarse por cualquier persona, también con
+necesidades especiales.
+
+• Fiabilidad: las operaciones clave (designaciones, resultados, pagos) deben quedar registradas y
+ser trazables.
+
+
+7. Flujo general del sistema (visión de negocio)
+1) La federación crea competiciones y abre inscripciones.
+
+2) Los clubes inscriben equipos y personas; la federación valida.
+
+3) Se generan calendarios y los clubes fijan horarios como locales.
+
+4) El Comité designa árbitros; los árbitros confirman.
+
+5) Se juega el partido, se cumplimenta el acta y se registran resultados.
+
+6) El sistema actualiza las clasificaciones y publica en la web.
+
+7) Se gestionan licencias, mutualidad, liquidaciones y facturas periódicamente.
+
+
+8. Indicadores de éxito (KPIs)
+• Resultados y actas cargados en menos de 24 horas desde el partido.
+
+• Tiempo medio de validación de equipos y licencias.
+
+• Número de incidencias resueltas por semana y su tiempo medio de resolución.
+
+• Porcentaje de pagos procesados correctamente en cada remesa.
+
+
+9. Plan de implantación (orientativo)
+• Fase 1: Inscripciones y validaciones (personas, clubes, equipos), competiciones y calendarios.
+• Fase 2: Designaciones, horarios y acta electrónica con publicación de resultados.
+
+• Fase 3: Licencias, mutualidad, pagos y facturación, y mejoras del portal público.
+
+
+10. Cierre
+Este documento refleja de forma clara qué debe ofrecer la aplicación desde el primer día. Sobre
+esta base se elaborarán prototipos, se priorizarán los entregables y se planificarán las fases de
+implantación.
+
