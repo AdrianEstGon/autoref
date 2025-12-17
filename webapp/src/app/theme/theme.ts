@@ -1,38 +1,38 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
-// Paleta de colores moderna y profesional
+// Paleta de colores moderna y profesional - Tonos azules suaves
 const palette = {
   primary: {
-    main: '#2563eb', // Azul vibrante moderno
-    light: '#60a5fa',
-    dark: '#1e40af',
+    main: '#4A90E2', // Azul suave principal
+    light: '#7BA7D9',
+    dark: '#2C5F8D',
     contrastText: '#ffffff',
   },
   secondary: {
-    main: '#8b5cf6', // Púrpura elegante
-    light: '#a78bfa',
-    dark: '#7c3aed',
+    main: '#5B7C99', // Azul grisáceo
+    light: '#8FA9BF',
+    dark: '#3A5166',
     contrastText: '#ffffff',
   },
   success: {
-    main: '#10b981', // Verde moderno
-    light: '#34d399',
-    dark: '#059669',
+    main: '#4A90E2', // Azul suave (consistente)
+    light: '#7BA7D9',
+    dark: '#2C5F8D',
   },
   error: {
-    main: '#ef4444', // Rojo vibrante
-    light: '#f87171',
-    dark: '#dc2626',
+    main: '#94A3B8', // Gris azulado suave (en lugar de rojo agresivo)
+    light: '#CBD5E1',
+    dark: '#64748B',
   },
   warning: {
-    main: '#f59e0b', // Naranja cálido
-    light: '#fbbf24',
-    dark: '#d97706',
+    main: '#7BA7D9', // Azul claro (en lugar de naranja)
+    light: '#A8C5E5',
+    dark: '#5B7C99',
   },
   info: {
-    main: '#3b82f6',
-    light: '#60a5fa',
-    dark: '#2563eb',
+    main: '#4A90E2',
+    light: '#7BA7D9',
+    dark: '#2C5F8D',
   },
   background: {
     default: '#f8fafc', // Gris muy claro
@@ -109,7 +109,7 @@ const components = {
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: '10px',
+        borderRadius: '6px',
         padding: '10px 24px',
         fontSize: '0.95rem',
         fontWeight: 600,
@@ -136,7 +136,7 @@ const components = {
   MuiCard: {
     styleOverrides: {
       root: {
-        borderRadius: '16px',
+        borderRadius: '8px',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
@@ -149,7 +149,7 @@ const components = {
   MuiPaper: {
     styleOverrides: {
       root: {
-        borderRadius: '12px',
+        borderRadius: '8px',
         backgroundImage: 'none',
       },
       elevation1: {
@@ -167,7 +167,7 @@ const components = {
     styleOverrides: {
       root: {
         '& .MuiOutlinedInput-root': {
-          borderRadius: '10px',
+          borderRadius: '6px',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
             '& .MuiOutlinedInput-notchedOutline': {
@@ -186,7 +186,7 @@ const components = {
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: '8px',
+        borderRadius: '6px',
         fontWeight: 500,
         fontSize: '0.875rem',
       },
@@ -227,7 +227,7 @@ const components = {
   MuiDialog: {
     styleOverrides: {
       paper: {
-        borderRadius: '16px',
+        borderRadius: '8px',
         boxShadow: '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',
       },
     },
@@ -248,7 +248,7 @@ const theme = createTheme({
   typography,
   components,
   shape: {
-    borderRadius: 12,
+    borderRadius: 6,
   },
   shadows: [
     'none',

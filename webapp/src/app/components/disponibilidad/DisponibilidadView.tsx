@@ -1,10 +1,10 @@
 import React, { useState, useEffect, JSX, useImperativeHandle, forwardRef } from "react";
 import {
-  Container, Typography, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
-  TextField, IconButton, Grid, useMediaQuery, useTheme,
-  Autocomplete
+  Typography, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+  TextField, IconButton, Grid, useMediaQuery, useTheme, Card,
+  Autocomplete, Chip
 } from "@mui/material";
-import NavigationBar from "../barra_navegacion/NavBar";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/es";
@@ -111,13 +111,13 @@ const DisponibilidadView = forwardRef((_props, ref) => {
         dayEvents.forEach(event => {
           if (event.availability === 1) {
             event.color = "blue";
-            event.icon = <DirectionsCarIcon style={{ color: 'blue' }} />;
+            event.icon = <DirectionsCarIcon style={{ color: '#4A90E2' }} />;
           } else if (event.availability === 2) {
-            event.color = "green";
-            event.icon = <DirectionsWalkIcon style={{ color: 'green' }} />;
+            event.color = "#5B7C99";
+            event.icon = <DirectionsWalkIcon style={{ color: '#5B7C99' }} />;
           } else if (event.availability === 3) {
-            event.color = "red";
-            event.icon = <DoNotDisturbIcon style={{ color: 'red' }} />;
+            event.color = "#94A3B8";
+            event.icon = <DoNotDisturbIcon style={{ color: '#94A3B8' }} />;
           }
         });
   
@@ -275,8 +275,8 @@ const DisponibilidadView = forwardRef((_props, ref) => {
               border: '1px solid #6ee7b7',
             }}
           >
-            <DirectionsWalkIcon sx={{ color: '#059669', mr: 1 }} />
-            <Typography variant="body2" fontWeight={500} color="#059669">
+            <DirectionsWalkIcon sx={{ color: '#5B7C99', mr: 1 }} />
+            <Typography variant="body2" fontWeight={500} color="#5B7C99">
               Sin transporte
             </Typography>
           </Box>
@@ -351,43 +351,38 @@ const DisponibilidadView = forwardRef((_props, ref) => {
 
 
   return (
-    <Box
-      sx={{
-        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <NavigationBar />
-      <Container 
-        maxWidth="xl"
-        sx={{ 
-          flexGrow: 1, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          paddingBottom: '2rem', 
-          minHeight: '100vh',
-          pt: 4,
-          px: { xs: 2, sm: 3, md: 4 },
-        }}
-      >
-        {/* Header moderno */}
-        <Box sx={{ mb: 4, width: '100%', maxWidth: '1200px' }}>
-          <Typography 
-            variant="h4" 
-            sx={{ 
-              fontWeight: 700,
-              color: '#1e293b',
-              mb: 1,
-              textAlign: 'center',
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            📅 Mi Disponibilidad
-          </Typography>
+            <CalendarMonthIcon sx={{ color: "white", fontSize: 28 }} />
+          </Box>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: "#1e293b" }}>
+              Mi Disponibilidad
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Configura tu disponibilidad para los partidos
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      <Card sx={{ p: 3, borderRadius: '16px' }}>
+        <Box sx={{ mb: 3 }}>
           <Typography 
-            variant="body1" 
+            variant="body2" 
             sx={{ 
               color: '#64748b',
               textAlign: 'center',
@@ -397,20 +392,12 @@ const DisponibilidadView = forwardRef((_props, ref) => {
           </Typography>
         </Box>
 
-        <Paper 
-          elevation={0}
+        <Box 
           sx={{ 
-            padding: { xs: 2, sm: 3 },
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-            borderRadius: '20px', 
-            width: '100%', 
-            maxWidth: '1200px',
             display: 'flex', 
             flexDirection: 'column',
             flex: 1, 
             height: '100%',
-            backgroundColor: '#ffffff',
           }}
         >
           {/* Controles de navegación del mes */}
@@ -420,10 +407,10 @@ const DisponibilidadView = forwardRef((_props, ref) => {
             alignItems="center" 
             mb={3}
             sx={{
-              bgcolor: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              bgcolor: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
               p: 2,
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
             }}
           >
             <IconButton 
@@ -584,7 +571,7 @@ const DisponibilidadView = forwardRef((_props, ref) => {
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '12px',
                     '&:hover fieldset': {
-                      borderColor: '#10b981',
+                      borderColor: '#4A90E2',
                     },
                   },
                 }}
@@ -614,11 +601,11 @@ const DisponibilidadView = forwardRef((_props, ref) => {
                 sx={{
                   borderRadius: '10px',
                   px: 3,
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    background: 'linear-gradient(135deg, #2C5F8D 0%, #1e3a5f 100%)',
                     transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                    boxShadow: '0 4px 12px rgba(74, 144, 226, 0.4)',
                   },
                   transition: 'all 0.2s',
                 }}
@@ -627,11 +614,8 @@ const DisponibilidadView = forwardRef((_props, ref) => {
               </Button>
             </DialogActions>
           </Dialog>
-
-
-
-        </Paper>
-      </Container>
+        </Box>
+      </Card>
       </Box>
     
   );

@@ -13,52 +13,76 @@ import DisponibilidadView from '../components/disponibilidad/DisponibilidadView'
 import PanelDesignacionesView from '../components/gestion_designaciones/PanelDesignacionesView';
 import DetallePartido from "../components/gestion_partidos/DetallesPartidoView";
 import HistorialDesignacionesView from '../components/designaciones/HistorialDesignacionesView';
+import MainLayout from '../components/layout/MainLayout';
 
+// Componente wrapper para páginas con layout
+const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <MainLayout>{children}</MainLayout>
+);
 
 const Router = () => {
     return (
         <HashRouter>
             <Routes>
-                {/* Rutas públicas */}
+                {/* Ruta pública - Login sin layout */}
                 <Route path="/" element={<LoginView />} />
-                <Route path="/misDesignaciones" element={<DesignacionesView />} />
-                <Route path="/miPerfil" element={<PerfilView />} /> 
-                <Route path="/miDisponibilidad" element={<DisponibilidadView />} />
-                <Route path="/miHistorial" element={<HistorialDesignacionesView />} />
-                <Route path="/gestionUsuarios/usuariosView" element={<UsuariosView />} />
-                <Route path="/gestionUsuarios/crearUsuario" element={<CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />} />
-                <Route path="/gestionUsuarios/modificarUsuario" element={
-                    <ModificarUsuario
-                        open={true}
-                        onClose={() => { }}
-                        onUpdate={() => { }}
-                        usuario={{
-                            id: "",
-                            nombre: "",
-                            primerApellido: "",
-                            segundoApellido: "",
-                            fechaNacimiento: "",
-                            nivel: "",
-                            clubVinculadoId: "",
-                            licencia: "",
-                            email: "",
-                            username: "",
-                            password: "",
-                            esAdmin: false,
-                            direccion: "",
-                            pais: "",
-                            region: "",
-                            ciudad: "",
-                            codigoPostal: ""
-                        }}
-                    />
+                
+                {/* Rutas con layout principal */}
+                <Route path="/misDesignaciones" element={<WithLayout><DesignacionesView /></WithLayout>} />
+                <Route path="/miPerfil" element={<WithLayout><PerfilView /></WithLayout>} /> 
+                <Route path="/miDisponibilidad" element={<WithLayout><DisponibilidadView /></WithLayout>} />
+                <Route path="/miHistorial" element={<WithLayout><HistorialDesignacionesView /></WithLayout>} />
+                
+                {/* Rutas de administración */}
+                <Route path="/gestionUsuarios/usuariosView" element={<WithLayout><UsuariosView /></WithLayout>} />
+                <Route path="/gestionUsuarios/crearUsuario" element={
+                    <WithLayout>
+                        <CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />
+                    </WithLayout>
                 } />
-                <Route path="/gestionPartidos/partidosView" element={<PartidosView />} />
-                <Route path="/gestionPartidos/crearPartido" element={<CrearPartido open={true} onClose={() => {}} onSave={() => {}} />} />
-                <Route path="/gestionPartidos/modificarPartido" element={<ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />} />
-                <Route path="/detallesPartido/:id" element={<DetallePartido />} />
-                <Route path="/gestionDesignaciones/panelDesignaciones" element={<PanelDesignacionesView />} />
-        
+                <Route path="/gestionUsuarios/modificarUsuario" element={
+                    <WithLayout>
+                        <ModificarUsuario
+                            open={true}
+                            onClose={() => { }}
+                            onUpdate={() => { }}
+                            usuario={{
+                                id: "",
+                                nombre: "",
+                                primerApellido: "",
+                                segundoApellido: "",
+                                fechaNacimiento: "",
+                                nivel: "",
+                                clubVinculadoId: "",
+                                licencia: "",
+                                email: "",
+                                username: "",
+                                password: "",
+                                esAdmin: false,
+                                direccion: "",
+                                pais: "",
+                                region: "",
+                                ciudad: "",
+                                codigoPostal: ""
+                            }}
+                        />
+                    </WithLayout>
+                } />
+                
+                <Route path="/gestionPartidos/partidosView" element={<WithLayout><PartidosView /></WithLayout>} />
+                <Route path="/gestionPartidos/crearPartido" element={
+                    <WithLayout>
+                        <CrearPartido open={true} onClose={() => {}} onSave={() => {}} />
+                    </WithLayout>
+                } />
+                <Route path="/gestionPartidos/modificarPartido" element={
+                    <WithLayout>
+                        <ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />
+                    </WithLayout>
+                } />
+                
+                <Route path="/detallesPartido/:id" element={<WithLayout><DetallePartido /></WithLayout>} />
+                <Route path="/gestionDesignaciones/panelDesignaciones" element={<WithLayout><PanelDesignacionesView /></WithLayout>} />
             </Routes>
         </HashRouter>
     );

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   IconButton, Button, Box, Tooltip, TablePagination, Dialog, DialogActions, DialogContent, 
-  DialogContentText, DialogTitle, Typography, Chip
+  DialogContentText, DialogTitle, Typography, Chip, Card, CardContent, Avatar
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import SportsIcon from '@mui/icons-material/Sports';
 import usuarioService from '../../services/UserService';
-import NavBar from '../barra_navegacion/NavBar';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -119,38 +121,74 @@ const UsuariosView: React.FC = () => {
   };
 
   return (
-    <>
-      <NavBar />
-      <Box 
-        sx={{ 
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-          minHeight: '100vh', 
-          pt: 4, 
-          pb: 12,
-        }}
-      >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          {/* Header moderno */}
-          <Box sx={{ mb: 4 }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontWeight: 700,
-                color: '#1e293b',
-                mb: 1,
-              }}
-            >
-              👥 Gestión de Usuarios
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PeopleAltIcon sx={{ color: "white", fontSize: 28 }} />
+          </Box>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: "#1e293b" }}>
+              Gestión de Usuarios
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: '#64748b',
-              }}
-            >
+            <Typography variant="body2" color="text.secondary">
               Administra los árbitros y usuarios del sistema
             </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Stats Cards */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 4 }}>
+        <Card sx={{ background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <PeopleAltIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>{usuarios.length}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Total usuarios</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ background: "linear-gradient(135deg, #5B7C99 0%, #3A5166 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <AdminPanelSettingsIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                {usuarios.filter(u => u.esAdmin).length}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Administradores</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ background: "linear-gradient(135deg, #7BA7D9 0%, #5B7C99 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <SportsIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                {usuarios.filter(u => !u.esAdmin).length}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Árbitros</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
           <TableContainer 
             component={Paper} 
@@ -166,7 +204,7 @@ const UsuariosView: React.FC = () => {
               <TableHead>
                 <TableRow 
                   sx={{ 
-                    background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                    background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                   }}
                 >
                   <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Nombre</TableCell>
@@ -323,23 +361,19 @@ const UsuariosView: React.FC = () => {
             </Table>
           </TableContainer>
 
+          {/* Footer with actions */}
           <Box 
             sx={{ 
-              position: 'fixed', 
-              bottom: 0, 
-              left: 0, 
-              right: 0,
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderTop: '1px solid #e2e8f0', 
-              py: 2, 
-              px: { xs: 2, sm: 4, md: 8 }, 
+              mt: 3,
+              p: 2,
+              bgcolor: 'white',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
               display: 'flex', 
               flexDirection: { xs: 'column', sm: 'row' }, 
               justifyContent: 'space-between', 
               alignItems: 'center',
-              zIndex: 10,
-              boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
+              gap: 2,
             }}
           >
             <Button 
@@ -348,14 +382,14 @@ const UsuariosView: React.FC = () => {
               onClick={handleAdd}
               sx={{ 
                 mb: { xs: 1, sm: 0 },
-                background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                 px: 3,
                 py: 1.2,
                 borderRadius: '10px',
-                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+                boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
-                  boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
+                  background: 'linear-gradient(135deg, #2C5F8D 0%, #1e3a5f 100%)',
+                  boxShadow: '0 6px 16px rgba(74, 144, 226, 0.4)',
                   transform: 'translateY(-1px)',
                 },
                 transition: 'all 0.2s',
@@ -388,8 +422,6 @@ const UsuariosView: React.FC = () => {
               }}
             />
           </Box>
-        </Container>
-      </Box>
 
       <Dialog 
         open={openConfirmDialog} 
@@ -449,7 +481,7 @@ const UsuariosView: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }
 

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   IconButton, Button, Box, TablePagination, Dialog, DialogActions, DialogContent, 
-  DialogContentText, DialogTitle, Typography, Chip, Tooltip
+  DialogContentText, DialogTitle, Typography, Chip, Tooltip, Card, CardContent, Avatar
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import UploadFileIcon from '@mui/icons-material/UploadFile'; 
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SportsVolleyballIcon from '@mui/icons-material/SportsVolleyball';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import partidosService from '../../services/PartidoService'; 
 import polideportivoService from '../../services/PolideportivoService';
 import equiposService from '../../services/EquipoService';
 import categoriaService from '../../services/CategoriaService';
-import NavBar from '../barra_navegacion/NavBar';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify'; 
 import * as XLSX from 'xlsx';
@@ -243,38 +245,83 @@ const PartidosView: React.FC = () => {
   };
 
   return (
-    <>
-      <NavBar />
-      <Box 
-        sx={{ 
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-          minHeight: '100vh', 
-          pt: 4, 
-          pb: 12,
-        }}
-      >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          {/* Header moderno */}
-          <Box sx={{ mb: 4 }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontWeight: 700,
-                color: '#1e293b',
-                mb: 1,
-              }}
-            >
-              ⚽ Gestión de Partidos
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <SportsVolleyballIcon sx={{ color: "white", fontSize: 28 }} />
+          </Box>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: "#1e293b" }}>
+              Gestión de Partidos
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: '#64748b',
-              }}
-            >
+            <Typography variant="body2" color="text.secondary">
               Administra los partidos y sus horarios
             </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Stats Cards */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 4 }}>
+        <Card sx={{ background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <SportsVolleyballIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>{partidos.length}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Total partidos</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ background: "linear-gradient(135deg, #5B7C99 0%, #3A5166 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <CalendarMonthIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                {partidos.filter(p => {
+                  const today = new Date().toISOString().split('T')[0];
+                  return p.fecha.split('T')[0] === today;
+                }).length}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Partidos hoy</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ background: "linear-gradient(135deg, #7BA7D9 0%, #5B7C99 100%)", color: "white" }}>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+              <ScheduleIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                {partidos.filter(p => {
+                  const fecha = new Date(p.fecha);
+                  const today = new Date();
+                  const weekFromNow = new Date();
+                  weekFromNow.setDate(today.getDate() + 7);
+                  return fecha >= today && fecha <= weekFromNow;
+                }).length}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Esta semana</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
           <TableContainer 
             component={Paper} 
@@ -290,7 +337,7 @@ const PartidosView: React.FC = () => {
               <TableHead>
                 <TableRow 
                   sx={{ 
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                   }}
                 >
                   <TableCell sx={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>Fecha</TableCell>
@@ -414,23 +461,19 @@ const PartidosView: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          {/* Footer with actions */}
           <Box 
             sx={{ 
-              position: 'fixed', 
-              bottom: 0, 
-              left: 0, 
-              right: 0,
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderTop: '1px solid #e2e8f0', 
-              py: 2, 
-              px: { xs: 2, sm: 4, md: 8 }, 
+              mt: 3,
+              p: 2,
+              bgcolor: 'white',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
               display: 'flex', 
               flexDirection: { xs: 'column', sm: 'row' }, 
               justifyContent: 'space-between', 
               alignItems: 'center',
-              zIndex: 10,
-              boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
+              gap: 2,
             }}
           >
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: { xs: 2, sm: 0 } }}>
@@ -439,14 +482,14 @@ const PartidosView: React.FC = () => {
                 onClick={handleAdd} 
                 startIcon={<AddIcon />}
                 sx={{ 
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                  background: 'linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)',
                   px: 3,
                   py: 1.2,
                   borderRadius: '10px',
-                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                  boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-                    boxShadow: '0 6px 16px rgba(139, 92, 246, 0.4)',
+                    background: 'linear-gradient(135deg, #2C5F8D 0%, #1e3a5f 100%)',
+                    boxShadow: '0 6px 16px rgba(74, 144, 226, 0.4)',
                     transform: 'translateY(-1px)',
                   },
                   transition: 'all 0.2s',
@@ -459,15 +502,15 @@ const PartidosView: React.FC = () => {
                 component="label"
                 startIcon={<UploadFileIcon />}
                 sx={{
-                  borderColor: '#10b981',
-                  color: '#10b981',
+                  borderColor: '#5B7C99',
+                  color: '#5B7C99',
                   borderWidth: '2px',
                   px: 3,
                   py: 1.2,
                   borderRadius: '10px',
                   '&:hover': {
-                    borderColor: '#059669', 
-                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderColor: '#3A5166', 
+                    backgroundColor: 'rgba(91, 124, 153, 0.08)',
                     borderWidth: '2px',
                   },
                 }}
@@ -560,9 +603,7 @@ const PartidosView: React.FC = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </Container>
-      </Box>
-    </>
+    </Box>
   );
 };
 

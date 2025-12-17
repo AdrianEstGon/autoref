@@ -1,19 +1,65 @@
+/* Global Reset & Base Styles */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  min-width: 660px;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-width: 320px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f1f5f9;
   min-height: 100vh;
+  line-height: 1.6;
+  color: #1e293b;
 }
 
-/* Animación global para cards */
+/* Typography Enhancements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1e293b;
+}
+
+/* Link Styles */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #2563eb;
+}
+
+/* Button Enhancements */
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Form Elements */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -25,14 +71,92 @@ body {
   }
 }
 
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
 .fade-in-up {
   animation: fadeInUp 0.5s ease-out;
 }
 
-/* Scrollbar personalizado */
+.fade-in-down {
+  animation: fadeInDown 0.5s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* Staggered Animation for Lists */
+.stagger-animation > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-animation > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -41,23 +165,177 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
   border-radius: 10px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
 }
 
-/* Mejoras de accesibilidad */
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Selection */
+::selection {
+  background: #3b82f6;
+  color: white;
+}
+
+::-moz-selection {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Focus States for Accessibility */
 button:focus-visible,
-a:focus-visible {
-  outline: 2px solid #2563eb;
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
-/* Transiciones suaves globales */
-* {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+/* Loading Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Card Hover Effect Classes */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Smooth Transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.transition-fast {
+  transition: all 0.15s ease;
+}
+
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Fix for MUI Calendar overlays */
+.MuiPickersPopper-root {
+  z-index: 1400 !important;
+}
+
+/* Fix for MUI Dialog backdrop */
+.MuiBackdrop-root {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+/* React Big Calendar customizations */
+.rbc-calendar {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.rbc-toolbar {
+  padding: 16px 0;
+  margin-bottom: 16px;
+}
+
+.rbc-toolbar button {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.rbc-toolbar button:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.rbc-toolbar button.rbc-active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #2563eb;
+}
+
+.rbc-header {
+  padding: 12px 0;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.rbc-today {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.rbc-event {
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #e2e8f0;
+}
+
+.rbc-month-row + .rbc-month-row {
+  border-top: 1px solid #e2e8f0;
 }

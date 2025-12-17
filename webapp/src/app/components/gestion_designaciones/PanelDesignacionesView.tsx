@@ -1,6 +1,6 @@
 import React, { useState, useEffect, JSX, useMemo } from "react";
 import { 
-  Container, Typography, Grid, Card, CardContent, TextField, Button,
+  Typography, Grid, Card, CardContent, TextField, Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -9,11 +9,13 @@ import {
   FormControlLabel,
   Box,
   Chip,
-  Popover
+  Popover,
+  Avatar
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import Autocomplete from "@mui/material/Autocomplete";
-import NavigationBar from "../barra_navegacion/NavBar";
+import SportsVolleyballIcon from "@mui/icons-material/SportsVolleyball";
+import SportsIcon from "@mui/icons-material/Sports";
 import moment, { Moment } from "moment";
 import "moment/locale/es";
 import partidosService from "../../services/PartidoService";
@@ -679,12 +681,70 @@ const DesignacionesView = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
-      <div style={{ backgroundColor: '#eafaff', minHeight: "100vh" }}>
-        <NavigationBar />
-        <Container maxWidth="lg" sx={{ padding: "2rem" }}>
-          <Typography variant="h4" textAlign="center" mb={3} color="#333">
-            Panel de Designaciones
-          </Typography>
+      <Box>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "12px",
+                background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <SportsIcon sx={{ color: "white", fontSize: 28 }} />
+            </Box>
+            <Box>
+              <Typography variant="h4" fontWeight={700} sx={{ color: "#1e293b" }}>
+                Panel de Designaciones
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Asigna árbitros a los partidos
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Stats Cards */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 2, mb: 4 }}>
+          <Card sx={{ background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)", color: "white" }}>
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+                <SportsVolleyballIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight={700}>{partidosFiltrados.length}</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Partidos filtrados</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+          <Card sx={{ background: "linear-gradient(135deg, #5B7C99 0%, #3A5166 100%)", color: "white" }}>
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+                <CheckCircle />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight={700}>{partidosSeleccionados.size}</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Seleccionados</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+          <Card sx={{ background: "linear-gradient(135deg, #7BA7D9 0%, #5B7C99 100%)", color: "white" }}>
+            <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", width: 48, height: 48 }}>
+                <SportsIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight={700}>{usuarios.length}</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Árbitros disponibles</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
 
          {/* FILTROS  */}
          <Card sx={{ backgroundColor: "#EDEDED", padding: "1rem", borderRadius: "12px", marginBottom: "2rem" }}>
@@ -743,8 +803,10 @@ const DesignacionesView = () => {
               </Grid>
             </CardContent>
           </Card>
-           {/* Botón para publicar designaciones */}
-           <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
+          
+          {/* Botón para publicar designaciones */}
+          <Box>
+            <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
             <Grid item xs={12} sm="auto" md={6} textAlign={'right'}>
               <Button variant="contained" color="primary" onClick={publicarDesignaciones}>
                 Publicar Designaciones
@@ -835,8 +897,8 @@ const DesignacionesView = () => {
                 No hay partidos que coincidan con los filtros.
               </Typography>
             )}
-          </Grid>
-        </Container>
+            </Grid>
+          </Box>
         {/* Diálogo de confirmación */}
         <Dialog open={openDialog} onClose={handleCancelar}>
           <DialogTitle>Publicar designaciones</DialogTitle>
@@ -848,7 +910,7 @@ const DesignacionesView = () => {
             <Button onClick={handleConfirmar} color="primary">Confirmar</Button>
           </DialogActions>
         </Dialog>
-      </div>
+      </Box>
     </LocalizationProvider>
   );
 };

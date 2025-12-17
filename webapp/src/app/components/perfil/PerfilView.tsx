@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import {
-  Container,
   TextField,
   Grid,
   Avatar,
   IconButton,
   Card,
   CardContent,
-  CardHeader,
   Typography,
   Box,
   Button,
@@ -17,11 +15,17 @@ import {
   DialogTitle,
   Tooltip,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { PhotoCamera } from "@mui/icons-material";
-import NavBar from "../barra_navegacion/NavBar";
+import PersonIcon from "@mui/icons-material/Person";
+import EmailIcon from "@mui/icons-material/Email";
+import BadgeIcon from "@mui/icons-material/Badge";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import CakeIcon from "@mui/icons-material/Cake";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import userService from "../../services/UserService";
 import clubService from "../../services/ClubService";
 import { toast } from "react-toastify";
@@ -209,70 +213,79 @@ const PerfilView = () => {
   };
 
   return (
-    <Box
-      sx={{
-        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        paddingBottom: "40px", 
-      }}
-    >
-      <NavBar />
-      <Container
-        maxWidth="lg" 
-        sx={{
-          minHeight: "calc(100vh - 64px)", 
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 5,
-          px: { xs: 2, sm: 3, md: 4 },
-        }}
-      >
-        <Card 
-          elevation={0}
-          sx={{ 
-            borderRadius: '24px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-            backgroundColor: "#ffffff",
-            width: "100%",
-            overflow: 'visible',
-          }}
-        >
-          {/* Header con gradiente */}
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
           <Box
             sx={{
-              background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
-              pt: 6,
-              pb: 8,
-              px: 3,
-              borderRadius: '24px 24px 0 0',
-              position: 'relative',
+              width: 48,
+              height: 48,
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #2563eb 0%, #1e40af 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                color: 'white',
-                fontWeight: 700,
-                textAlign: 'center',
-              }}
-            >
-              👤 Mi Perfil
+            <PersonIcon sx={{ color: "white", fontSize: 28 }} />
+          </Box>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: "#1e293b" }}>
+              Mi Perfil
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                color: 'rgba(255, 255, 255, 0.9)',
-                textAlign: 'center',
-                mt: 1,
-              }}
-            >
+            <Typography variant="body2" color="text.secondary">
               Información personal y configuración
             </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      <Card 
+        elevation={0}
+        sx={{ 
+          borderRadius: '24px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+          backgroundColor: "#ffffff",
+          width: "100%",
+          overflow: 'visible',
+        }}
+      >
+        {/* Header con gradiente */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+            pt: 4,
+            pb: 6,
+            px: 3,
+            borderRadius: '24px 24px 0 0',
+            position: 'relative',
+          }}
+        >
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              color: 'white',
+              fontWeight: 600,
+              textAlign: 'center',
+            }}
+          >
+            {perfil.nombre} {perfil.primerApellido}
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
+            <Chip 
+              label={perfil.nivel || 'Sin nivel'}
+              size="small"
+              sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+            />
+            <Chip 
+              label={`Lic: ${perfil.licencia}`}
+              size="small"
+              sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+            />
+          </Box>
+        </Box>
 
           <CardContent sx={{ mt: -4, position: 'relative', zIndex: 1 }}>
       <Grid container spacing={3} justifyContent="center">
@@ -319,257 +332,146 @@ const PerfilView = () => {
         </Grid>
         
         {/* Los campos del perfil */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Nombre"
             value={perfil.nombre}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-                '& .MuiFilledInput-input': {
-                  py: 2,
-                },
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Primer Apellido"
             value={perfil.primerApellido}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Segundo Apellido"
             value={perfil.segundoApellido}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Fecha de Nacimiento"
             value={perfil.fechaNacimiento}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Dirección"
             value={perfil.direccion}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="País"
             value={perfil.pais}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Región"
             value={perfil.region}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Ciudad"
             value={perfil.ciudad}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label="Código Postal"
             value={perfil.codigoPostal}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
@@ -581,23 +483,11 @@ const PerfilView = () => {
             value={perfil.nivel}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
@@ -609,23 +499,11 @@ const PerfilView = () => {
             value={clubNombre}
             InputProps={{ 
               readOnly: true,
-              sx: {
-                borderRadius: '12px',
-                bgcolor: '#f8fafc',
-              }
             }}
-            variant="filled"
+            variant="outlined"
             sx={{ 
-              '& .MuiFilledInput-root': {
-                borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 bgcolor: '#f8fafc',
-                '&:before, &:after': {
-                  display: 'none',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#64748b',
-                fontWeight: 500,
               },
             }}
           />
@@ -651,8 +529,8 @@ const PerfilView = () => {
           />
         </Grid>
 
-        {/* Botón de Modificar Contraseña junto a los últimos campos */}
-        <Grid item xs={12} md={6}>
+        {/* Botón de Modificar Contraseña */}
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant="contained"
             onClick={() => {
@@ -667,11 +545,10 @@ const PerfilView = () => {
               setOpenDialog(true);
             }}
             sx={{ 
-              mt: 3, 
-              width: "100%",
               background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
-              py: 1.5,
-              borderRadius: '12px',
+              px: 4,
+              py: 1,
+              borderRadius: '10px',
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
               '&:hover': {
                 background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
@@ -687,7 +564,6 @@ const PerfilView = () => {
       </Grid>
     </CardContent>
   </Card>
-</Container>
 
       {/* Diálogo de cambiar contraseña */}
       <Dialog 
