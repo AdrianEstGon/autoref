@@ -87,7 +87,9 @@ var allowedOrigins = new List<string>
 { 
     frontendUrl,
     "http://localhost:3000",
-    "https://localhost:3000"
+    "http://localhost:3001",
+    "https://localhost:3000",
+    "https://localhost:3001"
 };
 
 // Agregar origen adicional si existe
@@ -100,10 +102,17 @@ if (!string.IsNullOrEmpty(additionalOrigin))
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins(allowedOrigins.ToArray())
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+        policy => policy.SetIsOriginAllowed(origin =>
+        {
+            // Permitir todos los localhost en desarrollo
+            if (origin != null && (origin.StartsWith("http://localhost") || origin.StartsWith("https://localhost")))
+                return true;
+            // Permitir orígenes configurados
+            return allowedOrigins.Contains(origin);
+        })
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials());
 });
 
 var app = builder.Build();
