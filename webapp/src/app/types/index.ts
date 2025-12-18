@@ -1,3 +1,5 @@
+import type { ReactElement } from 'react';
+
 // ==================== TIPOS DE USUARIO ====================
 export interface Usuario {
   id: string;
@@ -31,7 +33,7 @@ export interface Arbitro {
   longitud?: number;
   transporte?: boolean;
   clubVinculadoId?: string;
-  icono?: JSX.Element;
+  icono?: ReactElement;
 }
 
 // ==================== TIPOS DE PARTIDO ====================
@@ -136,7 +138,7 @@ export interface Designacion {
 
 export interface ArbitroDesignacion {
   nombre: string;
-  icono: JSX.Element;
+  icono: ReactElement;
   id?: string;
   primerApellido?: string;
   segundoApellido?: string;

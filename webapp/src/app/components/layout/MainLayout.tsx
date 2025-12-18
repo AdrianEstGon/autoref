@@ -393,7 +393,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </List>
 
         {/* Admin Section */}
-        {isAdminLike && (
+        {(isAdmin || isFederacion || isComite) && (
           <>
             <Divider sx={{ my: 2, borderColor: alpha(theme.palette.common.white, 0.1) }} />
             {!collapsed && (
