@@ -160,36 +160,75 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     window.location.href = '/';
   };
 
-  const isAdminLike = userRole === 'Admin' || userRole === 'Federacion';
+  const isAdmin = userRole === 'Admin';
+  const isFederacion = userRole === 'Federacion';
+  const isComite = userRole === 'ComiteArbitros';
   const isClub = userRole === 'Club';
+  const isPublico = userRole === 'Publico';
 
-  const menuItems = isClub
-    ? [{ text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' }]
-    : [
-        { text: 'Mis Designaciones', icon: <DashboardIcon />, path: '/misDesignaciones' },
-        { text: 'Disponibilidad', icon: <CalendarMonthIcon />, path: '/miDisponibilidad' },
-        { text: 'Mi Historial', icon: <HistoryIcon />, path: '/miHistorial' },
+  const menuItems = (() => {
+    if (isClub) {
+      return [{ text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' }];
+    }
+
+    if (isPublico) {
+      // De momento solo perfil; las vistas públicas (calendario/resultados/clasificación) se añadirán cuando estén definidas
+      return [];
+    }
+
+    // Árbitro (y también Comité/Admin si quieren usar su perfil personal)
+    return [
+      { text: 'Mis Designaciones', icon: <DashboardIcon />, path: '/misDesignaciones' },
+      { text: 'Disponibilidad', icon: <CalendarMonthIcon />, path: '/miDisponibilidad' },
+      { text: 'Mi Historial', icon: <HistoryIcon />, path: '/miHistorial' },
+    ];
+  })();
+
+  const adminMenuItems = (() => {
+    if (isAdmin) {
+      return [
+        { text: 'Gestión de Usuarios', icon: <PeopleAltIcon />, path: '/gestionUsuarios/usuariosView' },
+        { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
+        { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
+        { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
+        { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
+        { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
+        { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
       ];
+    }
 
-  const adminMenuItems = [
-    { text: 'Gestión de Usuarios', icon: <PeopleAltIcon />, path: '/gestionUsuarios/usuariosView' },
-    { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
-    { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
-    { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
-    { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
-    { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
-    { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
-  ];
+    if (isFederacion) {
+      return [
+        { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
+        { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
+        { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
+        { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
+        { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
+      ];
+    }
+
+    if (isComite) {
+      return [
+        { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
+        { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
+      ];
+    }
+
+    return [];
+  })();
 
   const getRoleLabel = () => {
     if (userRole === 'Admin') return 'Administrador';
     if (userRole === 'Federacion') return 'Federación';
     if (userRole === 'Club') return 'Club';
+    if (userRole === 'ComiteArbitros') return 'Comité de Árbitros';
+    if (userRole === 'Publico') return 'Público';
     return 'Árbitro';
   };
 
   const getRoleChipColor = () => {
     if (userRole === 'Admin' || userRole === 'Federacion') return '#4A90E2';
+    if (userRole === 'ComiteArbitros') return '#2C5F8D';
     if (userRole === 'Club') return '#5B7C99';
     return '#7BA7D9';
   };

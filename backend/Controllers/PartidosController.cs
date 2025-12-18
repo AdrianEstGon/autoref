@@ -25,7 +25,7 @@ namespace AutoRef_API.Controllers
         }
 
         // GET: api/Partidos
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Federacion,ComiteArbitros")]
         [HttpGet]
         public async Task<IActionResult> GetPartidos()
         {
@@ -171,6 +171,7 @@ namespace AutoRef_API.Controllers
             return Ok(resultado);
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Federacion,ComiteArbitros")]
         public async Task<IActionResult> UpdatePartido(Guid id, [FromBody] UpdatePartidoModel partidoModel)
         {
             if (id != partidoModel.Id)
@@ -291,6 +292,7 @@ namespace AutoRef_API.Controllers
 
 
         [HttpPost("crearPartido")]
+        [Authorize(Roles = "Admin,Federacion,ComiteArbitros")]
         public async Task<IActionResult> CrearPartido([FromBody] PartidoModel partidoModel)
         {
             if (partidoModel == null)
@@ -335,6 +337,7 @@ namespace AutoRef_API.Controllers
 
         // DELETE: api/Partidos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Federacion,ComiteArbitros")]
         public async Task<IActionResult> DeletePartido(Guid id)
         {
             var partido = await _context.Partidos
@@ -402,6 +405,51 @@ Lamentamos las molestias.";
                 _context.Notificaciones.Add(notificacion);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public class UpdateEstadoDesignacionModel
+        {
+            public int Estado { get; set; }
+        }
+
+        /// <summary>
+        /// Actualiza el estado de aceptación/rechazo del usuario autenticado sobre su rol en el partido (Árbitro 1/2 o Anotador).
+        /// </summary>
+        [HttpPut("{id:guid}/estado")]
+        [Authorize(Roles = "Arbitro,Admin,Federacion,ComiteArbitros")]
+        public async Task<IActionResult> UpdateEstadoDesignacion(Guid id, [FromBody] UpdateEstadoDesignacionModel model)
+        {
+            if (model == null) return BadRequest(new { message = "Datos inválidos" });
+            if (model.Estado < 0 || model.Estado > 2) return BadRequest(new { message = "Estado inválido" });
+
+            var partido = await _context.Partidos.FirstOrDefaultAsync(p => p.Id == id);
+            if (partido == null) return NotFound(new { message = "El partido no existe." });
+
+            var userIdString = User?.Claims?.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdString, out var userId)) return Unauthorized();
+
+            var isAdminLike = User.IsInRole("Admin") || User.IsInRole("Federacion") || User.IsInRole("ComiteArbitros");
+
+            if (isAdminLike)
+            {
+                // Por defecto, en modo admin-like se actualiza el estado del rol que corresponda al usuario si está asignado.
+                // Si no está asignado a ningún rol, no permitimos cambiar estados (evita cambios arbitrarios).
+                if (partido.Arbitro1Id == userId) partido.EstadoArbitro1 = model.Estado;
+                else if (partido.Arbitro2Id == userId) partido.EstadoArbitro2 = model.Estado;
+                else if (partido.AnotadorId == userId) partido.EstadoAnotador = model.Estado;
+                else return BadRequest(new { message = "El usuario no está asignado a este partido." });
+            }
+            else
+            {
+                // Árbitro: solo puede actualizar su propio estado
+                if (partido.Arbitro1Id == userId) partido.EstadoArbitro1 = model.Estado;
+                else if (partido.Arbitro2Id == userId) partido.EstadoArbitro2 = model.Estado;
+                else if (partido.AnotadorId == userId) partido.EstadoAnotador = model.Estado;
+                else return BadRequest(new { message = "El usuario no está asignado a este partido." });
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Estado actualizado con éxito." });
         }
 
 

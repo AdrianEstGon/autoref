@@ -211,6 +211,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
             <MenuItem value="Arbitro">Árbitro</MenuItem>
             <MenuItem value="Club">Club</MenuItem>
             <MenuItem value="Federacion">Federación</MenuItem>
+            <MenuItem value="ComiteArbitros">Comité de Árbitros</MenuItem>
+            <MenuItem value="Publico">Público</MenuItem>
             <MenuItem value="Admin">Administrador</MenuItem>
           </Select>
         </FormControl>

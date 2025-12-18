@@ -85,7 +85,7 @@ const DesignacionesView = React.memo(() => {
       else if (partido.anotadorId === usuarioId) updatedPartido.estadoAnotador = selectedEstado;
       else return;
 
-      await partidosService.actualizarPartido(updatedPartido);
+      await partidosService.actualizarEstadoDesignacion(selectedPartidoId, selectedEstado);
       setPartidos((prevPartidos) =>
         prevPartidos.map((p) => (p.id === selectedPartidoId ? updatedPartido : p))
       );

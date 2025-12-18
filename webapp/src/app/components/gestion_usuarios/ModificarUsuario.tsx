@@ -18,7 +18,9 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     const roles: string[] = usuario?.roles || [];
     if (roles.includes('Admin')) return 'Admin';
     if (roles.includes('Federacion')) return 'Federacion';
+    if (roles.includes('ComiteArbitros')) return 'ComiteArbitros';
     if (roles.includes('Club')) return 'Club';
+    if (roles.includes('Publico')) return 'Publico';
     return 'Arbitro';
   });
   const [errores, setErrores] = useState({
@@ -210,6 +212,8 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <MenuItem value="Arbitro">Árbitro</MenuItem>
             <MenuItem value="Club">Club</MenuItem>
             <MenuItem value="Federacion">Federación</MenuItem>
+            <MenuItem value="ComiteArbitros">Comité de Árbitros</MenuItem>
+            <MenuItem value="Publico">Público</MenuItem>
             <MenuItem value="Admin">Administrador</MenuItem>
           </Select>
         </FormControl>

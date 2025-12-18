@@ -25,6 +25,20 @@ const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <MainLayout>{children}</MainLayout>
 );
 
+const RequireRole: React.FC<{ allowedRoles: string[]; children: React.ReactNode }> = ({ allowedRoles, children }) => {
+  const role = window.localStorage.getItem('userRole');
+  const token = window.localStorage.getItem('token');
+
+  // Si no hay sesión => login
+  if (!token || !role) return <LoginView />;
+
+  // Admin siempre puede
+  if (role === 'Admin') return <>{children}</>;
+
+  if (!allowedRoles.includes(role)) return <LoginView />;
+  return <>{children}</>;
+};
+
 const Router = () => {
     return (
         <HashRouter>
@@ -33,70 +47,130 @@ const Router = () => {
                 <Route path="/" element={<LoginView />} />
                 
                 {/* Rutas con layout principal */}
-                <Route path="/misDesignaciones" element={<WithLayout><DesignacionesView /></WithLayout>} />
-                <Route path="/miPerfil" element={<WithLayout><PerfilView /></WithLayout>} /> 
-                <Route path="/miDisponibilidad" element={<WithLayout><DisponibilidadView /></WithLayout>} />
-                <Route path="/miHistorial" element={<WithLayout><HistorialDesignacionesView /></WithLayout>} />
+                <Route path="/misDesignaciones" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}>
+                    <WithLayout><DesignacionesView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/miPerfil" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club', 'Publico']}>
+                    <WithLayout><PerfilView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/miDisponibilidad" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}>
+                    <WithLayout><DisponibilidadView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/miHistorial" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}>
+                    <WithLayout><HistorialDesignacionesView /></WithLayout>
+                  </RequireRole>
+                } />
                 
                 {/* Rutas de administración */}
-                <Route path="/gestionUsuarios/usuariosView" element={<WithLayout><UsuariosView /></WithLayout>} />
+                <Route path="/gestionUsuarios/usuariosView" element={
+                  <RequireRole allowedRoles={['Admin']}>
+                    <WithLayout><UsuariosView /></WithLayout>
+                  </RequireRole>
+                } />
                 <Route path="/gestionUsuarios/crearUsuario" element={
-                    <WithLayout>
-                        <CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />
-                    </WithLayout>
+                    <RequireRole allowedRoles={['Admin']}>
+                      <WithLayout>
+                          <CrearUsuario open={true} onClose={() => {}} onSave={() => {}} />
+                      </WithLayout>
+                    </RequireRole>
                 } />
                 <Route path="/gestionUsuarios/modificarUsuario" element={
-                    <WithLayout>
-                        <ModificarUsuario
-                            open={true}
-                            onClose={() => { }}
-                            onUpdate={() => { }}
-                            usuario={{
-                                id: "",
-                                nombre: "",
-                                primerApellido: "",
-                                segundoApellido: "",
-                                fechaNacimiento: "",
-                                nivel: "",
-                                clubVinculadoId: "",
-                                licencia: "",
-                                email: "",
-                                username: "",
-                                password: "",
-                                esAdmin: false,
-                                direccion: "",
-                                pais: "",
-                                region: "",
-                                ciudad: "",
-                                codigoPostal: ""
-                            }}
-                        />
-                    </WithLayout>
+                    <RequireRole allowedRoles={['Admin']}>
+                      <WithLayout>
+                          <ModificarUsuario
+                              open={true}
+                              onClose={() => { }}
+                              onUpdate={() => { }}
+                              usuario={{
+                                  id: "",
+                                  nombre: "",
+                                  primerApellido: "",
+                                  segundoApellido: "",
+                                  fechaNacimiento: "",
+                                  nivel: "",
+                                  clubVinculadoId: "",
+                                  licencia: "",
+                                  email: "",
+                                  username: "",
+                                  password: "",
+                                  esAdmin: false,
+                                  direccion: "",
+                                  pais: "",
+                                  region: "",
+                                  ciudad: "",
+                                  codigoPostal: ""
+                              }}
+                          />
+                      </WithLayout>
+                    </RequireRole>
                 } />
                 
-                <Route path="/gestionPartidos/partidosView" element={<WithLayout><PartidosView /></WithLayout>} />
+                <Route path="/gestionPartidos/partidosView" element={
+                  <RequireRole allowedRoles={['Federacion', 'ComiteArbitros']}>
+                    <WithLayout><PartidosView /></WithLayout>
+                  </RequireRole>
+                } />
                 <Route path="/gestionPartidos/crearPartido" element={
-                    <WithLayout>
-                        <CrearPartido open={true} onClose={() => {}} onSave={() => {}} />
-                    </WithLayout>
+                    <RequireRole allowedRoles={['Federacion', 'ComiteArbitros']}>
+                      <WithLayout>
+                          <CrearPartido open={true} onClose={() => {}} onSave={() => {}} />
+                      </WithLayout>
+                    </RequireRole>
                 } />
                 <Route path="/gestionPartidos/modificarPartido" element={
-                    <WithLayout>
-                        <ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />
-                    </WithLayout>
+                    <RequireRole allowedRoles={['Federacion', 'ComiteArbitros']}>
+                      <WithLayout>
+                          <ModificarPartido open={true} onClose={() => { } } onUpdate={() => { } } />
+                      </WithLayout>
+                    </RequireRole>
                 } />
                 
-                <Route path="/detallesPartido/:id" element={<WithLayout><DetallePartido /></WithLayout>} />
-                <Route path="/gestionDesignaciones/panelDesignaciones" element={<WithLayout><PanelDesignacionesView /></WithLayout>} />
+                <Route path="/detallesPartido/:id" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club', 'Publico']}>
+                    <WithLayout><DetallePartido /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/gestionDesignaciones/panelDesignaciones" element={
+                  <RequireRole allowedRoles={['ComiteArbitros']}>
+                    <WithLayout><PanelDesignacionesView /></WithLayout>
+                  </RequireRole>
+                } />
 
                 {/* Rutas Club */}
-                <Route path="/club/inscripciones" element={<WithLayout><ClubInscripcionesView /></WithLayout>} />
+                <Route path="/club/inscripciones" element={
+                  <RequireRole allowedRoles={['Club']}>
+                    <WithLayout><ClubInscripcionesView /></WithLayout>
+                  </RequireRole>
+                } />
 
                 {/* Rutas Federación */}
-                <Route path="/federacion/mutua" element={<WithLayout><FederacionMutuaView /></WithLayout>} />
-                <Route path="/federacion/competiciones" element={<WithLayout><CompeticionesView /></WithLayout>} />
-                <Route path="/federacion/equipos" element={<WithLayout><EquiposView /></WithLayout>} />
-                <Route path="/federacion/categorias" element={<WithLayout><CategoriasView /></WithLayout>} />
+                <Route path="/federacion/mutua" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><FederacionMutuaView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/competiciones" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><CompeticionesView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/equipos" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><EquiposView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/categorias" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><CategoriasView /></WithLayout>
+                  </RequireRole>
+                } />
             </Routes>
         </HashRouter>
     );

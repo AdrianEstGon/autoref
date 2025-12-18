@@ -64,6 +64,20 @@ const actualizarPartido = async (partido: any) => {
   }
 };
 
+const actualizarEstadoDesignacion = async (partidoId: string, estado: number) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/Partidos/${partidoId}/estado`,
+      { estado },
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error al actualizar estado de designación:', error);
+    throw new Error(error.response?.data?.message || 'No se pudo actualizar el estado de la designación.');
+  }
+};
+
 const eliminarPartido = async (id: number) => {
   try {
     await axios.delete(`${API_URL}/Partidos/${id}`, getAuthHeaders());
@@ -73,4 +87,4 @@ const eliminarPartido = async (id: number) => {
   }
 };
 
-export default { getPartidos, getPartidoById, crearPartido, actualizarPartido, eliminarPartido, getPartidosByUserId };
+export default { getPartidos, getPartidoById, crearPartido, actualizarPartido, actualizarEstadoDesignacion, eliminarPartido, getPartidosByUserId };
