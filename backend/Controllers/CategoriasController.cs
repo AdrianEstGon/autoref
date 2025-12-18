@@ -80,6 +80,7 @@ namespace AutoRef_API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCategoria(Guid id, Categoria categoria)
         {
@@ -109,6 +110,7 @@ namespace AutoRef_API.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpPost]
         public async Task<ActionResult<Categoria>> PostCategoria(Categoria categoria)
         {
@@ -118,6 +120,7 @@ namespace AutoRef_API.Controllers
             return CreatedAtAction("GetCategoria", new { id = categoria.Id }, categoria);
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoria(Guid id)
         {

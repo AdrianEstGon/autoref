@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, Autocomplete, Popper, Select, MenuItem, InputLabel } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, Autocomplete, Popper, Select, MenuItem, InputLabel, Typography } from '@mui/material';
 import authService from '../../services/UserService';
 import clubsService from '../../services/ClubService';
 import { toast } from 'react-toastify';
@@ -101,7 +101,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         const usuarioConContraseña = {
           ...nuevoUsuario,
           username: nuevoUsuario.email,
-          password: '',
+          // Si se deja vacío, el backend genera contraseña y (si hay SMTP) intenta enviarla por email
+          password: nuevoUsuario.password || '',
           rol: nuevoUsuario.rol,
           esAdmin: nuevoUsuario.rol === 'Admin'
         };
@@ -173,6 +174,25 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         />
         </FormControl>
         <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={nuevoUsuario.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
+
+        {/* Contraseña opcional: recomendada para Club/Federación si no hay SMTP */}
+        {nuevoUsuario.rol !== 'Arbitro' && (
+          <>
+            <TextField
+              label="Contraseña (opcional)"
+              fullWidth
+              margin="normal"
+              name="password"
+              type="password"
+              value={nuevoUsuario.password}
+              onChange={handleChange}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5 }}>
+              Si la dejas vacía, el sistema intentará generar una y enviarla por email (requiere SMTP configurado).
+            </Typography>
+          </>
+        )}
+
         <TextField label="Licencia" fullWidth margin="normal" name="licencia" value={nuevoUsuario.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
         <TextField label="Código Postal" fullWidth margin="normal" name="codigoPostal" value={nuevoUsuario.codigoPostal} onChange={handleChange} error={!!errores.codigoPostal} helperText={errores.codigoPostal} />
         <TextField label="Dirección" fullWidth margin="normal" name="direccion" value={nuevoUsuario.direccion} onChange={handleChange} error={!!errores.direccion} helperText={errores.direccion} />

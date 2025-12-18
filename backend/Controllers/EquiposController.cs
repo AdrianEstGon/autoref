@@ -171,6 +171,7 @@
             });
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEquipo(Guid id, Equipo equipo)
         {
@@ -200,6 +201,7 @@
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpPost]
         public async Task<ActionResult<Equipo>> PostEquipo(Equipo equipo)
         {
@@ -209,6 +211,7 @@
             return CreatedAtAction("GetEquipo", new { id = equipo.Id }, equipo);
         }
 
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEquipo(Guid id)
         {

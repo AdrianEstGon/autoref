@@ -77,8 +77,12 @@ public class UsuariosController : ControllerBase
         // Obtener las coordenadas (geolocalizaci�n)
         var coordenadas = await ObtenerCoordenadas(model.Direccion, model.Ciudad, model.Pais);
 
-        // Generar la contrase�a
-        var contrasenaGenerada = GenerarContrasena(model.Nombre); 
+        // Contraseña:
+        // - Si viene en el request, usarla (para poder crear usuarios Club/Federación sin depender de SMTP)
+        // - Si no, generar y (si hay SMTP) enviarla por correo como antes
+        var contrasenaGenerada = string.IsNullOrWhiteSpace(model.Password)
+            ? GenerarContrasena(model.Nombre)
+            : model.Password!;
 
         var user = new Usuario
         {
@@ -105,9 +109,24 @@ public class UsuariosController : ControllerBase
 
         if (result.Succeeded)
         {
-            // Enviar la contrase�a por correo
-            var mailService = new MailService();  // Crear instancia del servicio de correo
-            await mailService.SendEmailAsync(model.Email, "Tu nueva contrase�a", $"Hola {model.Nombre},\n\nTu nueva contrase�a es: {contrasenaGenerada}\n\nSaludos!");
+            // Enviar la contraseña por correo SOLO si fue generada y SMTP está configurado
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                try
+                {
+                    var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? "";
+                    if (!string.IsNullOrWhiteSpace(smtpPassword))
+                    {
+                        var mailService = new MailService();
+                        await mailService.SendEmailAsync(model.Email, "Tu nueva contrase�a", $"Hola {model.Nombre},\n\nTu nueva contrase�a es: {contrasenaGenerada}\n\nSaludos!");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // No bloquear el alta si falla el envío de correo
+                    Console.WriteLine($"Error enviando email: {ex.Message}");
+                }
+            }
 
             // Asignación de rol:
             // - Si EsAdmin => Admin (compatibilidad con UI actual)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControlLabel, Checkbox, SelectChangeEvent, Autocomplete, TextFieldVariants, FilledTextFieldProps, OutlinedTextFieldProps, StandardTextFieldProps } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, SelectChangeEvent, Autocomplete, TextFieldVariants, FilledTextFieldProps, OutlinedTextFieldProps, StandardTextFieldProps, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import authService from '../../services/UserService'; 
 import clubsService from '../../services/ClubService'; 
 import { validaciones } from '../../utils/ValidacionesUsuarios';
@@ -14,6 +14,13 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
   const usuario = location.state?.usuario || {};
 
   const [usuarioEditado, setUsuarioEditado] = useState({ ...usuario });
+  const [rol, setRol] = useState<string>(() => {
+    const roles: string[] = usuario?.roles || [];
+    if (roles.includes('Admin')) return 'Admin';
+    if (roles.includes('Federacion')) return 'Federacion';
+    if (roles.includes('Club')) return 'Club';
+    return 'Arbitro';
+  });
   const [errores, setErrores] = useState({
     nombre: '',
     primerApellido: '',
@@ -110,7 +117,12 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     }
 
     try {
-      await authService.updateUser(usuarioEditado);
+      const payload = {
+        ...usuarioEditado,
+        roles: [rol],
+        esAdmin: rol === 'Admin',
+      };
+      await authService.updateUser(payload);
       onUpdate();
       toast.success('Usuario actualizado con éxito');
       onClose();
@@ -118,7 +130,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
     }
-  }, [usuarioEditado, errores, usuario, onUpdate, onClose, navigate]);
+  }, [usuarioEditado, errores, usuario, onUpdate, onClose, navigate, rol]);
 
   const handleCancel = useCallback(() => {
     navigate('/gestionUsuarios/usuariosView');
@@ -179,7 +191,28 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
         <TextField label="Provincia" fullWidth margin="normal" name="region" value={usuarioEditado.region} onChange={handleChange} error={!!errores.region} helperText={errores.region} />
         <TextField label="Municipio" fullWidth margin="normal" name="ciudad" value={usuarioEditado.ciudad} onChange={handleChange} error={!!errores.ciudad} helperText={errores.ciudad} />
 
-        <FormControlLabel control={<Checkbox checked={usuarioEditado.esAdmin} onChange={handleCheckboxChange} />} label="Asignar rol de Administrador" />
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="rol-label">Rol</InputLabel>
+          <Select
+            labelId="rol-label"
+            label="Rol"
+            value={rol}
+            onChange={(e) => {
+              const next = String(e.target.value);
+              setRol(next);
+              setUsuarioEditado((prev: any) => ({
+                ...prev,
+                esAdmin: next === 'Admin',
+                roles: [next],
+              }));
+            }}
+          >
+            <MenuItem value="Arbitro">Árbitro</MenuItem>
+            <MenuItem value="Club">Club</MenuItem>
+            <MenuItem value="Federacion">Federación</MenuItem>
+            <MenuItem value="Admin">Administrador</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="error">Cancelar</Button>
