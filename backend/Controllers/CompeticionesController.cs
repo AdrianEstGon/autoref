@@ -45,6 +45,7 @@ public class CompeticionesController : ControllerBase
 
         var entidad = new Competicion
         {
+            FederacionId = SeedIds.FederacionAsturianaId,
             Nombre = model.Nombre.Trim(),
             EsFederada = model.EsFederada,
             Activa = model.Activa

@@ -531,6 +531,13 @@ public class UsuariosController : ControllerBase
     [HttpPut("upload-profile-picture/{userId}")]
     public async Task<IActionResult> UploadProfilePicture(string userId, IFormFile file)
     {
+        // Si Cloudinary no está configurado, evitamos intentar subir (daría error y puede confundir en entornos nuevos)
+        var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME") ?? _configuration["CloudinarySettings:CloudName"];
+        if (string.IsNullOrWhiteSpace(cloudName))
+        {
+            return StatusCode(503, new { message = "Cloudinary no está configurado. Configura CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET para habilitar la subida de fotos." });
+        }
+
         var user = await _userManager.FindByIdAsync(userId);
 
         if (user == null)

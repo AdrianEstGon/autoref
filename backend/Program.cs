@@ -31,10 +31,23 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddControllers();
 
 // Configurar Cloudinary desde variables de entorno
+var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME") ?? builder.Configuration["CloudinarySettings:CloudName"];
+var cloudApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY") ?? builder.Configuration["CloudinarySettings:ApiKey"];
+var cloudApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET") ?? builder.Configuration["CloudinarySettings:ApiSecret"];
+
+// Evita que el backend falle al arrancar si Cloudinary no está configurado (p.ej. en despliegues iniciales / migraciones)
+if (string.IsNullOrWhiteSpace(cloudName))
+{
+    Console.WriteLine("Cloudinary no configurado (CLOUDINARY_CLOUD_NAME vacío). Subida de fotos deshabilitada hasta configurar credenciales.");
+    cloudName = "disabled";
+}
+if (string.IsNullOrWhiteSpace(cloudApiKey)) cloudApiKey = "disabled";
+if (string.IsNullOrWhiteSpace(cloudApiSecret)) cloudApiSecret = "disabled";
+
 var cloudinaryAccount = new Account(
-    Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME") ?? builder.Configuration["CloudinarySettings:CloudName"],
-    Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY") ?? builder.Configuration["CloudinarySettings:ApiKey"],
-    Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET") ?? builder.Configuration["CloudinarySettings:ApiSecret"]
+    cloudName,
+    cloudApiKey,
+    cloudApiSecret
 );
 
 var cloudinary = new Cloudinary(cloudinaryAccount);
@@ -147,6 +160,9 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
+        var db = services.GetRequiredService<AppDataBase>();
+        await db.Database.MigrateAsync();
+
         var userManager = services.GetRequiredService<UserManager<Usuario>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 
