@@ -24,6 +24,10 @@ namespace AutoRef_API.Database
         public DbSet<Notificacion> Notificaciones { get; set; }
         public DbSet<Competicion> Competiciones { get; set; }
         public DbSet<Persona> Personas { get; set; }
+        public DbSet<Temporada> Temporadas { get; set; }
+        public DbSet<Modalidad> Modalidades { get; set; }
+        public DbSet<LicenciaPersona> LicenciasPersonas { get; set; }
+        public DbSet<LicenciaCategoriaHabilitada> LicenciasCategoriasHabilitadas { get; set; }
         public DbSet<Inscripcion> Inscripciones { get; set; }
         public DbSet<EnvioMutua> EnviosMutua { get; set; }
         public DbSet<EnvioMutuaItem> EnviosMutuaItems { get; set; }
@@ -67,6 +71,13 @@ namespace AutoRef_API.Database
                 .WithMany()
                 .HasForeignKey(e => e.ClubId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación entre Equipo y Competición (equipos por competición)
+            modelBuilder.Entity<Equipo>()
+                .HasOne(e => e.Competicion)
+                .WithMany()
+                .HasForeignKey(e => e.CompeticionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relación entre Club y Federación
             modelBuilder.Entity<Club>()
@@ -156,6 +167,10 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<Categoria>().Property(c => c.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Competicion>().Property(c => c.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Persona>().Property(p => p.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Temporada>().Property(t => t.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Modalidad>().Property(m => m.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<LicenciaPersona>().Property(l => l.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<LicenciaCategoriaHabilitada>().Property(l => l.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Inscripcion>().Property(i => i.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<EnvioMutua>().Property(e => e.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<EnvioMutuaItem>().Property(e => e.Id).ValueGeneratedOnAdd();
@@ -167,6 +182,26 @@ namespace AutoRef_API.Database
             // Persona: documento único
             modelBuilder.Entity<Persona>()
                 .HasIndex(p => p.Documento)
+                .IsUnique();
+
+            // Temporada: nombre único
+            modelBuilder.Entity<Temporada>()
+                .HasIndex(t => t.Nombre)
+                .IsUnique();
+
+            // Modalidad: nombre único
+            modelBuilder.Entity<Modalidad>()
+                .HasIndex(m => m.Nombre)
+                .IsUnique();
+
+            // Licencia: una por persona+temporada+modalidad
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasIndex(l => new { l.PersonaId, l.TemporadaId, l.ModalidadId })
+                .IsUnique();
+
+            // Categorías habilitadas: evitar duplicados por licencia
+            modelBuilder.Entity<LicenciaCategoriaHabilitada>()
+                .HasIndex(x => new { x.LicenciaPersonaId, x.CategoriaId })
                 .IsUnique();
 
             // Inscripción: evitar duplicados exactos (misma persona en mismo equipo+competición)
@@ -184,9 +219,19 @@ namespace AutoRef_API.Database
                 .HasIndex(c => new { c.FederacionId, c.Nombre })
                 .IsUnique();
 
+            // Club: CIF único dentro de la federación (si viene informado)
+            modelBuilder.Entity<Club>()
+                .HasIndex(c => new { c.FederacionId, c.CIF })
+                .IsUnique();
+
             // Competición: nombre único dentro de la federación
             modelBuilder.Entity<Competicion>()
                 .HasIndex(c => new { c.FederacionId, c.Nombre })
+                .IsUnique();
+
+            // Equipo: evitar duplicados por club+competición+categoría+nombre
+            modelBuilder.Entity<Equipo>()
+                .HasIndex(e => new { e.ClubId, e.CompeticionId, e.CategoriaId, e.Nombre })
                 .IsUnique();
 
             modelBuilder.Entity<Inscripcion>()
@@ -225,6 +270,61 @@ namespace AutoRef_API.Database
                 .WithMany()
                 .HasForeignKey(p => p.UltimoEnvioMutuaId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Licencias
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.Persona)
+                .WithMany()
+                .HasForeignKey(l => l.PersonaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.Temporada)
+                .WithMany()
+                .HasForeignKey(l => l.TemporadaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.Modalidad)
+                .WithMany()
+                .HasForeignKey(l => l.ModalidadId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.CategoriaBase)
+                .WithMany()
+                .HasForeignKey(l => l.CategoriaBaseId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasMany(l => l.CategoriasHabilitadas)
+                .WithOne(x => x.LicenciaPersona)
+                .HasForeignKey(x => x.LicenciaPersonaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LicenciaCategoriaHabilitada>()
+                .HasOne(x => x.Categoria)
+                .WithMany()
+                .HasForeignKey(x => x.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Seed Temporada/Modalidad por defecto
+            modelBuilder.Entity<Temporada>().HasData(new Temporada
+            {
+                Id = SeedIds.TemporadaDefaultId,
+                Nombre = "Temporada actual",
+                // HasData requiere valores constantes (sin DateTime.UtcNow)
+                FechaInicio = new DateTime(2025, 8, 1),
+                FechaFin = new DateTime(2026, 7, 31),
+                Activa = true
+            });
+
+            modelBuilder.Entity<Modalidad>().HasData(new Modalidad
+            {
+                Id = SeedIds.ModalidadDefaultId,
+                Nombre = "Voleibol",
+                Activa = true
+            });
 
             // Seed Federación Asturiana y Competiciones
             modelBuilder.Entity<Federacion>().HasData(new Federacion

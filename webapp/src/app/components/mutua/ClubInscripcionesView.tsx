@@ -23,18 +23,21 @@ import {
   Paper,
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import DownloadIcon from '@mui/icons-material/Download';
 import { toast } from 'react-toastify';
 import equipoService from '../../services/EquipoService';
 import competicionService, { Competicion } from '../../services/CompeticionService';
 import inscripcionService, { Inscripcion } from '../../services/InscripcionService';
+import documentoService from '../../services/DocumentoService';
 
-type Equipo = { id: string; nombre: string; clubId: string; categoriaId: string };
+type Equipo = { id: string; nombre: string; clubId: string; competicionId?: string | null; categoriaId: string };
 
 const ClubInscripcionesView: React.FC = () => {
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [competiciones, setCompeticiones] = useState<Competicion[]>([]);
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cupos, setCupos] = useState<{ jugadores: number; staff: number; minJugadores?: number | null; maxJugadores?: number | null } | null>(null);
 
   const [form, setForm] = useState({
     nombre: '',
@@ -47,13 +50,13 @@ const ClubInscripcionesView: React.FC = () => {
     mutuaSolicitada: true,
   });
 
-  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico' } as Record<number, string>), []);
+  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico', 3: 'Árbitro', 4: 'Staff' } as Record<number, string>), []);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const [misEquipos, comps, misIns] = await Promise.all([
-        equipoService.getMisEquipos(),
+        equipoService.getMisEquipos(form.competicionId || undefined),
         competicionService.getCompeticiones(),
         inscripcionService.getMisInscripciones(),
       ]);
@@ -75,6 +78,38 @@ const ClubInscripcionesView: React.FC = () => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Recargar equipos cuando cambia la competición seleccionada (para que el selector de equipos sea por competición)
+  useEffect(() => {
+    const reloadEquipos = async () => {
+      if (!form.competicionId) return;
+      try {
+        const misEquipos = await equipoService.getMisEquipos(form.competicionId);
+        setEquipos(misEquipos);
+        if (!misEquipos.find((e: any) => e.id === form.equipoId) && misEquipos?.[0]?.id) {
+          setForm((p) => ({ ...p, equipoId: misEquipos[0].id }));
+        }
+      } catch {
+        // silencioso
+      }
+    };
+    reloadEquipos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.competicionId]);
+
+  // Mostrar cupos del equipo seleccionado (jugadores / max) para ayudar al club
+  useEffect(() => {
+    const loadCupos = async () => {
+      if (!form.equipoId || !form.competicionId) return setCupos(null);
+      try {
+        const data = await equipoService.getCuposEquipo(form.equipoId, form.competicionId);
+        setCupos(data);
+      } catch {
+        setCupos(null);
+      }
+    };
+    loadCupos();
+  }, [form.equipoId, form.competicionId]);
 
   const handleCreate = async () => {
     if (!form.nombre || !form.apellidos || !form.documento || !form.fechaNacimiento || !form.equipoId || !form.competicionId) {
@@ -164,6 +199,8 @@ const ClubInscripcionesView: React.FC = () => {
                 <Select value={form.tipo} label="Tipo" onChange={(e) => setForm((p) => ({ ...p, tipo: Number(e.target.value) }))}>
                   <MenuItem value={1}>Jugador</MenuItem>
                   <MenuItem value={2}>Staff técnico</MenuItem>
+                  <MenuItem value={3}>Árbitro</MenuItem>
+                  <MenuItem value={4}>Staff</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -178,6 +215,13 @@ const ClubInscripcionesView: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
+              {cupos && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  Jugadores: {cupos.jugadores}
+                  {cupos.maxJugadores ? ` / ${cupos.maxJugadores}` : ''} · Staff: {cupos.staff}
+                  {cupos.minJugadores ? ` · Min jugadores: ${cupos.minJugadores}` : ''}
+                </Typography>
+              )}
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
@@ -236,6 +280,7 @@ const ClubInscripcionesView: React.FC = () => {
                   <TableCell>Competición</TableCell>
                   <TableCell>Mutua</TableCell>
                   <TableCell>Estado</TableCell>
+                  <TableCell>Docs</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -268,11 +313,26 @@ const ClubInscripcionesView: React.FC = () => {
                         <Chip label="No solicitado" size="small" sx={{ bgcolor: '#E8ECEF', color: '#64748B' }} />
                       )}
                     </TableCell>
+                    <TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={async () => {
+                          try {
+                            await documentoService.descargarAutorizacionExcel(i.id);
+                          } catch (e: any) {
+                            toast.error(e?.message || 'No se pudo descargar la autorización');
+                          }
+                        }}
+                        title="Descargar autorización (Excel)"
+                      >
+                        <DownloadIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {inscripciones.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={8}>
                       <Typography variant="body2" color="text.secondary">
                         Todavía no hay inscripciones.
                       </Typography>

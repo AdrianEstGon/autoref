@@ -61,9 +61,12 @@ const getEquipoById = async (id: string) => {
 };
 
 // Obtener mis equipos (rol Club)
-const getMisEquipos = async () => {
+const getMisEquipos = async (competicionId?: string) => {
     try {
-        const response = await axios.get(`${API_URL}/Equipos/mis`, getAuthHeaders());
+        const response = await axios.get(`${API_URL}/Equipos/mis`, {
+            ...getAuthHeaders(),
+            params: competicionId ? { competicionId } : undefined,
+        });
         return response.data;
     } catch (error) {
         console.error('Error obteniendo mis equipos:', error);
@@ -72,7 +75,7 @@ const getMisEquipos = async () => {
 };
 
 // Crear equipo (admin/federación)
-const createEquipo = async (equipo: { nombre: string; clubId: string; categoriaId: string }) => {
+const createEquipo = async (equipo: { nombre: string; clubId: string; competicionId: string; categoriaId: string }) => {
     try {
         const response = await axios.post(`${API_URL}/Equipos`, equipo, getAuthHeaders());
         return response.data;
@@ -82,4 +85,12 @@ const createEquipo = async (equipo: { nombre: string; clubId: string; categoriaI
     }
 };
 
-export default { getEquipos, getMisEquipos, createEquipo, getEquiposPorCategoria, getEquipoById, getEquipoByNameAndCategory };
+const getCuposEquipo = async (equipoId: string, competicionId: string) => {
+    const response = await axios.get(`${API_URL}/Equipos/${equipoId}/cupos`, {
+        ...getAuthHeaders(),
+        params: { competicionId },
+    });
+    return response.data;
+};
+
+export default { getEquipos, getMisEquipos, createEquipo, getEquiposPorCategoria, getEquipoById, getEquipoByNameAndCategory, getCuposEquipo };

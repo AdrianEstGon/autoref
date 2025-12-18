@@ -20,6 +20,14 @@ public class InscripcionCreateModel
     public DateTime FechaNacimiento { get; set; }
     public TipoPersona Tipo { get; set; }
 
+    // Contacto (opcional)
+    public string? Email { get; set; }
+    public string? Telefono { get; set; }
+    public string? Direccion { get; set; }
+    public string? CodigoPostal { get; set; }
+    public string? Provincia { get; set; }
+    public string? Ciudad { get; set; }
+
     // Inscripción
     public Guid EquipoId { get; set; }
     public Guid CompeticionId { get; set; }

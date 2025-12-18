@@ -19,6 +19,10 @@ import FederacionMutuaView from '../components/mutua/FederacionMutuaView';
 import CompeticionesView from '../components/federacion/CompeticionesView';
 import EquiposView from '../components/federacion/EquiposView';
 import CategoriasView from '../components/federacion/CategoriasView';
+import TemporadasView from '../components/federacion/TemporadasView';
+import ModalidadesView from '../components/federacion/ModalidadesView';
+import PersonasView from '../components/federacion/PersonasView';
+import ClubsView from '../components/federacion/ClubsView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -156,9 +160,29 @@ const Router = () => {
                     <WithLayout><FederacionMutuaView /></WithLayout>
                   </RequireRole>
                 } />
+                <Route path="/federacion/clubs" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><ClubsView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/personas" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><PersonasView /></WithLayout>
+                  </RequireRole>
+                } />
                 <Route path="/federacion/competiciones" element={
                   <RequireRole allowedRoles={['Federacion']}>
                     <WithLayout><CompeticionesView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/temporadas" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><TemporadasView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/modalidades" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><ModalidadesView /></WithLayout>
                   </RequireRole>
                 } />
                 <Route path="/federacion/equipos" element={

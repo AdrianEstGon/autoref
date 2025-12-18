@@ -23,27 +23,36 @@ import { toast } from 'react-toastify';
 import clubService from '../../services/ClubService';
 import categoriaService from '../../services/CategoriaService';
 import equipoService from '../../services/EquipoService';
+import competicionService, { Competicion } from '../../services/CompeticionService';
 
 type Club = { id: string; nombre: string };
 type Categoria = { id: string; nombre: string };
-type Equipo = { id: string; nombre: string; clubId: string; categoriaId: string };
+type Equipo = { id: string; nombre: string; clubId: string; competicionId?: string | null; categoriaId: string };
 
 const EquiposView: React.FC = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [competiciones, setCompeticiones] = useState<Competicion[]>([]);
   const [equipos, setEquipos] = useState<Equipo[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [form, setForm] = useState({ nombre: '', clubId: '', categoriaId: '' });
+  const [form, setForm] = useState({ nombre: '', clubId: '', competicionId: '', categoriaId: '' });
 
   const load = async () => {
     setLoading(true);
     try {
-      const [c, cat, eq] = await Promise.all([clubService.getClubs(), categoriaService.getCategorias(), equipoService.getEquipos()]);
+      const [c, cat, comps, eq] = await Promise.all([
+        clubService.getClubs(),
+        categoriaService.getCategorias(),
+        competicionService.getCompeticiones(),
+        equipoService.getEquipos(),
+      ]);
       setClubs(c);
       setCategorias(cat);
+      setCompeticiones(comps);
       setEquipos(eq);
       if (!form.clubId && c?.[0]?.id) setForm((p) => ({ ...p, clubId: c[0].id }));
+      if (!form.competicionId && comps?.[0]?.id) setForm((p) => ({ ...p, competicionId: comps[0].id }));
       if (!form.categoriaId && cat?.[0]?.id) setForm((p) => ({ ...p, categoriaId: cat[0].id }));
     } catch (e: any) {
       toast.error(e?.message || 'Error cargando datos');
@@ -58,13 +67,13 @@ const EquiposView: React.FC = () => {
   }, []);
 
   const handleCreate = async () => {
-    if (!form.nombre.trim() || !form.clubId || !form.categoriaId) {
-      toast.error('Completa nombre, club y categoría');
+    if (!form.nombre.trim() || !form.clubId || !form.competicionId || !form.categoriaId) {
+      toast.error('Completa nombre, club, competición y categoría');
       return;
     }
     setLoading(true);
     try {
-      await equipoService.createEquipo({ nombre: form.nombre.trim(), clubId: form.clubId, categoriaId: form.categoriaId });
+      await equipoService.createEquipo({ nombre: form.nombre.trim(), clubId: form.clubId, competicionId: form.competicionId, categoriaId: form.categoriaId });
       toast.success('Equipo creado');
       setForm((p) => ({ ...p, nombre: '' }));
       await load();
@@ -77,6 +86,7 @@ const EquiposView: React.FC = () => {
 
   const clubName = (id: string) => clubs.find((c) => c.id === id)?.nombre || id;
   const catName = (id: string) => categorias.find((c) => c.id === id)?.nombre || id;
+  const compName = (id?: string | null) => competiciones.find((c) => c.id === id)?.nombre || (id ? id : '-');
 
   return (
     <Box>
@@ -128,6 +138,20 @@ const EquiposView: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
+            <FormControl sx={{ minWidth: 260 }}>
+              <InputLabel>Competición</InputLabel>
+              <Select
+                value={form.competicionId}
+                label="Competición"
+                onChange={(e) => setForm((p) => ({ ...p, competicionId: String(e.target.value) }))}
+              >
+                {competiciones.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.nombre} {c.esFederada ? '(Federada)' : ''}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl sx={{ minWidth: 220 }}>
               <InputLabel>Categoría</InputLabel>
               <Select
@@ -165,6 +189,7 @@ const EquiposView: React.FC = () => {
                 <TableRow>
                   <TableCell>Nombre</TableCell>
                   <TableCell>Club</TableCell>
+                  <TableCell>Competición</TableCell>
                   <TableCell>Categoría</TableCell>
                 </TableRow>
               </TableHead>
@@ -173,12 +198,13 @@ const EquiposView: React.FC = () => {
                   <TableRow key={e.id} hover>
                     <TableCell>{e.nombre}</TableCell>
                     <TableCell>{clubName(e.clubId)}</TableCell>
+                    <TableCell>{compName(e.competicionId)}</TableCell>
                     <TableCell>{catName(e.categoriaId)}</TableCell>
                   </TableRow>
                 ))}
                 {equipos.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3}>
+                    <TableCell colSpan={4}>
                       <Typography variant="body2" color="text.secondary">
                         No hay equipos todavía.
                       </Typography>

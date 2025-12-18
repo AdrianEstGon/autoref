@@ -48,7 +48,7 @@ const getCategoriaById = async (id: string) => {
 };
 
 // Crear categoría (admin/federación)
-const createCategoria = async (categoria: { nombre: string; primerArbitro?: string; segundoArbitro?: string; anotador?: string; minArbitros?: number; prioridad?: number; }) => {
+const createCategoria = async (categoria: { nombre: string; primerArbitro?: string; segundoArbitro?: string; anotador?: string; minArbitros?: number; prioridad?: number; minJugadores?: number | null; maxJugadores?: number | null; }) => {
     const response = await axios.post(`${API_URL}/Categorias`, categoria, getAuthHeaders());
     return response.data;
 };

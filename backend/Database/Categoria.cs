@@ -11,6 +11,10 @@
 
         public int Prioridad { get; set; }
 
+        // Control de plantilla (jugadores) - opcional
+        public int? MinJugadores { get; set; }
+        public int? MaxJugadores { get; set; }
+
 
     }
 }

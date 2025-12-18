@@ -57,6 +57,12 @@ public class InscripcionesController : ControllerBase
                     i.Persona.Documento,
                     i.Persona.FechaNacimiento,
                     i.Persona.Tipo,
+                    i.Persona.Email,
+                    i.Persona.Telefono,
+                    i.Persona.Direccion,
+                    i.Persona.CodigoPostal,
+                    i.Persona.Provincia,
+                    i.Persona.Ciudad,
                     i.Persona.MutuaEnviada,
                     i.Persona.FechaEnvioMutua
                 },
@@ -102,6 +108,10 @@ public class InscripcionesController : ControllerBase
         var competicion = await _context.Competiciones.FindAsync(model.CompeticionId);
         if (competicion == null) return BadRequest(new { message = "Competición no encontrada" });
 
+        // Si el equipo está asociado a una competición concreta, debe coincidir
+        if (equipo.CompeticionId != null && equipo.CompeticionId.Value != model.CompeticionId)
+            return BadRequest(new { message = "El equipo no pertenece a la competición seleccionada" });
+
         var documentoNorm = model.Documento.Trim();
         var persona = await _context.Personas.FirstOrDefaultAsync(p => p.Documento == documentoNorm);
         if (persona == null)
@@ -112,7 +122,13 @@ public class InscripcionesController : ControllerBase
                 Apellidos = model.Apellidos.Trim(),
                 Documento = documentoNorm,
                 FechaNacimiento = model.FechaNacimiento,
-                Tipo = model.Tipo
+                Tipo = model.Tipo,
+                Email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim(),
+                Telefono = string.IsNullOrWhiteSpace(model.Telefono) ? null : model.Telefono.Trim(),
+                Direccion = string.IsNullOrWhiteSpace(model.Direccion) ? null : model.Direccion.Trim(),
+                CodigoPostal = string.IsNullOrWhiteSpace(model.CodigoPostal) ? null : model.CodigoPostal.Trim(),
+                Provincia = string.IsNullOrWhiteSpace(model.Provincia) ? null : model.Provincia.Trim(),
+                Ciudad = string.IsNullOrWhiteSpace(model.Ciudad) ? null : model.Ciudad.Trim(),
             };
             _context.Personas.Add(persona);
             await _context.SaveChangesAsync();
@@ -124,6 +140,34 @@ public class InscripcionesController : ControllerBase
             persona.Apellidos = string.IsNullOrWhiteSpace(model.Apellidos) ? persona.Apellidos : model.Apellidos.Trim();
             persona.FechaNacimiento = model.FechaNacimiento == default ? persona.FechaNacimiento : model.FechaNacimiento;
             persona.Tipo = model.Tipo;
+
+            // Contacto (solo si viene informado)
+            if (!string.IsNullOrWhiteSpace(model.Email)) persona.Email = model.Email.Trim();
+            if (!string.IsNullOrWhiteSpace(model.Telefono)) persona.Telefono = model.Telefono.Trim();
+            if (!string.IsNullOrWhiteSpace(model.Direccion)) persona.Direccion = model.Direccion.Trim();
+            if (!string.IsNullOrWhiteSpace(model.CodigoPostal)) persona.CodigoPostal = model.CodigoPostal.Trim();
+            if (!string.IsNullOrWhiteSpace(model.Provincia)) persona.Provincia = model.Provincia.Trim();
+            if (!string.IsNullOrWhiteSpace(model.Ciudad)) persona.Ciudad = model.Ciudad.Trim();
+        }
+
+        // Control de max jugadores por categoría (solo Jugadores)
+        if (persona.Tipo == AutoRef_API.Enum.TipoPersona.Jugador && equipo.CategoriaId != null)
+        {
+            var categoria = await _context.Categorias.FindAsync(equipo.CategoriaId.Value);
+            if (categoria?.MaxJugadores != null && categoria.MaxJugadores.Value > 0)
+            {
+                var countJugadores = await _context.Inscripciones
+                    .Include(i => i.Persona)
+                    .Where(i =>
+                        i.Activa &&
+                        i.EquipoId == model.EquipoId &&
+                        i.CompeticionId == model.CompeticionId &&
+                        i.Persona.Tipo == AutoRef_API.Enum.TipoPersona.Jugador)
+                    .CountAsync();
+
+                if (countJugadores >= categoria.MaxJugadores.Value)
+                    return BadRequest(new { message = $"El equipo ya tiene el máximo de jugadores ({categoria.MaxJugadores.Value})." });
+            }
         }
 
         // Si ya está enviada a mutua globalmente, el club no puede gestionar la solicitud
