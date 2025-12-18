@@ -519,11 +519,26 @@ namespace AutoRef_API.Migrations
                     b.Property<Guid?>("CategoriaBaseId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("ClubSolicitanteId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaSolicitudUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaValidacionUtc")
                         .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("ModalidadId")
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("MotivoRechazo")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NumeroLicencia")
                         .HasColumnType("longtext");
@@ -535,6 +550,9 @@ namespace AutoRef_API.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<Guid>("TemporadaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("ValidadaPorUsuarioId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");

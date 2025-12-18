@@ -32,6 +32,9 @@ import HistoryIcon from '@mui/icons-material/History';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SportsVolleyballIcon from '@mui/icons-material/SportsVolleyball';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -42,10 +45,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import BadgeIcon from '@mui/icons-material/Badge';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CategoryIcon from '@mui/icons-material/Category';
-import BadgeIcon from '@mui/icons-material/Badge';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -174,6 +177,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     if (isClub) {
       return [
         { text: 'Partidos', icon: <SportsVolleyballIcon />, path: '/club/partidos' },
+        { text: 'Licencias', icon: <BadgeIcon />, path: '/club/licencias' },
         { text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' },
       ];
     }
@@ -188,6 +192,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       { text: 'Mis Designaciones', icon: <DashboardIcon />, path: '/misDesignaciones' },
       { text: 'Disponibilidad', icon: <CalendarMonthIcon />, path: '/miDisponibilidad' },
       { text: 'Mi Historial', icon: <HistoryIcon />, path: '/miHistorial' },
+      { text: 'Liquidaciones', icon: <ReceiptLongIcon />, path: '/liquidaciones' },
     ];
   })();
 
@@ -199,6 +204,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
         { text: 'Clubes', icon: <BusinessIcon />, path: '/federacion/clubs' },
         { text: 'Personas', icon: <BadgeIcon />, path: '/federacion/personas' },
+        { text: 'Licencias', icon: <BadgeIcon />, path: '/federacion/licencias' },
         { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
         { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
         { text: 'Temporadas', icon: <CalendarMonthIcon />, path: '/federacion/temporadas' },
@@ -214,7 +220,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
         { text: 'Clubes', icon: <BusinessIcon />, path: '/federacion/clubs' },
         { text: 'Personas', icon: <BadgeIcon />, path: '/federacion/personas' },
+        { text: 'Licencias', icon: <BadgeIcon />, path: '/federacion/licencias' },
         { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
+        { text: 'Facturación', icon: <ReceiptIcon />, path: '/federacion/facturacion' },
         { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
         { text: 'Temporadas', icon: <CalendarMonthIcon />, path: '/federacion/temporadas' },
         { text: 'Modalidades', icon: <SportsVolleyballIcon />, path: '/federacion/modalidades' },
@@ -228,6 +236,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       return [
         { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
         { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
+        { text: 'Liquidaciones', icon: <ReceiptLongIcon />, path: '/comite/liquidaciones' },
+        { text: 'Órdenes de pago', icon: <PaymentsIcon />, path: '/comite/ordenes-pago' },
       ];
     }
 

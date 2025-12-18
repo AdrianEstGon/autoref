@@ -27,6 +27,12 @@ import PartidosClubView from '../components/club/PartidosClubView';
 import CambiosPartidosView from '../components/federacion/CambiosPartidosView';
 import ActaPartidoView from '../components/acta/ActaPartidoView';
 import PublicoPortalView from '../components/publico/PublicoPortalView';
+import LicenciasClubView from '../components/club/LicenciasClubView';
+import LicenciasFederacionView from '../components/federacion/LicenciasFederacionView';
+import MisLiquidacionesView from '../components/liquidaciones/MisLiquidacionesView';
+import ComiteLiquidacionesView from '../components/liquidaciones/ComiteLiquidacionesView';
+import OrdenesPagoView from '../components/liquidaciones/OrdenesPagoView';
+import FacturacionView from '../components/federacion/FacturacionView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -79,6 +85,11 @@ const Router = () => {
                 <Route path="/miHistorial" element={
                   <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}>
                     <WithLayout><HistorialDesignacionesView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/liquidaciones" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}>
+                    <WithLayout><MisLiquidacionesView /></WithLayout>
                   </RequireRole>
                 } />
                 
@@ -161,11 +172,26 @@ const Router = () => {
                     <WithLayout><PanelDesignacionesView /></WithLayout>
                   </RequireRole>
                 } />
+                <Route path="/comite/liquidaciones" element={
+                  <RequireRole allowedRoles={['ComiteArbitros']}>
+                    <WithLayout><ComiteLiquidacionesView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/comite/ordenes-pago" element={
+                  <RequireRole allowedRoles={['ComiteArbitros']}>
+                    <WithLayout><OrdenesPagoView /></WithLayout>
+                  </RequireRole>
+                } />
 
                 {/* Rutas Club */}
                 <Route path="/club/partidos" element={
                   <RequireRole allowedRoles={['Club']}>
                     <WithLayout><PartidosClubView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/club/licencias" element={
+                  <RequireRole allowedRoles={['Club']}>
+                    <WithLayout><LicenciasClubView /></WithLayout>
                   </RequireRole>
                 } />
                 <Route path="/club/inscripciones" element={
@@ -218,6 +244,16 @@ const Router = () => {
                 <Route path="/federacion/cambios-partidos" element={
                   <RequireRole allowedRoles={['Federacion']}>
                     <WithLayout><CambiosPartidosView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/licencias" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><LicenciasFederacionView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/facturacion" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><FacturacionView /></WithLayout>
                   </RequireRole>
                 } />
             </Routes>

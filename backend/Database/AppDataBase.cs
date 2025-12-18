@@ -35,6 +35,12 @@ namespace AutoRef_API.Database
         public DbSet<EnvioMutuaItem> EnviosMutuaItems { get; set; }
         public DbSet<PartidoCambioSolicitud> PartidosCambiosSolicitudes { get; set; }
         public DbSet<ActaPartido> ActasPartido { get; set; }
+        public DbSet<Liquidacion> Liquidaciones { get; set; }
+        public DbSet<LiquidacionItem> LiquidacionItems { get; set; }
+        public DbSet<OrdenPago> OrdenesPago { get; set; }
+        public DbSet<OrdenPagoItem> OrdenesPagoItems { get; set; }
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<FacturaLinea> FacturaLineas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +78,58 @@ namespace AutoRef_API.Database
                 .HasOne(a => a.Partido)
                 .WithOne(p => p.Acta)
                 .HasForeignKey<ActaPartido>(a => a.PartidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Liquidaciones
+            modelBuilder.Entity<Liquidacion>()
+                .HasOne(l => l.Usuario)
+                .WithMany()
+                .HasForeignKey(l => l.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Liquidacion>()
+                .HasOne(l => l.Partido)
+                .WithMany()
+                .HasForeignKey(l => l.PartidoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Liquidacion>()
+                .HasMany(l => l.Items)
+                .WithOne(i => i.Liquidacion)
+                .HasForeignKey(i => i.LiquidacionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Órdenes de pago
+            modelBuilder.Entity<OrdenPago>()
+                .HasMany(o => o.Items)
+                .WithOne(i => i.OrdenPago)
+                .HasForeignKey(i => i.OrdenPagoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrdenPagoItem>()
+                .HasOne(i => i.Liquidacion)
+                .WithMany()
+                .HasForeignKey(i => i.LiquidacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrdenPagoItem>()
+                .HasOne(i => i.Usuario)
+                .WithMany()
+                .HasForeignKey(i => i.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Facturas
+            modelBuilder.Entity<Factura>()
+                .HasOne(f => f.Club)
+                .WithMany()
+                .HasForeignKey(f => f.ClubId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Factura>()
+                .HasMany(f => f.Lineas)
+                .WithOne(l => l.Factura)
+                .HasForeignKey(l => l.FacturaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Partido -> Competición (opcional, para calendarios)
@@ -251,6 +309,12 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<EnvioMutuaItem>().Property(e => e.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<PartidoCambioSolicitud>().Property(p => p.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<ActaPartido>().Property(a => a.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Liquidacion>().Property(l => l.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<LiquidacionItem>().Property(i => i.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<OrdenPago>().Property(o => o.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<OrdenPagoItem>().Property(i => i.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Factura>().Property(f => f.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<FacturaLinea>().Property(l => l.Id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Licencia)
@@ -328,6 +392,22 @@ namespace AutoRef_API.Database
 
             modelBuilder.Entity<PartidoCambioSolicitud>()
                 .HasIndex(c => c.Estado);
+
+            modelBuilder.Entity<Liquidacion>()
+                .HasIndex(l => new { l.UsuarioId, l.Fecha });
+
+            modelBuilder.Entity<Liquidacion>()
+                .HasIndex(l => l.Estado);
+
+            modelBuilder.Entity<OrdenPago>()
+                .HasIndex(o => o.Estado);
+
+            modelBuilder.Entity<Factura>()
+                .HasIndex(f => f.Estado);
+
+            modelBuilder.Entity<Factura>()
+                .HasIndex(f => f.Numero)
+                .IsUnique();
 
             // Equipo: evitar duplicados por club+competición+categoría+nombre
             // IMPORTANTE (MySQL): para poder indexar, Nombre no puede ser TEXT/LONGTEXT.

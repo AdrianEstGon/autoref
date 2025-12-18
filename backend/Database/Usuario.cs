@@ -31,6 +31,11 @@ public class Usuario : IdentityUser<Guid>
 
     public string? FotoPerfil { get; set; }
 
+    // 5.8: datos bancarios para liquidaciones/órdenes de pago
+    public string? Iban { get; set; }
+    public string? Bic { get; set; }
+    public string? TitularCuenta { get; set; }
+
     public SqlGeography Ubicacion
     {
         get

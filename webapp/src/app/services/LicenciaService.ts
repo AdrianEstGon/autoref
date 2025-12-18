@@ -17,6 +17,12 @@ export type Licencia = {
   activa: boolean;
   fechaAlta: string;
   observaciones?: string | null;
+  estado?: string;
+  fechaSolicitudUtc?: string | null;
+  clubSolicitanteId?: string | null;
+  fechaValidacionUtc?: string | null;
+  validadaPorUsuarioId?: string | null;
+  motivoRechazo?: string | null;
   categoriasHabilitadas: { categoriaId: string; nombre: string; fechaAlta: string }[];
 };
 
@@ -49,6 +55,40 @@ const setHabilitaciones = async (licenciaId: string, categoriaIds: string[]) => 
   return response.data;
 };
 
-export default { getLicenciasByPersona, upsertLicencia, setHabilitaciones };
+export type SolicitarLicencia = {
+  personaId: string;
+  temporadaId: string;
+  modalidadId: string;
+  categoriaBaseId?: string | null;
+  observaciones?: string | null;
+};
+
+const solicitarLicencia = async (data: SolicitarLicencia) => {
+  const response = await axios.post(`${API_URL}/Licencias/solicitar`, data, getAuthHeaders());
+  return response.data;
+};
+
+const getMisSolicitudes = async (temporadaId: string, modalidadId: string) => {
+  const response = await axios.get(`${API_URL}/Licencias/mis-solicitudes`, {
+    ...getAuthHeaders(),
+    params: { temporadaId, modalidadId },
+  });
+  return response.data;
+};
+
+const getPendientes = async (temporadaId: string, modalidadId: string) => {
+  const response = await axios.get(`${API_URL}/Licencias/pendientes`, {
+    ...getAuthHeaders(),
+    params: { temporadaId, modalidadId },
+  });
+  return response.data;
+};
+
+const validarLicencia = async (licenciaId: string, data: { aprobar: boolean; numeroLicencia?: string | null; motivoRechazo?: string | null }) => {
+  const response = await axios.post(`${API_URL}/Licencias/${licenciaId}/validar`, data, getAuthHeaders());
+  return response.data;
+};
+
+export default { getLicenciasByPersona, upsertLicencia, setHabilitaciones, solicitarLicencia, getMisSolicitudes, getPendientes, validarLicencia };
 
 

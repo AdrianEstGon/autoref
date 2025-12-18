@@ -1,5 +1,7 @@
 namespace AutoRef_API.Database;
 
+using AutoRef_API.Enum;
+
 public class LicenciaPersona
 {
     public Guid Id { get; set; }
@@ -17,6 +19,14 @@ public class LicenciaPersona
     public bool Activa { get; set; } = true;
     public DateTime FechaAlta { get; set; } = DateTime.UtcNow;
     public string? Observaciones { get; set; }
+
+    // 5.7: workflow de solicitud/validación de licencias
+    public EstadoLicencia Estado { get; set; } = EstadoLicencia.Validada;
+    public DateTime? FechaSolicitudUtc { get; set; }
+    public Guid? ClubSolicitanteId { get; set; }
+    public DateTime? FechaValidacionUtc { get; set; }
+    public Guid? ValidadaPorUsuarioId { get; set; }
+    public string? MotivoRechazo { get; set; }
 
     public Persona Persona { get; set; } = null!;
     public Temporada Temporada { get; set; } = null!;

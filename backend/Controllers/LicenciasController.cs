@@ -1,5 +1,6 @@
 using AutoRef_API.Database;
 using AutoRef_API.Models;
+using AutoRef_API.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -65,6 +66,12 @@ public class LicenciasController : ControllerBase
                 l.Activa,
                 l.FechaAlta,
                 l.Observaciones,
+                estado = l.Estado.ToString(),
+                l.FechaSolicitudUtc,
+                l.ClubSolicitanteId,
+                l.FechaValidacionUtc,
+                l.ValidadaPorUsuarioId,
+                l.MotivoRechazo,
                 categoriasHabilitadas = l.CategoriasHabilitadas.Select(c => new { c.CategoriaId, c.Categoria.Nombre, c.FechaAlta })
             })
             .ToListAsync();
@@ -109,7 +116,10 @@ public class LicenciasController : ControllerBase
                 NumeroLicencia = string.IsNullOrWhiteSpace(model.NumeroLicencia) ? null : model.NumeroLicencia.Trim(),
                 Activa = model.Activa,
                 Observaciones = string.IsNullOrWhiteSpace(model.Observaciones) ? null : model.Observaciones.Trim(),
-                FechaAlta = DateTime.UtcNow
+                FechaAlta = DateTime.UtcNow,
+                Estado = EstadoLicencia.Validada,
+                FechaValidacionUtc = DateTime.UtcNow,
+                ValidadaPorUsuarioId = (await GetCurrentUserAsync())?.Id
             };
             _context.LicenciasPersonas.Add(licencia);
             await _context.SaveChangesAsync();
@@ -120,6 +130,10 @@ public class LicenciasController : ControllerBase
         licencia.NumeroLicencia = string.IsNullOrWhiteSpace(model.NumeroLicencia) ? licencia.NumeroLicencia : model.NumeroLicencia.Trim();
         licencia.Activa = model.Activa;
         licencia.Observaciones = string.IsNullOrWhiteSpace(model.Observaciones) ? licencia.Observaciones : model.Observaciones.Trim();
+        licencia.Estado = EstadoLicencia.Validada;
+        licencia.FechaValidacionUtc = DateTime.UtcNow;
+        licencia.ValidadaPorUsuarioId = (await GetCurrentUserAsync())?.Id;
+        licencia.MotivoRechazo = null;
 
         await _context.SaveChangesAsync();
         return Ok(new { message = "Licencia actualizada con éxito", id = licencia.Id });
@@ -181,6 +195,182 @@ public class LicenciasController : ControllerBase
         _context.LicenciasCategoriasHabilitadas.Remove(entity);
         await _context.SaveChangesAsync();
         return Ok(new { message = "Habilitación eliminada con éxito" });
+    }
+
+    // ===================== 5.7 Solicitud/validación de licencias =====================
+
+    [Authorize(Roles = "Club")]
+    [HttpPost("solicitar")]
+    public async Task<IActionResult> SolicitarLicencia([FromBody] SolicitarLicenciaModel model)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null) return Unauthorized();
+        if (user.ClubVinculadoId == null) return BadRequest(new { message = "El usuario no tiene un club vinculado" });
+
+        if (model.PersonaId == Guid.Empty) return BadRequest(new { message = "PersonaId es obligatorio" });
+        if (model.TemporadaId == Guid.Empty) return BadRequest(new { message = "TemporadaId es obligatorio" });
+        if (model.ModalidadId == Guid.Empty) return BadRequest(new { message = "ModalidadId es obligatorio" });
+
+        var clubId = user.ClubVinculadoId.Value;
+
+        var tienePersona = await _context.Inscripciones
+            .Include(i => i.Equipo)
+            .AnyAsync(i => i.Activa && i.PersonaId == model.PersonaId && i.Equipo.ClubId == clubId);
+        if (!tienePersona) return Forbid();
+
+        var temporadaExists = await _context.Temporadas.AnyAsync(t => t.Id == model.TemporadaId);
+        if (!temporadaExists) return BadRequest(new { message = "Temporada no encontrada" });
+
+        var modalidadExists = await _context.Modalidades.AnyAsync(m => m.Id == model.ModalidadId);
+        if (!modalidadExists) return BadRequest(new { message = "Modalidad no encontrada" });
+
+        if (model.CategoriaBaseId != null)
+        {
+            var catExists = await _context.Categorias.AnyAsync(c => c.Id == model.CategoriaBaseId.Value);
+            if (!catExists) return BadRequest(new { message = "Categoría base no encontrada" });
+        }
+
+        var licencia = await _context.LicenciasPersonas
+            .FirstOrDefaultAsync(l => l.PersonaId == model.PersonaId && l.TemporadaId == model.TemporadaId && l.ModalidadId == model.ModalidadId);
+
+        if (licencia == null)
+        {
+            licencia = new LicenciaPersona
+            {
+                PersonaId = model.PersonaId,
+                TemporadaId = model.TemporadaId,
+                ModalidadId = model.ModalidadId,
+                CategoriaBaseId = model.CategoriaBaseId,
+                Activa = false,
+                Estado = EstadoLicencia.Pendiente,
+                FechaSolicitudUtc = DateTime.UtcNow,
+                ClubSolicitanteId = clubId,
+                Observaciones = string.IsNullOrWhiteSpace(model.Observaciones) ? null : model.Observaciones.Trim(),
+                FechaAlta = DateTime.UtcNow
+            };
+            _context.LicenciasPersonas.Add(licencia);
+        }
+        else
+        {
+            if (licencia.Estado == EstadoLicencia.Validada && licencia.Activa)
+                return BadRequest(new { message = "La licencia ya está validada y activa para esta temporada/modalidad." });
+
+            licencia.CategoriaBaseId = model.CategoriaBaseId;
+            licencia.Activa = false;
+            licencia.Estado = EstadoLicencia.Pendiente;
+            licencia.FechaSolicitudUtc = DateTime.UtcNow;
+            licencia.ClubSolicitanteId = clubId;
+            licencia.MotivoRechazo = null;
+            if (!string.IsNullOrWhiteSpace(model.Observaciones)) licencia.Observaciones = model.Observaciones.Trim();
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Solicitud de licencia enviada", id = licencia.Id });
+    }
+
+    [Authorize(Roles = "Club")]
+    [HttpGet("mis-solicitudes")]
+    public async Task<IActionResult> GetMisSolicitudes([FromQuery] Guid temporadaId, [FromQuery] Guid modalidadId)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null) return Unauthorized();
+        if (user.ClubVinculadoId == null) return BadRequest(new { message = "El usuario no tiene un club vinculado" });
+
+        if (temporadaId == Guid.Empty) return BadRequest(new { message = "temporadaId requerido" });
+        if (modalidadId == Guid.Empty) return BadRequest(new { message = "modalidadId requerido" });
+
+        var clubId = user.ClubVinculadoId.Value;
+
+        var personaIds = await _context.Inscripciones
+            .Include(i => i.Equipo)
+            .Where(i => i.Activa && i.Equipo.ClubId == clubId)
+            .Select(i => i.PersonaId)
+            .Distinct()
+            .ToListAsync();
+
+        var licencias = await _context.LicenciasPersonas
+            .Include(l => l.Persona)
+            .Include(l => l.CategoriaBase)
+            .Where(l => personaIds.Contains(l.PersonaId) && l.TemporadaId == temporadaId && l.ModalidadId == modalidadId)
+            .Select(l => new
+            {
+                l.Id,
+                l.PersonaId,
+                persona = new { l.Persona.Nombre, l.Persona.Apellidos, l.Persona.Documento, l.Persona.Tipo },
+                categoriaBase = l.CategoriaBaseId == null ? null : new { l.CategoriaBase!.Id, l.CategoriaBase!.Nombre },
+                l.NumeroLicencia,
+                l.Activa,
+                estado = l.Estado.ToString(),
+                l.FechaSolicitudUtc,
+                l.FechaValidacionUtc,
+                l.MotivoRechazo
+            })
+            .ToListAsync();
+
+        return Ok(licencias);
+    }
+
+    [Authorize(Roles = "Admin,Federacion")]
+    [HttpGet("pendientes")]
+    public async Task<IActionResult> GetPendientes([FromQuery] Guid temporadaId, [FromQuery] Guid modalidadId)
+    {
+        if (temporadaId == Guid.Empty) return BadRequest(new { message = "temporadaId requerido" });
+        if (modalidadId == Guid.Empty) return BadRequest(new { message = "modalidadId requerido" });
+
+        var items = await _context.LicenciasPersonas
+            .Include(l => l.Persona)
+            .Include(l => l.CategoriaBase)
+            .Where(l => l.TemporadaId == temporadaId && l.ModalidadId == modalidadId && l.Estado == EstadoLicencia.Pendiente)
+            .OrderByDescending(l => l.FechaSolicitudUtc)
+            .Select(l => new
+            {
+                l.Id,
+                l.PersonaId,
+                persona = new { l.Persona.Nombre, l.Persona.Apellidos, l.Persona.Documento, l.Persona.Tipo },
+                l.ClubSolicitanteId,
+                categoriaBase = l.CategoriaBaseId == null ? null : new { l.CategoriaBase!.Id, l.CategoriaBase!.Nombre },
+                l.Observaciones,
+                l.FechaSolicitudUtc
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
+
+    [Authorize(Roles = "Admin,Federacion")]
+    [HttpPost("{licenciaId:guid}/validar")]
+    public async Task<IActionResult> Validar(Guid licenciaId, [FromBody] ValidarLicenciaModel model)
+    {
+        var user = await GetCurrentUserAsync();
+        if (user == null) return Unauthorized();
+
+        var lic = await _context.LicenciasPersonas.FirstOrDefaultAsync(l => l.Id == licenciaId);
+        if (lic == null) return NotFound(new { message = "Licencia no encontrada" });
+
+        if (model.Aprobar)
+        {
+            lic.Estado = EstadoLicencia.Validada;
+            lic.Activa = true;
+            lic.FechaValidacionUtc = DateTime.UtcNow;
+            lic.ValidadaPorUsuarioId = user.Id;
+            lic.MotivoRechazo = null;
+            if (!string.IsNullOrWhiteSpace(model.NumeroLicencia))
+                lic.NumeroLicencia = model.NumeroLicencia.Trim();
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(model.MotivoRechazo))
+                return BadRequest(new { message = "MotivoRechazo es obligatorio al rechazar" });
+
+            lic.Estado = EstadoLicencia.Rechazada;
+            lic.Activa = false;
+            lic.FechaValidacionUtc = DateTime.UtcNow;
+            lic.ValidadaPorUsuarioId = user.Id;
+            lic.MotivoRechazo = model.MotivoRechazo.Trim();
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = model.Aprobar ? "Licencia validada" : "Licencia rechazada" });
     }
 }
 
