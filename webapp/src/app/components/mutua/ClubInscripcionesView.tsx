@@ -21,6 +21,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  IconButton,
 } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import DownloadIcon from '@mui/icons-material/Download';

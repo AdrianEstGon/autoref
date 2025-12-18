@@ -27,6 +27,8 @@ import PartidosClubView from '../components/club/PartidosClubView';
 import CambiosPartidosView from '../components/federacion/CambiosPartidosView';
 import ActaPartidoView from '../components/acta/ActaPartidoView';
 import PublicoPortalView from '../components/publico/PublicoPortalView';
+import PublicoNoticiasView from '../components/publico/PublicoNoticiasView';
+import PublicoNoticiaDetalleView from '../components/publico/PublicoNoticiaDetalleView';
 import LicenciasClubView from '../components/club/LicenciasClubView';
 import LicenciasFederacionView from '../components/federacion/LicenciasFederacionView';
 import MisLiquidacionesView from '../components/liquidaciones/MisLiquidacionesView';
@@ -65,6 +67,10 @@ const Router = () => {
 
                 {/* Alias portal público */}
                 <Route path="/publico" element={<PublicoPortalView />} />
+
+                {/* Noticias (público) */}
+                <Route path="/noticias" element={<PublicoNoticiasView />} />
+                <Route path="/noticias/:slug" element={<PublicoNoticiaDetalleView />} />
                 
                 {/* Rutas con layout principal */}
                 <Route path="/misDesignaciones" element={
