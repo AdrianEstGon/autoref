@@ -34,6 +34,7 @@ namespace AutoRef_API.Database
         public DbSet<EnvioMutua> EnviosMutua { get; set; }
         public DbSet<EnvioMutuaItem> EnviosMutuaItems { get; set; }
         public DbSet<PartidoCambioSolicitud> PartidosCambiosSolicitudes { get; set; }
+        public DbSet<ActaPartido> ActasPartido { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +66,13 @@ namespace AutoRef_API.Database
                 .HasForeignKey(p => p.LugarId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
+
+            // Partido -> Acta (1:1)
+            modelBuilder.Entity<ActaPartido>()
+                .HasOne(a => a.Partido)
+                .WithOne(p => p.Acta)
+                .HasForeignKey<ActaPartido>(a => a.PartidoId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Partido -> Competición (opcional, para calendarios)
             modelBuilder.Entity<Partido>()
@@ -242,6 +250,7 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<EnvioMutua>().Property(e => e.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<EnvioMutuaItem>().Property(e => e.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<PartidoCambioSolicitud>().Property(p => p.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<ActaPartido>().Property(a => a.Id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Licencia)

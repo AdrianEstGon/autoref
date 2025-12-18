@@ -23,6 +23,22 @@ public class Partido
     public int EstadoArbitro2 { get; set; }
     public int EstadoAnotador { get; set; }
 
+    // 5.5: motivos y registro de respuesta (aceptación/rechazo)
+    public string? MotivoEstadoArbitro1 { get; set; }
+    public string? MotivoEstadoArbitro2 { get; set; }
+    public string? MotivoEstadoAnotador { get; set; }
+
+    public DateTime? FechaRespuestaArbitro1Utc { get; set; }
+    public DateTime? FechaRespuestaArbitro2Utc { get; set; }
+    public DateTime? FechaRespuestaAnotadorUtc { get; set; }
+
+    // 5.6: resultado/acta
+    public bool Cerrado { get; set; }
+    public DateTime? FechaCierreUtc { get; set; }
+    public int? ResultadoLocal { get; set; }
+    public int? ResultadoVisitante { get; set; }
+
+    public virtual ActaPartido? Acta { get; set; }
 
 
 

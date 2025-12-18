@@ -24,7 +24,7 @@ import categoriaService from "../../services/CategoriaService";
 import polideportivoService from "../../services/PolideportivoService";
 import disponibilidadService from "../../services/DisponibilidadService";
 import equipoService from "../../services/EquipoService";
-import notificacionesService from "../../services/NotificacionService";
+import competicionService from "../../services/CompeticionService";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { toast } from "react-toastify";
@@ -42,6 +42,7 @@ const DesignacionesView = () => {
   const [categorias, setCategorias] = useState<any[]>([]);
   const [lugares, setLugares] = useState<any[]>([]);
   const [equipos, setEquipos] = useState<any[]>([]);
+  const [competiciones, setCompeticiones] = useState<any[]>([]);
   const [designaciones, setDesignaciones] = useState<Record<string, Designacion>>({});
   const [disponibilidades, setDisponibilidades] = useState<any[]>([]);
 
@@ -50,6 +51,11 @@ const DesignacionesView = () => {
   const [fechaFin, setFechaFin] = useState<Moment | null>(moment().add(7, "days")); // +7 días
   const [categoriaFiltro, setCategoriaFiltro] = useState<any | null>(null);
   const [lugarFiltro, setLugarFiltro] = useState<any | null>(null);
+  const [competicionFiltro, setCompeticionFiltro] = useState<any | null>(null);
+
+  // Filtros de árbitros (nivel / localidad)
+  const [nivelFiltro, setNivelFiltro] = useState<string | null>(null);
+  const [ciudadFiltro, setCiudadFiltro] = useState<string | null>(null);
   const [partidosFiltrados, setPartidosFiltrados] = useState<any[]>([]);
   const [partidosSeleccionados, setPartidosSeleccionados] = useState<Set<string>>(new Set());
   
@@ -68,15 +74,27 @@ const DesignacionesView = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        const partidosLista = await partidosService.getPartidos();
-        const usuariosLista = await usuariosService.getUsuarios();
-        const categoriasLista = await categoriaService.getCategorias();
-        const lugaresLista = await polideportivoService.getPolideportivos();
-        const disponibilidadesLista = await disponibilidadService.getDisponibilidades();
-        const equiposLista = await equipoService.getEquipos(); 
+        const [
+          partidosLista,
+          usuariosLista,
+          categoriasLista,
+          lugaresLista,
+          disponibilidadesLista,
+          equiposLista,
+          competicionesLista,
+        ] = await Promise.all([
+          partidosService.getPartidos(),
+          usuariosService.getUsuarios(),
+          categoriaService.getCategorias(),
+          polideportivoService.getPolideportivos(),
+          disponibilidadService.getDisponibilidades(),
+          equipoService.getEquipos(),
+          competicionService.getCompeticiones(),
+        ]);
   
         setPartidos(partidosLista);
         setUsuarios(usuariosLista);
+        setCompeticiones(competicionesLista || []);
         setCategorias(categoriasLista.sort((a: { nombre: string; }, 
           b: { nombre: string; }) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))); // Ordenar categorías alfabéticamente
         setLugares(lugaresLista.sort((a: { nombre: string; }, 
@@ -223,7 +241,8 @@ const DesignacionesView = () => {
       return (
         fechaPartido.isBetween(fechaInicio, fechaFin, "day", "[]") &&
         (!categoriaFiltro || partido.categoria === categoriaFiltro.nombre) &&
-        (!lugarFiltro || partido.lugar === lugarFiltro.nombre)
+        (!lugarFiltro || partido.lugar === lugarFiltro.nombre) &&
+        (!competicionFiltro || String(partido.competicionId || "") === String(competicionFiltro.id || ""))
       );
     });
   
@@ -247,7 +266,15 @@ const DesignacionesView = () => {
     const fechaStr = moment(fecha).format("YYYY-MM-DD");
     const franja = obtenerFranja(hora);
   
-    return usuarios
+    let usuariosBase = usuarios;
+    if (nivelFiltro) {
+      usuariosBase = usuariosBase.filter((u) => String(u.nivel || "") === String(nivelFiltro));
+    }
+    if (ciudadFiltro) {
+      usuariosBase = usuariosBase.filter((u) => String(u.ciudad || "") === String(ciudadFiltro));
+    }
+
+    return usuariosBase
       .map((usuario) => {
         const disp = mapDisponibilidades.get(`${usuario.id}_${fechaStr}`);
         if (!disp || (disp[franja] !== 1 && disp[franja] !== 2)) return null;
@@ -274,6 +301,14 @@ const DesignacionesView = () => {
         return nombreA.localeCompare(nombreB);
       });
   };
+
+  const niveles = useMemo(() => {
+    return Array.from(new Set((usuarios || []).map((u: any) => u.nivel).filter(Boolean))).sort();
+  }, [usuarios]);
+
+  const ciudades = useMemo(() => {
+    return Array.from(new Set((usuarios || []).map((u: any) => u.ciudad).filter(Boolean))).sort();
+  }, [usuarios]);
   
   const mapDisponibilidades = useMemo(() => {
     const map = new Map<string, Record<string, any>>();
@@ -503,6 +538,15 @@ const DesignacionesView = () => {
 
   const handleConfirmar = async () => {
     try {
+      // 5.5: solo publicar/asignar designaciones si el partido tiene fecha y hora
+      const partidosConDesignacion = partidosFiltrados.filter((p) => !!designaciones[p.id]);
+      const sinHorario = partidosConDesignacion.filter((p) => !p.fecha || !p.hora);
+      if (sinHorario.length > 0) {
+        toast.error("Hay partidos con designación pero sin fecha/hora. Fija el horario antes de publicar.");
+        setOpenDialog(false);
+        return;
+      }
+
       await Promise.all(
         partidosFiltrados.map(async (partido) => {
         const designacion = designaciones[partido.id];
@@ -537,37 +581,7 @@ const DesignacionesView = () => {
         };
         // Actualizar el partido
         await partidosService.actualizarPartido(partidoActualizado);
-  
-        // Preparar el mensaje y la fecha
-        const nombreLugar = lugares.find(l => l.id === partido.lugarId)?.nombre ?? "lugar desconocido";
-  
-        const fechaPartido = new Date(partido.fecha);
-        const [hours, minutes] = partido.hora.split(':').map(Number);
-        fechaPartido.setHours(hours, minutes, 0, 0);
-  
-        const dia = fechaPartido.getDate().toString().padStart(2, '0');
-        const mes = (fechaPartido.getMonth() + 1).toString().padStart(2, '0');
-        const año = fechaPartido.getFullYear();
-        const horaFormateada = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  
-        const mensaje = `Has sido designado para el partido ${partido.equipoLocal} - ${partido.equipoVisitante}, que se disputa en el ${nombreLugar} a las ${horaFormateada} del día ${dia}/${mes}/${año}`;
-  
-        // Crear notificaciones en paralelo
-        const crearNotificacionSiAplica = async (usuarioId: string | null) => {
-          if (usuarioId) {
-            await notificacionesService.crearNotificacion({
-              usuarioId,
-              mensaje,
-              fecha: fechaPartido.toLocaleString('sv-SE').replace(' ', 'T'), 
-            });            
-          }
-        };
-  
-        await Promise.all([
-          crearNotificacionSiAplica(arbitro1Id),
-          crearNotificacionSiAplica(arbitro2Id),
-          crearNotificacionSiAplica(anotadorId),
-        ]);
+        // Notificación: ahora se gestiona desde backend cuando cambia la asignación (evita duplicados).
   
         // **Actualizar el estado de la designación a "Pendiente" (0)**
         setDesignaciones((prevDesignaciones) => ({
@@ -640,6 +654,13 @@ const DesignacionesView = () => {
         setAsignando(false);
         return;
       }
+
+      const sinHorario = partidosAAsignar.filter((p) => !p.fecha || !p.hora);
+      if (sinHorario.length > 0) {
+        toast.error("Hay partidos seleccionados sin fecha/hora. Primero fija el horario del partido y vuelve a intentar.");
+        setAsignando(false);
+        return;
+      }
   
       const designacionesFiltradas = Object.fromEntries(
         Object.entries(designaciones).filter(([partidoId]) =>
@@ -656,9 +677,14 @@ const DesignacionesView = () => {
         setAsignando(false);
         return;
       }
+
+      // Aplicar filtros de árbitros (nivel/ciudad) también al auto-asignador
+      let usuariosBase = usuarios;
+      if (nivelFiltro) usuariosBase = usuariosBase.filter((u) => String(u.nivel || "") === String(nivelFiltro));
+      if (ciudadFiltro) usuariosBase = usuariosBase.filter((u) => String(u.ciudad || "") === String(ciudadFiltro));
   
       const asignador = new AsignadorArbitros(
-        usuarios,
+        usuariosBase,
         disponibilidades,
         designacionesFiltradas,
         partidosAAsignar,
@@ -770,8 +796,19 @@ const DesignacionesView = () => {
                   />
                 </Grid>
 
+                {/* Filtro Competición */}
+                <Grid item xs={12} sm={6} md={4}>
+                  <Autocomplete
+                    options={competiciones}
+                    getOptionLabel={(option: any) => option.nombre || ""}
+                    value={competicionFiltro}
+                    onChange={(_, newValue) => setCompeticionFiltro(newValue)}
+                    renderInput={(params) => <TextField {...params} label="Competición" fullWidth />}
+                  />
+                </Grid>
+
                 {/* Filtro Lugar */}
-                <Grid item xs={12} sm={6} md={8}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Autocomplete
                     options={lugares}
                     getOptionLabel={(option) => option.nombre}
@@ -784,7 +821,7 @@ const DesignacionesView = () => {
               {/* Nueva fila para la categoría */}
               <Grid container spacing={2} mt={2}>
                 {/* Filtro Categoría */}
-                <Grid item xs={12} sm={6} md={10}>
+                <Grid item xs={12} sm={6} md={6}>
                   <Autocomplete
                     options={categorias}
                     getOptionLabel={(option) => option.nombre}
@@ -793,13 +830,35 @@ const DesignacionesView = () => {
                     renderInput={(params) => <TextField {...params} label="Categoría" fullWidth />}
                   />
                   </Grid>
-                  {/* Botón Aplicar Filtro */}
-                    <Grid item xs={12} sm={6} md={2} textAlign="right">
-                    <Button variant="outlined" color="primary" fullWidth sx={{ height: "56px" }} onClick={aplicarFiltro}>
-                        Aplicar Filtro
-                    </Button>
-                    </Grid>
+
+                  {/* Filtro Nivel árbitro */}
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Autocomplete
+                      options={niveles}
+                      value={nivelFiltro}
+                      onChange={(_, v) => setNivelFiltro(v)}
+                      renderInput={(params) => <TextField {...params} label="Nivel árbitro" fullWidth />}
+                    />
+                  </Grid>
+
+                  {/* Filtro Ciudad árbitro */}
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Autocomplete
+                      options={ciudades}
+                      value={ciudadFiltro}
+                      onChange={(_, v) => setCiudadFiltro(v)}
+                      renderInput={(params) => <TextField {...params} label="Ciudad árbitro" fullWidth />}
+                    />
+                  </Grid>
                 
+              </Grid>
+
+              <Grid container spacing={2} mt={2}>
+                <Grid item xs={12} sm={6} md={2} textAlign="right">
+                  <Button variant="outlined" color="primary" fullWidth sx={{ height: "56px" }} onClick={aplicarFiltro}>
+                    Aplicar Filtro
+                  </Button>
+                </Grid>
               </Grid>
             </CardContent>
           </Card>

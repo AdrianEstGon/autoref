@@ -621,7 +621,13 @@ namespace AutoRef_API.Migrations
                     b.Property<Guid?>("Arbitro2Id")
                         .HasColumnType("char(36)");
 
+                    b.Property<bool>("Cerrado")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<Guid?>("CategoriaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("CompeticionId")
                         .HasColumnType("char(36)");
 
                     b.Property<Guid?>("EquipoLocalId")
@@ -639,7 +645,19 @@ namespace AutoRef_API.Migrations
                     b.Property<int>("EstadoArbitro2")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("FechaRespuestaAnotadorUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaRespuestaArbitro1Utc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaRespuestaArbitro2Utc")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaCierreUtc")
                         .HasColumnType("datetime(6)");
 
                     b.Property<TimeSpan>("Hora")
@@ -651,7 +669,22 @@ namespace AutoRef_API.Migrations
                     b.Property<Guid?>("LugarId")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("MotivoEstadoAnotador")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MotivoEstadoArbitro1")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MotivoEstadoArbitro2")
+                        .HasColumnType("longtext");
+
                     b.Property<int>("NumeroPartido")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResultadoLocal")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResultadoVisitante")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -671,6 +704,33 @@ namespace AutoRef_API.Migrations
                     b.HasIndex("LugarId");
 
                     b.ToTable("Partidos");
+                });
+
+            modelBuilder.Entity("AutoRef_API.Database.ActaPartido", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("CreadaPorUsuarioId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DataJson")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("FechaActualizacionUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("PartidoId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartidoId")
+                        .IsUnique();
+
+                    b.ToTable("ActasPartido");
                 });
 
             modelBuilder.Entity("AutoRef_API.Database.Persona", b =>
@@ -1197,6 +1257,11 @@ namespace AutoRef_API.Migrations
                         .WithMany()
                         .HasForeignKey("CategoriaId");
 
+                    b.HasOne("AutoRef_API.Database.Competicion", "Competicion")
+                        .WithMany()
+                        .HasForeignKey("CompeticionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AutoRef_API.Database.Equipo", "EquipoLocal")
                         .WithMany()
                         .HasForeignKey("EquipoLocalId")
@@ -1225,6 +1290,19 @@ namespace AutoRef_API.Migrations
                     b.Navigation("EquipoVisitante");
 
                     b.Navigation("Lugar");
+
+                    b.Navigation("Competicion");
+                });
+
+            modelBuilder.Entity("AutoRef_API.Database.ActaPartido", b =>
+                {
+                    b.HasOne("AutoRef_API.Database.Partido", "Partido")
+                        .WithOne("Acta")
+                        .HasForeignKey("AutoRef_API.Database.ActaPartido", "PartidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Partido");
                 });
 
             modelBuilder.Entity("AutoRef_API.Database.Persona", b =>

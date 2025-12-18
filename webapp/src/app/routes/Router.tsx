@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes, Navigate } from 'react-router-dom';
 import LoginView from '../components/login/LoginView';
 import DesignacionesView from '../components/designaciones/DesignacionesView';
 import PerfilView from '../components/perfil/PerfilView';
@@ -25,6 +25,8 @@ import PersonasView from '../components/federacion/PersonasView';
 import ClubsView from '../components/federacion/ClubsView';
 import PartidosClubView from '../components/club/PartidosClubView';
 import CambiosPartidosView from '../components/federacion/CambiosPartidosView';
+import ActaPartidoView from '../components/acta/ActaPartidoView';
+import PublicoPortalView from '../components/publico/PublicoPortalView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -36,12 +38,12 @@ const RequireRole: React.FC<{ allowedRoles: string[]; children: React.ReactNode 
   const token = window.localStorage.getItem('token');
 
   // Si no hay sesión => login
-  if (!token || !role) return <LoginView />;
+  if (!token || !role) return <Navigate to="/login" replace />;
 
   // Admin siempre puede
   if (role === 'Admin') return <>{children}</>;
 
-  if (!allowedRoles.includes(role)) return <LoginView />;
+  if (!allowedRoles.includes(role)) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
@@ -49,8 +51,14 @@ const Router = () => {
     return (
         <HashRouter>
             <Routes>
-                {/* Ruta pública - Login sin layout */}
-                <Route path="/" element={<LoginView />} />
+                {/* Home público (sin login) */}
+                <Route path="/" element={<PublicoPortalView />} />
+
+                {/* Login (sin layout) */}
+                <Route path="/login" element={<LoginView />} />
+
+                {/* Alias portal público */}
+                <Route path="/publico" element={<PublicoPortalView />} />
                 
                 {/* Rutas con layout principal */}
                 <Route path="/misDesignaciones" element={
@@ -141,6 +149,11 @@ const Router = () => {
                 <Route path="/detallesPartido/:id" element={
                   <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club', 'Publico']}>
                     <WithLayout><DetallePartido /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/acta/:id" element={
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion']}> 
+                    <WithLayout><ActaPartidoView /></WithLayout>
                   </RequireRole>
                 } />
                 <Route path="/gestionDesignaciones/panelDesignaciones" element={

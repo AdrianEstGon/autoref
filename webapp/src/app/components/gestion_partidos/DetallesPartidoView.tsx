@@ -69,6 +69,7 @@ const DetallesPartidoView = React.memo(() => {
 
   const userRole = window.localStorage.getItem("userRole") || "";
   const myClubId = window.localStorage.getItem("clubVinculadoId") || "";
+  const userId = window.localStorage.getItem("userId") || "";
 
   const center = useMemo(
     () =>
@@ -231,6 +232,16 @@ const DetallesPartidoView = React.memo(() => {
         >
           Volver
         </Button>
+        {(userRole === "Arbitro" || userRole === "ComiteArbitros" || userRole === "Federacion" || userRole === "Admin") && (
+          <Button
+            variant="outlined"
+            onClick={() => navigate(`/acta/${id}`)}
+            sx={{ mb: 2, ml: 1 }}
+            disabled={!id}
+          >
+            Acta
+          </Button>
+        )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
           <Box
             sx={{

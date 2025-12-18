@@ -62,12 +62,22 @@ namespace AutoRef_API.Controllers
                     partido.CompeticionId,
                     partido.Jornada,
                     partido.NumeroPartido,
+                    partido.Cerrado,
+                    partido.FechaCierreUtc,
+                    partido.ResultadoLocal,
+                    partido.ResultadoVisitante,
                     partido.Arbitro1Id,
                     partido.Arbitro2Id,
                     partido.AnotadorId,
                     partido.EstadoArbitro1,
                     partido.EstadoArbitro2,
                     partido.EstadoAnotador,
+                    partido.MotivoEstadoArbitro1,
+                    partido.MotivoEstadoArbitro2,
+                    partido.MotivoEstadoAnotador,
+                    partido.FechaRespuestaArbitro1Utc,
+                    partido.FechaRespuestaArbitro2Utc,
+                    partido.FechaRespuestaAnotadorUtc,
                 });
             }
 
@@ -116,6 +126,10 @@ namespace AutoRef_API.Controllers
                 partido.CompeticionId,
                 ClubLocalId = partido.EquipoLocal?.ClubId,
                 ClubVisitanteId = partido.EquipoVisitante?.ClubId,
+                partido.Cerrado,
+                partido.FechaCierreUtc,
+                partido.ResultadoLocal,
+                partido.ResultadoVisitante,
                 partido.Jornada,
                 Arbitro1 = partido.Arbitro1 != null ? $"{partido.Arbitro1.Nombre} {partido.Arbitro1.PrimerApellido} {partido.Arbitro1.SegundoApellido} " : null,
                 Arbitro1Licencia = partido.Arbitro1?.Licencia,
@@ -126,6 +140,12 @@ namespace AutoRef_API.Controllers
                 partido.EstadoArbitro1,
                 partido.EstadoArbitro2,
                 partido.EstadoAnotador,
+                partido.MotivoEstadoArbitro1,
+                partido.MotivoEstadoArbitro2,
+                partido.MotivoEstadoAnotador,
+                partido.FechaRespuestaArbitro1Utc,
+                partido.FechaRespuestaArbitro2Utc,
+                partido.FechaRespuestaAnotadorUtc,
             };
 
             return Ok(resultado);
@@ -286,6 +306,7 @@ namespace AutoRef_API.Controllers
                 partido.LugarId,
                 Categoria = partido.Categoria?.Nombre,
                 partido.CategoriaId,
+                partido.CompeticionId,
                 partido.Jornada,
                 partido.NumeroPartido,
                 Arbitro1 = partido.Arbitro1 != null ? $"{partido.Arbitro1.Nombre} {partido.Arbitro1.PrimerApellido} {partido.Arbitro1.SegundoApellido}" : null,
@@ -297,6 +318,12 @@ namespace AutoRef_API.Controllers
                 partido.EstadoArbitro1,
                 partido.EstadoArbitro2,
                 partido.EstadoAnotador,
+                partido.MotivoEstadoArbitro1,
+                partido.MotivoEstadoArbitro2,
+                partido.MotivoEstadoAnotador,
+                partido.FechaRespuestaArbitro1Utc,
+                partido.FechaRespuestaArbitro2Utc,
+                partido.FechaRespuestaAnotadorUtc,
             });
 
             return Ok(resultado);
@@ -313,6 +340,24 @@ namespace AutoRef_API.Controllers
 
             if (partido == null)
                 return NotFound(new { message = "El partido no existe." });
+
+            // 5.5: si se están asignando árbitros/anotador (nueva designación), el partido debe tener fecha y hora
+            var arbitro1Antes = partido.Arbitro1Id;
+            var arbitro2Antes = partido.Arbitro2Id;
+            var anotadorAntes = partido.AnotadorId;
+
+            var asignaArbitro1 = arbitro1Antes != partidoModel.Arbitro1Id && partidoModel.Arbitro1Id != null;
+            var asignaArbitro2 = arbitro2Antes != partidoModel.Arbitro2Id && partidoModel.Arbitro2Id != null;
+            var asignaAnotador = anotadorAntes != partidoModel.AnotadorId && partidoModel.AnotadorId != null;
+
+            if (asignaArbitro1 || asignaArbitro2 || asignaAnotador)
+            {
+                if (partidoModel.Fecha == default || partidoModel.Fecha.Year < 2000)
+                    return BadRequest(new { message = "El partido debe tener fecha válida antes de asignar designaciones." });
+
+                if (string.IsNullOrWhiteSpace(partidoModel.Hora) || !TimeSpan.TryParse(partidoModel.Hora, out _))
+                    return BadRequest(new { message = "El partido debe tener hora válida antes de asignar designaciones." });
+            }
 
             var datosOriginales = new
             {
@@ -342,6 +387,26 @@ namespace AutoRef_API.Controllers
             partido.EstadoArbitro2 = partidoModel.EstadoArbitro2;
             partido.EstadoAnotador = partidoModel.EstadoAnotador;
 
+            // Si cambia la asignación, reiniciar estados/motivos del rol afectado (pendiente)
+            if (arbitro1Antes != partido.Arbitro1Id)
+            {
+                partido.EstadoArbitro1 = 0;
+                partido.MotivoEstadoArbitro1 = null;
+                partido.FechaRespuestaArbitro1Utc = null;
+            }
+            if (arbitro2Antes != partido.Arbitro2Id)
+            {
+                partido.EstadoArbitro2 = 0;
+                partido.MotivoEstadoArbitro2 = null;
+                partido.FechaRespuestaArbitro2Utc = null;
+            }
+            if (anotadorAntes != partido.AnotadorId)
+            {
+                partido.EstadoAnotador = 0;
+                partido.MotivoEstadoAnotador = null;
+                partido.FechaRespuestaAnotadorUtc = null;
+            }
+
             bool datosPartidoModificados =
                 datosOriginales.EquipoLocalId != partido.EquipoLocalId ||
                 datosOriginales.EquipoVisitanteId != partido.EquipoVisitanteId ||
@@ -353,6 +418,62 @@ namespace AutoRef_API.Controllers
                 datosOriginales.NumeroPartido != partido.NumeroPartido;
 
             await _context.SaveChangesAsync();
+
+            // Notificar nuevas designaciones (aunque el resto del partido no haya cambiado)
+            var asignacionCambia = arbitro1Antes != partido.Arbitro1Id || arbitro2Antes != partido.Arbitro2Id || anotadorAntes != partido.AnotadorId;
+            if (asignacionCambia)
+            {
+                var partidoFull = await _context.Partidos
+                    .Include(p => p.Lugar)
+                    .Include(p => p.Categoria)
+                    .Include(p => p.EquipoLocal)
+                    .Include(p => p.EquipoVisitante)
+                    .Include(p => p.Arbitro1)
+                    .Include(p => p.Arbitro2)
+                    .Include(p => p.Anotador)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                async Task NotificarDesignacion(Usuario? usuario, string rol)
+                {
+                    if (usuario == null) return;
+
+                    var fecha = partidoFull!.Fecha.ToString("yyyy-MM-dd");
+                    var hora = partidoFull!.Hora.ToString(@"hh\:mm");
+                    var lugar = partidoFull!.Lugar?.Nombre ?? "Sin definir";
+                    var categoria = partidoFull!.Categoria?.Nombre ?? "Sin definir";
+                    var equipos = $"{partidoFull!.EquipoLocal?.Nombre ?? "Sin definir"} vs {partidoFull!.EquipoVisitante?.Nombre ?? "Sin definir"}";
+
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(usuario.Email))
+                        {
+                            var mailService = new MailService();
+                            await mailService.SendEmailAsync(
+                                usuario.Email,
+                                "Nueva designación",
+                                $"Hola {usuario.Nombre},\n\nHas sido designado como {rol} para el partido:\n\n- Partido: {equipos}\n- Categoría: {categoria}\n- Fecha/Hora: {fecha} {hora}\n- Lugar: {lugar}\n\nEntra en la app para aceptar o rechazar la designación.\n\nGracias."
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error enviando email: {ex.Message}");
+                    }
+
+                    _context.Notificaciones.Add(new Notificacion
+                    {
+                        UsuarioId = usuario.Id,
+                        Mensaje = $"Nueva designación como {rol}: {equipos} — {fecha} {hora} — {lugar}.",
+                        Fecha = partidoFull!.Fecha,
+                        Leida = false
+                    });
+                    await _context.SaveChangesAsync();
+                }
+
+                if (arbitro1Antes != partidoFull!.Arbitro1Id && partidoFull.Arbitro1Id != null) await NotificarDesignacion(partidoFull.Arbitro1, "Árbitro 1");
+                if (arbitro2Antes != partidoFull.Arbitro2Id && partidoFull.Arbitro2Id != null) await NotificarDesignacion(partidoFull.Arbitro2, "Árbitro 2");
+                if (anotadorAntes != partidoFull.AnotadorId && partidoFull.AnotadorId != null) await NotificarDesignacion(partidoFull.Anotador, "Anotador");
+            }
 
             if (datosPartidoModificados)
             {
@@ -543,6 +664,7 @@ Lamentamos las molestias.";
         public class UpdateEstadoDesignacionModel
         {
             public int Estado { get; set; }
+            public string? Motivo { get; set; }
         }
 
         /// <summary>
@@ -554,6 +676,8 @@ Lamentamos las molestias.";
         {
             if (model == null) return BadRequest(new { message = "Datos inválidos" });
             if (model.Estado < 0 || model.Estado > 2) return BadRequest(new { message = "Estado inválido" });
+            if (model.Estado == 2 && string.IsNullOrWhiteSpace(model.Motivo))
+                return BadRequest(new { message = "Indica un motivo para rechazar la designación." });
 
             var partido = await _context.Partidos.FirstOrDefaultAsync(p => p.Id == id);
             if (partido == null) return NotFound(new { message = "El partido no existe." });
@@ -567,17 +691,47 @@ Lamentamos las molestias.";
             {
                 // Por defecto, en modo admin-like se actualiza el estado del rol que corresponda al usuario si está asignado.
                 // Si no está asignado a ningún rol, no permitimos cambiar estados (evita cambios arbitrarios).
-                if (partido.Arbitro1Id == userId) partido.EstadoArbitro1 = model.Estado;
-                else if (partido.Arbitro2Id == userId) partido.EstadoArbitro2 = model.Estado;
-                else if (partido.AnotadorId == userId) partido.EstadoAnotador = model.Estado;
+                if (partido.Arbitro1Id == userId)
+                {
+                    partido.EstadoArbitro1 = model.Estado;
+                    partido.MotivoEstadoArbitro1 = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaArbitro1Utc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
+                else if (partido.Arbitro2Id == userId)
+                {
+                    partido.EstadoArbitro2 = model.Estado;
+                    partido.MotivoEstadoArbitro2 = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaArbitro2Utc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
+                else if (partido.AnotadorId == userId)
+                {
+                    partido.EstadoAnotador = model.Estado;
+                    partido.MotivoEstadoAnotador = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaAnotadorUtc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
                 else return BadRequest(new { message = "El usuario no está asignado a este partido." });
             }
             else
             {
                 // Árbitro: solo puede actualizar su propio estado
-                if (partido.Arbitro1Id == userId) partido.EstadoArbitro1 = model.Estado;
-                else if (partido.Arbitro2Id == userId) partido.EstadoArbitro2 = model.Estado;
-                else if (partido.AnotadorId == userId) partido.EstadoAnotador = model.Estado;
+                if (partido.Arbitro1Id == userId)
+                {
+                    partido.EstadoArbitro1 = model.Estado;
+                    partido.MotivoEstadoArbitro1 = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaArbitro1Utc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
+                else if (partido.Arbitro2Id == userId)
+                {
+                    partido.EstadoArbitro2 = model.Estado;
+                    partido.MotivoEstadoArbitro2 = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaArbitro2Utc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
+                else if (partido.AnotadorId == userId)
+                {
+                    partido.EstadoAnotador = model.Estado;
+                    partido.MotivoEstadoAnotador = model.Estado == 2 ? model.Motivo?.Trim() : null;
+                    partido.FechaRespuestaAnotadorUtc = model.Estado == 0 ? null : DateTime.UtcNow;
+                }
                 else return BadRequest(new { message = "El usuario no está asignado a este partido." });
             }
 

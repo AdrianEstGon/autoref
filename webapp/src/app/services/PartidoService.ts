@@ -64,11 +64,11 @@ const actualizarPartido = async (partido: any) => {
   }
 };
 
-const actualizarEstadoDesignacion = async (partidoId: string, estado: number) => {
+const actualizarEstadoDesignacion = async (partidoId: string, estado: number, motivo?: string | null) => {
   try {
     const response = await axios.put(
       `${API_URL}/Partidos/${partidoId}/estado`,
-      { estado },
+      { estado, motivo: motivo ?? null },
       getAuthHeaders()
     );
     return response.data;

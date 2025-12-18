@@ -18,6 +18,7 @@ import {
   alpha,
   Tabs,
   Tab,
+  TextField,
 } from "@mui/material";
 import moment from "moment";
 import "moment/locale/es";
@@ -34,6 +35,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import PersonIcon from "@mui/icons-material/Person";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { toast } from "react-toastify";
 
 moment.locale("es");
 
@@ -45,6 +47,7 @@ const DesignacionesView = React.memo(() => {
   const [disabledButtons, setDisabledButtons] = useState<Record<string, boolean>>({});
   const [usuarioId, setUsuarioId] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
+  const [motivoRechazo, setMotivoRechazo] = useState<string>("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -57,6 +60,17 @@ const DesignacionesView = React.memo(() => {
       if (partido.arbitro1Id === usuarioId) return partido.estadoArbitro1;
       if (partido.arbitro2Id === usuarioId) return partido.estadoArbitro2;
       if (partido.anotadorId === usuarioId) return partido.estadoAnotador;
+      return null;
+    },
+    [usuarioId]
+  );
+
+  const getMotivoActual = useCallback(
+    (partido: any) => {
+      if (!usuarioId) return null;
+      if (partido.arbitro1Id === usuarioId) return partido.motivoEstadoArbitro1 || null;
+      if (partido.arbitro2Id === usuarioId) return partido.motivoEstadoArbitro2 || null;
+      if (partido.anotadorId === usuarioId) return partido.motivoEstadoAnotador || null;
       return null;
     },
     [usuarioId]
@@ -76,6 +90,11 @@ const DesignacionesView = React.memo(() => {
   const handleConfirm = useCallback(async () => {
     if (!selectedPartidoId || selectedEstado === null || !usuarioId) return;
     try {
+      if (selectedEstado === 2 && !motivoRechazo.trim()) {
+        toast.error("Indica un motivo para rechazar la designación");
+        return;
+      }
+
       const partido = partidos.find((p) => p.id === selectedPartidoId);
       if (!partido) return;
 
@@ -85,7 +104,11 @@ const DesignacionesView = React.memo(() => {
       else if (partido.anotadorId === usuarioId) updatedPartido.estadoAnotador = selectedEstado;
       else return;
 
-      await partidosService.actualizarEstadoDesignacion(selectedPartidoId, selectedEstado);
+      await partidosService.actualizarEstadoDesignacion(
+        selectedPartidoId,
+        selectedEstado,
+        selectedEstado === 2 ? motivoRechazo.trim() : null
+      );
       setPartidos((prevPartidos) =>
         prevPartidos.map((p) => (p.id === selectedPartidoId ? updatedPartido : p))
       );
@@ -96,12 +119,14 @@ const DesignacionesView = React.memo(() => {
       setDialogOpen(false);
       setSelectedPartidoId(null);
       setSelectedEstado(null);
+      setMotivoRechazo("");
     }
-  }, [selectedPartidoId, selectedEstado, usuarioId, partidos]);
+  }, [selectedPartidoId, selectedEstado, usuarioId, partidos, motivoRechazo]);
 
   const handleOpenDialog = useCallback((partidoId: string, estado: number) => {
     setSelectedPartidoId(partidoId);
     setSelectedEstado(estado);
+    if (estado !== 2) setMotivoRechazo("");
     setDialogOpen(true);
   }, []);
 
@@ -109,6 +134,7 @@ const DesignacionesView = React.memo(() => {
     setDialogOpen(false);
     setSelectedPartidoId(null);
     setSelectedEstado(null);
+    setMotivoRechazo("");
   }, []);
 
   const getEstadoColor = (estado: number | null) => {
@@ -265,6 +291,16 @@ const DesignacionesView = React.memo(() => {
                               fontSize: "0.85rem",
                             }}
                           />
+                          {estadoActual === 2 && getMotivoActual(partido) && (
+                            <Tooltip title={`Motivo: ${getMotivoActual(partido)}`} arrow>
+                              <Chip
+                                size="small"
+                                label="Ver motivo"
+                                variant="outlined"
+                                sx={{ ml: 1 }}
+                              />
+                            </Tooltip>
+                          )}
                         </Box>
 
                         {/* Info Grid */}
@@ -450,6 +486,18 @@ const DesignacionesView = React.memo(() => {
             ¿Estás seguro de que deseas {selectedEstado === 1 ? "aceptar" : "rechazar"} esta designación?
             {selectedEstado === 2 && " Se notificará al administrador."}
           </DialogContentText>
+          {selectedEstado === 2 && (
+            <TextField
+              label="Motivo del rechazo"
+              value={motivoRechazo}
+              onChange={(e) => setMotivoRechazo(e.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+              sx={{ mt: 2 }}
+              placeholder="Ej: No puedo por trabajo, viaje, lesión..."
+            />
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2.5, pt: 1 }}>
           <Button onClick={handleCancel} variant="outlined" color="inherit">
