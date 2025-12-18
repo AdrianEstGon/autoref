@@ -12,65 +12,132 @@ namespace AutoRef_API.Migrations;
 [Migration("20251218211500_GestionClubesEquipos")]
 public class GestionClubesEquipos : Migration
 {
+    private static void AddColumnIfMissing(MigrationBuilder migrationBuilder, string table, string column, string definitionSql)
+    {
+        // Compatible con versiones antiguas: no usa "IF NOT EXISTS" (no soportado en algunos MySQL).
+        migrationBuilder.Sql($@"SET @__autoref_col_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = '{table}'
+    AND COLUMN_NAME = '{column}'
+);");
+
+        migrationBuilder.Sql($@"SET @__autoref_sql := (
+  SELECT IF(
+    @__autoref_col_exists = 0,
+    'ALTER TABLE `{table}` ADD COLUMN `{column}` {definitionSql}',
+    'DO 0'
+  )
+);");
+
+        migrationBuilder.Sql("PREPARE __autoref_stmt FROM @__autoref_sql;");
+        migrationBuilder.Sql("EXECUTE __autoref_stmt;");
+        migrationBuilder.Sql("DEALLOCATE PREPARE __autoref_stmt;");
+    }
+
+    private static void CreateIndexIfMissing(MigrationBuilder migrationBuilder, string table, string indexName, string columnsSql, bool unique)
+    {
+        migrationBuilder.Sql($@"SET @__autoref_idx_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = '{table}'
+    AND INDEX_NAME = '{indexName}'
+);");
+
+        var create = unique
+            ? $"CREATE UNIQUE INDEX `{indexName}` ON `{table}` ({columnsSql})"
+            : $"CREATE INDEX `{indexName}` ON `{table}` ({columnsSql})";
+
+        migrationBuilder.Sql($@"SET @__autoref_sql := (
+  SELECT IF(
+    @__autoref_idx_exists = 0,
+    '{create}',
+    'DO 0'
+  )
+);");
+
+        migrationBuilder.Sql("PREPARE __autoref_stmt FROM @__autoref_sql;");
+        migrationBuilder.Sql("EXECUTE __autoref_stmt;");
+        migrationBuilder.Sql("DEALLOCATE PREPARE __autoref_stmt;");
+    }
+
+    private static void AddForeignKeyIfMissing(
+        MigrationBuilder migrationBuilder,
+        string table,
+        string fkName,
+        string column,
+        string principalTable,
+        string principalColumn,
+        string onDeleteSql)
+    {
+        migrationBuilder.Sql($@"SET @__autoref_fk_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE()
+    AND TABLE_NAME = '{table}'
+    AND CONSTRAINT_NAME = '{fkName}'
+    AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+);");
+
+        var addFk = $"ALTER TABLE `{table}` ADD CONSTRAINT `{fkName}` FOREIGN KEY (`{column}`) REFERENCES `{principalTable}` (`{principalColumn}`) ON DELETE {onDeleteSql}";
+
+        migrationBuilder.Sql($@"SET @__autoref_sql := (
+  SELECT IF(
+    @__autoref_fk_exists = 0,
+    '{addFk}',
+    'DO 0'
+  )
+);");
+
+        migrationBuilder.Sql("PREPARE __autoref_stmt FROM @__autoref_sql;");
+        migrationBuilder.Sql("EXECUTE __autoref_stmt;");
+        migrationBuilder.Sql("DEALLOCATE PREPARE __autoref_stmt;");
+    }
+
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         // Clubs: datos fiscales + responsables
         // NOTA: esta migración pudo quedar a medias en producción (falló creando un índice). Para permitir reintentos,
-        // añadimos columnas con "IF NOT EXISTS" y así evitamos el error "Duplicate column name ...".
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `RazonSocial` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CIF` varchar(255) CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `DireccionFiscal` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CodigoPostalFiscal` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ProvinciaFiscal` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CiudadFiscal` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `EmailFacturacion` varchar(255) CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `Telefono` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableNombre` longtext CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableEmail` varchar(255) CHARACTER SET utf8mb4 NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableTelefono` longtext CHARACTER SET utf8mb4 NULL;");
+        // añadimos columnas de forma idempotente (check en information_schema).
+        AddColumnIfMissing(migrationBuilder, "Clubs", "RazonSocial", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "CIF", "varchar(255) CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "DireccionFiscal", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "CodigoPostalFiscal", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "ProvinciaFiscal", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "CiudadFiscal", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "EmailFacturacion", "varchar(255) CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "Telefono", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "ResponsableNombre", "longtext CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "ResponsableEmail", "varchar(255) CHARACTER SET utf8mb4 NULL");
+        AddColumnIfMissing(migrationBuilder, "Clubs", "ResponsableTelefono", "longtext CHARACTER SET utf8mb4 NULL");
 
         // Categorias: cupos
-        migrationBuilder.Sql("ALTER TABLE `Categorias` ADD COLUMN IF NOT EXISTS `MinJugadores` int NULL;");
-        migrationBuilder.Sql("ALTER TABLE `Categorias` ADD COLUMN IF NOT EXISTS `MaxJugadores` int NULL;");
+        AddColumnIfMissing(migrationBuilder, "Categorias", "MinJugadores", "int NULL");
+        AddColumnIfMissing(migrationBuilder, "Categorias", "MaxJugadores", "int NULL");
 
         // Equipos: competición
-        migrationBuilder.Sql("ALTER TABLE `Equipos` ADD COLUMN IF NOT EXISTS `CompeticionId` char(36) NULL COLLATE ascii_general_ci;");
+        AddColumnIfMissing(migrationBuilder, "Equipos", "CompeticionId", "char(36) NULL COLLATE ascii_general_ci");
 
-        // MySQL: el campo Nombre de Equipos debe ser VARCHAR para poder indexarlo (no TEXT/LONGTEXT)
-        migrationBuilder.AlterColumn<string>(
-            name: "Nombre",
+        // MySQL: el campo Nombre de Equipos debe ser VARCHAR para poder indexarlo (no TEXT/LONGTEXT).
+        // MODIFY es idempotente si ya está en el tipo objetivo.
+        migrationBuilder.Sql("ALTER TABLE `Equipos` MODIFY COLUMN `Nombre` varchar(255) CHARACTER SET utf8mb4 NOT NULL;");
+
+        CreateIndexIfMissing(migrationBuilder, "Clubs", "IX_Clubs_FederacionId_CIF", "`FederacionId`, `CIF`", unique: true);
+
+        CreateIndexIfMissing(migrationBuilder, "Equipos", "IX_Equipos_ClubId_CompeticionId_CategoriaId_Nombre", "`ClubId`, `CompeticionId`, `CategoriaId`, `Nombre`", unique: true);
+
+        CreateIndexIfMissing(migrationBuilder, "Equipos", "IX_Equipos_CompeticionId", "`CompeticionId`", unique: false);
+
+        AddForeignKeyIfMissing(
+            migrationBuilder,
             table: "Equipos",
-            type: "varchar(255)",
-            nullable: false,
-            oldClrType: typeof(string),
-            oldType: "longtext")
-            .Annotation("MySql:CharSet", "utf8mb4")
-            .OldAnnotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Clubs_FederacionId_CIF",
-            table: "Clubs",
-            columns: new[] { "FederacionId", "CIF" },
-            unique: true);
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Equipos_ClubId_CompeticionId_CategoriaId_Nombre",
-            table: "Equipos",
-            columns: new[] { "ClubId", "CompeticionId", "CategoriaId", "Nombre" },
-            unique: true);
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Equipos_CompeticionId",
-            table: "Equipos",
-            column: "CompeticionId");
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_Equipos_Competiciones_CompeticionId",
-            table: "Equipos",
+            fkName: "FK_Equipos_Competiciones_CompeticionId",
             column: "CompeticionId",
             principalTable: "Competiciones",
             principalColumn: "Id",
-            onDelete: ReferentialAction.Restrict);
+            onDeleteSql: "RESTRICT");
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
