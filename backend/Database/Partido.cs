@@ -6,6 +6,7 @@ using System;
 public class Partido
 {
     public Guid Id { get; private set; }
+    public Guid? CompeticionId { get; set; }
     public Guid? LugarId { get; set; }
     public Guid? Arbitro1Id { get; set; }
     public Guid? Arbitro2Id { get; set; }
@@ -34,6 +35,7 @@ public class Partido
     public virtual Equipo EquipoVisitante { get; set; }
 
     public virtual Categoria Categoria { get; set; }
+    public virtual Competicion? Competicion { get; set; }
 
 }
 

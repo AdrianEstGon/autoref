@@ -11,6 +11,13 @@ public class Competicion
 
     public Guid FederacionId { get; set; }
     public virtual Federacion? Federacion { get; set; }
+
+    // 5.3: competiciones por temporada y modalidad (si aplica)
+    public Guid? TemporadaId { get; set; }
+    public virtual Temporada? Temporada { get; set; }
+
+    public Guid? ModalidadId { get; set; }
+    public virtual Modalidad? Modalidad { get; set; }
 }
 
 

@@ -57,6 +57,7 @@ namespace AutoRef_API.Controllers
                     partido.LugarId,
                     Categoria = partido.Categoria?.Nombre,
                     partido.CategoriaId,
+                    partido.CompeticionId,
                     partido.Jornada,
                     partido.NumeroPartido,
                     partido.Arbitro1Id,
@@ -201,6 +202,7 @@ namespace AutoRef_API.Controllers
             partido.Hora = TimeSpan.Parse(partidoModel.Hora);
             partido.LugarId = partidoModel.LugarId;
             partido.CategoriaId = partidoModel.CategoriaId;
+            partido.CompeticionId = partidoModel.CompeticionId;
             partido.Jornada = partidoModel.Jornada;
             partido.NumeroPartido = partidoModel.NumeroPartido;
             partido.Arbitro1Id = partidoModel.Arbitro1Id;
@@ -312,6 +314,7 @@ namespace AutoRef_API.Controllers
             // Crear el partido con los valores correctos
             var partido = new Partido
             {
+                CompeticionId = partidoModel.CompeticionId,
                 LugarId = partidoModel.LugarId,
                 Arbitro1Id = null,  
                 Arbitro2Id = null,  

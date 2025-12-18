@@ -16,6 +16,8 @@ export type Competicion = {
   nombre: string;
   esFederada: boolean;
   activa: boolean;
+  temporadaId?: string | null;
+  modalidadId?: string | null;
 };
 
 const getCompeticiones = async (): Promise<Competicion[]> => {
@@ -23,14 +25,14 @@ const getCompeticiones = async (): Promise<Competicion[]> => {
   return response.data;
 };
 
-const createCompeticion = async (data: { nombre: string; esFederada: boolean; activa: boolean }) => {
+const createCompeticion = async (data: { nombre: string; esFederada: boolean; activa: boolean; temporadaId: string; modalidadId?: string | null }) => {
   const response = await axios.post(`${API_URL}/Competiciones`, data, getAuthHeaders());
   return response.data;
 };
 
 const updateCompeticion = async (
   id: string,
-  data: { nombre: string; esFederada: boolean; activa: boolean }
+  data: { nombre: string; esFederada: boolean; activa: boolean; temporadaId: string; modalidadId?: string | null }
 ) => {
   const response = await axios.put(`${API_URL}/Competiciones/${id}`, data, getAuthHeaders());
   return response.data;

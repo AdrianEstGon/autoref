@@ -112,6 +112,26 @@ public class InscripcionesController : ControllerBase
         if (equipo.CompeticionId != null && equipo.CompeticionId.Value != model.CompeticionId)
             return BadRequest(new { message = "El equipo no pertenece a la competición seleccionada" });
 
+        // Apertura de inscripciones (por competición + categoría) — se aplica a Club.
+        // Admin/Federación pueden registrar fuera de ventana.
+        if (User.IsInRole("Club") && !User.IsInRole("Admin") && !User.IsInRole("Federacion"))
+        {
+            if (equipo.CategoriaId != null)
+            {
+                var cfg = await _context.CompeticionesCategorias
+                    .FirstOrDefaultAsync(x => x.CompeticionId == model.CompeticionId && x.CategoriaId == equipo.CategoriaId.Value);
+
+                if (cfg == null || !cfg.Activa)
+                    return BadRequest(new { message = "Las inscripciones no están abiertas para esta competición/categoría" });
+
+                var ahora = DateTime.UtcNow;
+                if (cfg.InscripcionDesde != null && ahora < cfg.InscripcionDesde.Value)
+                    return BadRequest(new { message = "Las inscripciones aún no están abiertas" });
+                if (cfg.InscripcionHasta != null && ahora > cfg.InscripcionHasta.Value)
+                    return BadRequest(new { message = "Las inscripciones están cerradas" });
+            }
+        }
+
         var documentoNorm = model.Documento.Trim();
         var persona = await _context.Personas.FirstOrDefaultAsync(p => p.Documento == documentoNorm);
         if (persona == null)

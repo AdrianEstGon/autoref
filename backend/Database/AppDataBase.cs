@@ -23,6 +23,8 @@ namespace AutoRef_API.Database
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Notificacion> Notificaciones { get; set; }
         public DbSet<Competicion> Competiciones { get; set; }
+        public DbSet<CompeticionCategoria> CompeticionesCategorias { get; set; }
+        public DbSet<CompeticionReglas> CompeticionesReglas { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Temporada> Temporadas { get; set; }
         public DbSet<Modalidad> Modalidades { get; set; }
@@ -63,6 +65,14 @@ namespace AutoRef_API.Database
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
 
+            // Partido -> Competición (opcional, para calendarios)
+            modelBuilder.Entity<Partido>()
+                .HasOne(p => p.Competicion)
+                .WithMany()
+                .HasForeignKey(p => p.CompeticionId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
             modelBuilder.Entity<Usuario>().ToTable("Usuarios");
 
             // Relación entre Equipo y Club
@@ -100,6 +110,39 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<Competicion>()
                 .Property(c => c.FederacionId)
                 .HasDefaultValue(federacionAsturianaId);
+
+            // Competición -> Temporada (opcional para compatibilidad con datos existentes)
+            modelBuilder.Entity<Competicion>()
+                .HasOne(c => c.Temporada)
+                .WithMany()
+                .HasForeignKey(c => c.TemporadaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Competición -> Modalidad (opcional)
+            modelBuilder.Entity<Competicion>()
+                .HasOne(c => c.Modalidad)
+                .WithMany()
+                .HasForeignKey(c => c.ModalidadId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Competición -> Categorías (configuración)
+            modelBuilder.Entity<CompeticionCategoria>()
+                .HasOne(cc => cc.Competicion)
+                .WithMany()
+                .HasForeignKey(cc => cc.CompeticionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CompeticionCategoria>()
+                .HasOne(cc => cc.Categoria)
+                .WithMany()
+                .HasForeignKey(cc => cc.CategoriaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CompeticionReglas>()
+                .HasOne(r => r.Competicion)
+                .WithMany()
+                .HasForeignKey(r => r.CompeticionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Relación entre Usuario y Club
             modelBuilder.Entity<Usuario>()
@@ -166,6 +209,8 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<Federacion>().Property(f => f.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Categoria>().Property(c => c.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Competicion>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<CompeticionCategoria>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<CompeticionReglas>().Property(c => c.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Persona>().Property(p => p.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Temporada>().Property(t => t.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Modalidad>().Property(m => m.Id).ValueGeneratedOnAdd();
@@ -227,6 +272,20 @@ namespace AutoRef_API.Database
             // Competición: nombre único dentro de la federación
             modelBuilder.Entity<Competicion>()
                 .HasIndex(c => new { c.FederacionId, c.Nombre })
+                .IsUnique();
+
+            modelBuilder.Entity<Competicion>()
+                .HasIndex(c => c.TemporadaId);
+
+            modelBuilder.Entity<Competicion>()
+                .HasIndex(c => c.ModalidadId);
+
+            modelBuilder.Entity<CompeticionCategoria>()
+                .HasIndex(cc => new { cc.CompeticionId, cc.CategoriaId })
+                .IsUnique();
+
+            modelBuilder.Entity<CompeticionReglas>()
+                .HasIndex(r => r.CompeticionId)
                 .IsUnique();
 
             // Equipo: evitar duplicados por club+competición+categoría+nombre

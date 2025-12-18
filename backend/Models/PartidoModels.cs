@@ -2,6 +2,7 @@
 {
     public class PartidoModel
     {
+        public Guid? CompeticionId { get; set; }
         public Guid? EquipoLocalId { get; set; } 
         public Guid? EquipoVisitanteId { get; set; } 
         public DateTime Fecha { get; set; }     
@@ -16,6 +17,7 @@
     public class UpdatePartidoModel
     {
         public Guid Id { get; set; }
+        public Guid? CompeticionId { get; set; }
         public Guid? EquipoLocalId { get; set; }   
         public Guid? EquipoVisitanteId { get; set; } 
         public DateTime Fecha { get; set; }

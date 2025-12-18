@@ -9,6 +9,10 @@ public class CompeticionCreateUpdateModel
     public string Nombre { get; set; } = string.Empty;
     public bool EsFederada { get; set; }
     public bool Activa { get; set; } = true;
+
+    // 5.3: por temporada y modalidad
+    public Guid? TemporadaId { get; set; }
+    public Guid? ModalidadId { get; set; }
 }
 
 public class InscripcionCreateModel
