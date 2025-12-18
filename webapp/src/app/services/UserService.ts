@@ -156,6 +156,16 @@ const uploadProfilePicture = async (file: File) => {
   }
 };
 
+const updateMyBanco = async (data: { iban?: string | null; bic?: string | null; titularCuenta?: string | null }) => {
+  try {
+    const response = await axios.put(`${API_URL}/Usuarios/me/banco`, data, getAuthHeaders());
+    return response.data;
+  } catch (error: any) {
+    const message = error.response?.data?.message || 'No se pudieron actualizar los datos bancarios.';
+    throw new Error(message);
+  }
+};
+
 
 const getProfilePicture = async (userId: string) => {
   try {
@@ -171,4 +181,4 @@ const getProfilePicture = async (userId: string) => {
 };
 
 
-export default { login, getUsuarios, getUsuarioById, eliminarUsuario, register, updateUser, changePassword, uploadProfilePicture, getProfilePicture };
+export default { login, getUsuarios, getUsuarioById, eliminarUsuario, register, updateUser, changePassword, uploadProfilePicture, getProfilePicture, updateMyBanco };

@@ -102,6 +102,9 @@ public class UsuariosController : ControllerBase
             CodigoPostal = model.CodigoPostal,
             Latitud = coordenadas.Latitud,
             Longitud = coordenadas.Longitud,
+            Iban = string.IsNullOrWhiteSpace(model.Iban) ? null : model.Iban.Trim(),
+            Bic = string.IsNullOrWhiteSpace(model.Bic) ? null : model.Bic.Trim(),
+            TitularCuenta = string.IsNullOrWhiteSpace(model.TitularCuenta) ? null : model.TitularCuenta.Trim(),
         };
 
         // Registrar el usuario
@@ -306,6 +309,13 @@ public class UsuariosController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(string id)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+        if (!isAdmin && !string.Equals(currentUserId, id, StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
@@ -326,6 +336,9 @@ public class UsuariosController : ControllerBase
             user.SegundoApellido,
             user.FechaNacimiento,
             user.FotoPerfil,
+            user.Iban,
+            user.Bic,
+            user.TitularCuenta,
             user.Longitud,
             user.Latitud,
             user.Email,
@@ -337,6 +350,33 @@ public class UsuariosController : ControllerBase
             user.Region,
             ClubVinculado = user.ClubVinculado?.Nombre
         });
+    }
+
+    public class UpdateBancoModel
+    {
+        public string? Iban { get; set; }
+        public string? Bic { get; set; }
+        public string? TitularCuenta { get; set; }
+    }
+
+    [Authorize]
+    [HttpPut("me/banco")]
+    public async Task<IActionResult> UpdateMyBanco([FromBody] UpdateBancoModel model)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return Unauthorized();
+
+        user.Iban = string.IsNullOrWhiteSpace(model.Iban) ? null : model.Iban.Trim();
+        user.Bic = string.IsNullOrWhiteSpace(model.Bic) ? null : model.Bic.Trim();
+        user.TitularCuenta = string.IsNullOrWhiteSpace(model.TitularCuenta) ? null : model.TitularCuenta.Trim();
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded) return BadRequest(new { message = "No se pudo actualizar", errors = result.Errors });
+
+        return Ok(new { message = "Datos bancarios actualizados" });
     }
 
     [Authorize(Roles = "Admin")]
@@ -428,6 +468,9 @@ public class UsuariosController : ControllerBase
         user.Ciudad = model.Ciudad;
         user.CodigoPostal = model.CodigoPostal;
         user.FotoPerfil = model.FotoPerfil;
+        user.Iban = string.IsNullOrWhiteSpace(model.Iban) ? user.Iban : model.Iban.Trim();
+        user.Bic = string.IsNullOrWhiteSpace(model.Bic) ? user.Bic : model.Bic.Trim();
+        user.TitularCuenta = string.IsNullOrWhiteSpace(model.TitularCuenta) ? user.TitularCuenta : model.TitularCuenta.Trim();
 
         // Obtener las coordenadas actualizadas
         var coordenadas = await ObtenerCoordenadas(model.Direccion, model.Ciudad, model.Pais);

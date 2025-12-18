@@ -18,6 +18,11 @@
     public bool EsAdmin { get; set; } 
     // Nuevo: rol explícito (por defecto se asignará "Arbitro" si no se indica)
     public string? Rol { get; set; }
+
+    // 5.8: datos bancarios (opcional)
+    public string? Iban { get; set; }
+    public string? Bic { get; set; }
+    public string? TitularCuenta { get; set; }
 }
 
 public class UpdateModel
@@ -46,6 +51,11 @@ public class UpdateModel
     public double Longitud { get; set; }
     public string? FotoPerfil { get; set; }
     public bool EsAdmin { get; set; } 
+
+    // 5.8: datos bancarios (opcional)
+    public string? Iban { get; set; }
+    public string? Bic { get; set; }
+    public string? TitularCuenta { get; set; }
 }
 
 public class ChangePasswordModel

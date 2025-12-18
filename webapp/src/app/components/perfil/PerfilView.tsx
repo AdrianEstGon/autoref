@@ -47,6 +47,9 @@ const PerfilView = () => {
     clubVinculado: "",
     email: "",
     licencia: "",
+    iban: "",
+    bic: "",
+    titularCuenta: "",
   });
 
   const [oldPassword, setOldPassword] = useState("");
@@ -94,6 +97,9 @@ const PerfilView = () => {
             clubVinculado: datosUsuario.clubVinculadoId || "No tiene club vinculado",
             email: datosUsuario.email || "",
             licencia: datosUsuario.licencia || "",
+            iban: datosUsuario.iban || "",
+            bic: datosUsuario.bic || "",
+            titularCuenta: datosUsuario.titularCuenta || "",
           });
 
           // Obtener el nombre del club vinculado
@@ -209,6 +215,19 @@ const PerfilView = () => {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    }
+  };
+
+  const handleGuardarBanco = async () => {
+    try {
+      const res = await userService.updateMyBanco({
+        iban: perfil.iban || null,
+        bic: perfil.bic || null,
+        titularCuenta: perfil.titularCuenta || null,
+      });
+      toast.success(res?.message || "Datos bancarios actualizados");
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudieron actualizar los datos bancarios");
     }
   };
 
@@ -527,6 +546,61 @@ const PerfilView = () => {
             variant="filled"
             sx={{ backgroundColor: "#f5f5f5", borderRadius: 1 }}
           />
+        </Grid>
+
+        {/* Datos bancarios (para liquidaciones/órdenes de pago) */}
+        <Grid item xs={12}>
+          <Box sx={{ mt: 1, mb: 1 }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#1e293b" }}>
+              Datos bancarios (para liquidaciones)
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Necesarios para exportar la remesa SEPA y poder realizar pagos.
+            </Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Titular de la cuenta"
+            value={perfil.titularCuenta}
+            onChange={(e) => setPerfil((p) => ({ ...p, titularCuenta: e.target.value }))}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="IBAN"
+            value={perfil.iban}
+            onChange={(e) => setPerfil((p) => ({ ...p, iban: e.target.value }))}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="BIC (opcional)"
+            value={perfil.bic}
+            onChange={(e) => setPerfil((p) => ({ ...p, bic: e.target.value }))}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <Button
+            variant="contained"
+            onClick={handleGuardarBanco}
+            sx={{
+              background: "linear-gradient(135deg, #2563eb 0%, #1e40af 100%)",
+              borderRadius: "10px",
+              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
+              },
+            }}
+          >
+            Guardar datos bancarios
+          </Button>
         </Grid>
 
         {/* Botón de Modificar Contraseña */}
