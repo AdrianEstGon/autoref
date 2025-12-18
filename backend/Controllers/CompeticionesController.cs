@@ -136,7 +136,9 @@ public class CompeticionesController : ControllerBase
                 cc.Activa,
                 cc.InscripcionDesde,
                 cc.InscripcionHasta,
-                cc.Cuota
+                cc.Cuota,
+                cc.HorarioLocalDesde,
+                cc.HorarioLocalHasta
             })
             .ToListAsync();
 
@@ -189,6 +191,8 @@ public class CompeticionesController : ControllerBase
             entity.InscripcionDesde = item.InscripcionDesde;
             entity.InscripcionHasta = item.InscripcionHasta;
             entity.Cuota = item.Cuota;
+            entity.HorarioLocalDesde = item.HorarioLocalDesde;
+            entity.HorarioLocalHasta = item.HorarioLocalHasta;
         }
 
         await _context.SaveChangesAsync();

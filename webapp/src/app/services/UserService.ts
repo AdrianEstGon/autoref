@@ -20,6 +20,11 @@ const login = async (email: string, password: string) => {
       localStorage.setItem('licencia', response.data.licencia);
     }
 
+    if (response.data.clubVinculadoId !== undefined) {
+      // Puede ser null para roles sin club
+      localStorage.setItem('clubVinculadoId', response.data.clubVinculadoId ? String(response.data.clubVinculadoId) : '');
+    }
+
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 401) {

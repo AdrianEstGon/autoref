@@ -9,6 +9,8 @@ using AutoRef_API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using AutoRef_API.Services;
+using AutoRef_API.Models;
+using System.Security.Claims;
 
 namespace AutoRef_API.Controllers
 {
@@ -80,6 +82,8 @@ namespace AutoRef_API.Controllers
                 .Include(p => p.EquipoLocal)
                 .Include(p => p.EquipoVisitante)
                 .Include(p => p.Categoria)
+                .Include(p => p.EquipoLocal).ThenInclude(e => e.Club)
+                .Include(p => p.EquipoVisitante).ThenInclude(e => e.Club)
                 .Include(p => p.Arbitro1)
                 .Include(p => p.Arbitro2)
                 .Include(p => p.Anotador)
@@ -109,6 +113,9 @@ namespace AutoRef_API.Controllers
                 partido.LugarId,
                 Categoria = partido.Categoria?.Nombre,
                 partido.CategoriaId,
+                partido.CompeticionId,
+                ClubLocalId = partido.EquipoLocal?.ClubId,
+                ClubVisitanteId = partido.EquipoVisitante?.ClubId,
                 partido.Jornada,
                 Arbitro1 = partido.Arbitro1 != null ? $"{partido.Arbitro1.Nombre} {partido.Arbitro1.PrimerApellido} {partido.Arbitro1.SegundoApellido} " : null,
                 Arbitro1Licencia = partido.Arbitro1?.Licencia,
@@ -122,6 +129,129 @@ namespace AutoRef_API.Controllers
             };
 
             return Ok(resultado);
+        }
+
+        // Club: ver partidos donde participa su club (local o visitante)
+        [Authorize(Roles = "Club,Admin,Federacion")]
+        [HttpGet("club/mis")]
+        public async Task<IActionResult> GetPartidosMiClub()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userId, out var userGuid)) return Unauthorized();
+            var user = await _context.Users.FindAsync(userGuid);
+            if (user == null) return Unauthorized();
+            if (user.ClubVinculadoId == null) return BadRequest(new { message = "El usuario no tiene un club vinculado" });
+
+            var clubId = user.ClubVinculadoId.Value;
+            var partidos = await _context.Partidos
+                .Include(p => p.Lugar)
+                .Include(p => p.EquipoLocal).ThenInclude(e => e.Club)
+                .Include(p => p.EquipoVisitante).ThenInclude(e => e.Club)
+                .Include(p => p.Categoria)
+                .Where(p => (p.EquipoLocal != null && p.EquipoLocal.ClubId == clubId) || (p.EquipoVisitante != null && p.EquipoVisitante.ClubId == clubId))
+                .OrderBy(p => p.Fecha)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.CompeticionId,
+                    p.CategoriaId,
+                    equipoLocal = p.EquipoLocal.Nombre,
+                    equipoVisitante = p.EquipoVisitante.Nombre,
+                    clubLocalId = p.EquipoLocal.ClubId,
+                    clubVisitanteId = p.EquipoVisitante.ClubId,
+                    fecha = p.Fecha.ToString("yyyy-MM-dd"),
+                    hora = p.Hora.ToString(@"hh\:mm"),
+                    lugar = p.Lugar != null ? p.Lugar.Nombre : null,
+                    lugarId = p.LugarId,
+                    categoria = p.Categoria != null ? p.Categoria.Nombre : null,
+                    jornada = p.Jornada,
+                    numeroPartido = p.NumeroPartido
+                })
+                .ToListAsync();
+
+            return Ok(partidos);
+        }
+
+        // Club local: fijar fecha/hora/lugar dentro de ventana configurada por federación
+        [Authorize(Roles = "Club,Admin,Federacion")]
+        [HttpPut("{id:guid}/horario-local")]
+        public async Task<IActionResult> FijarHorarioLocal(Guid id, [FromBody] FijarHorarioLocalModel model)
+        {
+            if (model == null) return BadRequest(new { message = "Datos inválidos" });
+            if (!TimeSpan.TryParse(model.Hora, out var hora)) return BadRequest(new { message = "Hora inválida (ej: 10:00)" });
+
+            var partido = await _context.Partidos
+                .Include(p => p.EquipoLocal).ThenInclude(e => e.Club)
+                .Include(p => p.EquipoVisitante).ThenInclude(e => e.Club)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            if (partido == null) return NotFound(new { message = "Partido no encontrado" });
+            if (partido.EquipoLocal?.ClubId == null) return BadRequest(new { message = "El partido no tiene club local" });
+
+            // Club: solo el club local puede fijar
+            if (User.IsInRole("Club") && !User.IsInRole("Admin") && !User.IsInRole("Federacion"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!Guid.TryParse(userId, out var userGuid)) return Unauthorized();
+                var user = await _context.Users.FindAsync(userGuid);
+                if (user?.ClubVinculadoId == null) return Forbid();
+                if (user.ClubVinculadoId.Value != partido.EquipoLocal.ClubId.Value) return Forbid();
+
+                // Validar ventana de horario (si está configurada)
+                if (partido.CompeticionId != null && partido.CategoriaId != null)
+                {
+                    var cfg = await _context.CompeticionesCategorias.FirstOrDefaultAsync(x => x.CompeticionId == partido.CompeticionId.Value && x.CategoriaId == partido.CategoriaId.Value);
+                    if (cfg != null)
+                    {
+                        var ahora = DateTime.UtcNow;
+                        if (cfg.HorarioLocalDesde != null)
+                        {
+                            var desde = cfg.HorarioLocalDesde.Value;
+                            if (desde.TimeOfDay == TimeSpan.Zero) desde = desde.Date; // inicio del día
+                            if (ahora < desde) return BadRequest(new { message = "Aún no está abierta la ventana para fijar horario" });
+                        }
+                        if (cfg.HorarioLocalHasta != null)
+                        {
+                            var hasta = cfg.HorarioLocalHasta.Value;
+                            // Si viene como fecha (00:00) desde UI, interpretarlo como fin de ese día
+                            if (hasta.TimeOfDay == TimeSpan.Zero) hasta = hasta.Date.AddDays(1).AddTicks(-1);
+                            if (ahora > hasta) return BadRequest(new { message = "La ventana para fijar horario está cerrada" });
+                        }
+                    }
+                }
+            }
+
+            if (model.LugarId != null)
+            {
+                var existsLugar = await _context.Polideportivos.AnyAsync(p => p.Id == model.LugarId.Value);
+                if (!existsLugar) return BadRequest(new { message = "Lugar no encontrado" });
+            }
+
+            partido.Hora = hora;
+            partido.Fecha = model.Fecha.Date.Add(hora);
+            partido.LugarId = model.LugarId;
+
+            // Notificar a ambos clubes y oficiales (si ya están asignados)
+            var msg = $"Horario fijado: {partido.EquipoLocal?.Nombre} vs {partido.EquipoVisitante?.Nombre} — {partido.Fecha:yyyy-MM-dd} {partido.Hora}.";
+            var clubLocalId = partido.EquipoLocal.ClubId.Value;
+            var clubVisitId = partido.EquipoVisitante?.ClubId;
+
+            var clubUsersLocal = await _context.Users.Where(u => u.ClubVinculadoId == clubLocalId).Select(u => u.Id).ToListAsync();
+            foreach (var uid in clubUsersLocal)
+                _context.Notificaciones.Add(new Notificacion { UsuarioId = uid, Mensaje = msg, Fecha = DateTime.UtcNow, Leida = false });
+
+            if (clubVisitId != null)
+            {
+                var clubUsersVisit = await _context.Users.Where(u => u.ClubVinculadoId == clubVisitId.Value).Select(u => u.Id).ToListAsync();
+                foreach (var uid in clubUsersVisit)
+                    _context.Notificaciones.Add(new Notificacion { UsuarioId = uid, Mensaje = msg, Fecha = DateTime.UtcNow, Leida = false });
+            }
+
+            if (partido.Arbitro1Id != null) _context.Notificaciones.Add(new Notificacion { UsuarioId = partido.Arbitro1Id, Mensaje = msg, Fecha = DateTime.UtcNow, Leida = false });
+            if (partido.Arbitro2Id != null) _context.Notificaciones.Add(new Notificacion { UsuarioId = partido.Arbitro2Id, Mensaje = msg, Fecha = DateTime.UtcNow, Leida = false });
+            if (partido.AnotadorId != null) _context.Notificaciones.Add(new Notificacion { UsuarioId = partido.AnotadorId, Mensaje = msg, Fecha = DateTime.UtcNow, Leida = false });
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Horario actualizado" });
         }
 
         [HttpGet("Usuario/{userId}")]

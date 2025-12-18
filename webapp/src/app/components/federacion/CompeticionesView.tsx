@@ -166,6 +166,8 @@ const CompeticionesView: React.FC = () => {
           inscripcionDesde: x.inscripcionDesde ? String(x.inscripcionDesde).slice(0, 10) : null,
           inscripcionHasta: x.inscripcionHasta ? String(x.inscripcionHasta).slice(0, 10) : null,
           cuota: x.cuota ?? null,
+          horarioLocalDesde: x.horarioLocalDesde ? String(x.horarioLocalDesde).slice(0, 10) : null,
+          horarioLocalHasta: x.horarioLocalHasta ? String(x.horarioLocalHasta).slice(0, 10) : null,
         };
       });
       setCatConfig(map);
@@ -408,7 +410,16 @@ const CompeticionesView: React.FC = () => {
                                 if (!checked) {
                                   delete copy[cat.id];
                                 } else {
-                                  copy[cat.id] = { categoriaId: cat.id, activa: true, inscripcionDesde: null, inscripcionHasta: null, cuota: null, categoriaNombre: cat.nombre };
+                                  copy[cat.id] = {
+                                    categoriaId: cat.id,
+                                    activa: true,
+                                    inscripcionDesde: null,
+                                    inscripcionHasta: null,
+                                    cuota: null,
+                                    horarioLocalDesde: null,
+                                    horarioLocalHasta: null,
+                                    categoriaNombre: cat.nombre,
+                                  };
                                 }
                                 return copy;
                               });
@@ -451,6 +462,22 @@ const CompeticionesView: React.FC = () => {
                                 type="number"
                                 value={cfg?.cuota ?? ''}
                                 onChange={(e) => setCatConfig((p) => ({ ...p, [cat.id]: { ...(p[cat.id] || cfg!), cuota: e.target.value === '' ? null : Number(e.target.value) } }))}
+                                size="small"
+                              />
+                              <TextField
+                                label="Horario local desde"
+                                type="date"
+                                value={cfg?.horarioLocalDesde ?? ''}
+                                onChange={(e) => setCatConfig((p) => ({ ...p, [cat.id]: { ...(p[cat.id] || cfg!), horarioLocalDesde: e.target.value || null } }))}
+                                InputLabelProps={{ shrink: true }}
+                                size="small"
+                              />
+                              <TextField
+                                label="Horario local hasta"
+                                type="date"
+                                value={cfg?.horarioLocalHasta ?? ''}
+                                onChange={(e) => setCatConfig((p) => ({ ...p, [cat.id]: { ...(p[cat.id] || cfg!), horarioLocalHasta: e.target.value || null } }))}
+                                InputLabelProps={{ shrink: true }}
                                 size="small"
                               />
                             </Box>

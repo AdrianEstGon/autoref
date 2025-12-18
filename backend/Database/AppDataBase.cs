@@ -33,6 +33,7 @@ namespace AutoRef_API.Database
         public DbSet<Inscripcion> Inscripciones { get; set; }
         public DbSet<EnvioMutua> EnviosMutua { get; set; }
         public DbSet<EnvioMutuaItem> EnviosMutuaItems { get; set; }
+        public DbSet<PartidoCambioSolicitud> PartidosCambiosSolicitudes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +72,27 @@ namespace AutoRef_API.Database
                 .WithMany()
                 .HasForeignKey(p => p.CompeticionId)
                 .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Cambios de partido
+            modelBuilder.Entity<PartidoCambioSolicitud>()
+                .HasOne(c => c.Partido)
+                .WithMany()
+                .HasForeignKey(c => c.PartidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PartidoCambioSolicitud>()
+                .HasOne(c => c.LugarOriginal)
+                .WithMany()
+                .HasForeignKey(c => c.LugarOriginalId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<PartidoCambioSolicitud>()
+                .HasOne(c => c.LugarPropuesto)
+                .WithMany()
+                .HasForeignKey(c => c.LugarPropuestoId)
+                .OnDelete(DeleteBehavior.SetNull)
                 .IsRequired(false);
 
             modelBuilder.Entity<Usuario>().ToTable("Usuarios");
@@ -219,6 +241,7 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<Inscripcion>().Property(i => i.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<EnvioMutua>().Property(e => e.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<EnvioMutuaItem>().Property(e => e.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<PartidoCambioSolicitud>().Property(p => p.Id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Licencia)
@@ -288,7 +311,22 @@ namespace AutoRef_API.Database
                 .HasIndex(r => r.CompeticionId)
                 .IsUnique();
 
+            modelBuilder.Entity<Partido>()
+                .HasIndex(p => p.CompeticionId);
+
+            modelBuilder.Entity<PartidoCambioSolicitud>()
+                .HasIndex(c => c.PartidoId);
+
+            modelBuilder.Entity<PartidoCambioSolicitud>()
+                .HasIndex(c => c.Estado);
+
             // Equipo: evitar duplicados por club+competición+categoría+nombre
+            // IMPORTANTE (MySQL): para poder indexar, Nombre no puede ser TEXT/LONGTEXT.
+            modelBuilder.Entity<Equipo>()
+                .Property(e => e.Nombre)
+                .HasMaxLength(255)
+                .HasColumnType("varchar(255)");
+
             modelBuilder.Entity<Equipo>()
                 .HasIndex(e => new { e.ClubId, e.CompeticionId, e.CategoriaId, e.Nombre })
                 .IsUnique();

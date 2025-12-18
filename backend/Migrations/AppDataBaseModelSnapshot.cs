@@ -63,7 +63,8 @@ namespace AutoRef_API.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255);
 
                     b.Property<string>("PrimerArbitro")
                         .HasColumnType("longtext");

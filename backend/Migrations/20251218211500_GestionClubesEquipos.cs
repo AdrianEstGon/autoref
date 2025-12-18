@@ -113,6 +113,17 @@ public class GestionClubesEquipos : Migration
             nullable: true,
             collation: "ascii_general_ci");
 
+        // MySQL: el campo Nombre de Equipos debe ser VARCHAR para poder indexarlo (no TEXT/LONGTEXT)
+        migrationBuilder.AlterColumn<string>(
+            name: "Nombre",
+            table: "Equipos",
+            type: "varchar(255)",
+            nullable: false,
+            oldClrType: typeof(string),
+            oldType: "longtext")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
+
         migrationBuilder.CreateIndex(
             name: "IX_Clubs_FederacionId_CIF",
             table: "Clubs",
@@ -156,6 +167,16 @@ public class GestionClubesEquipos : Migration
         migrationBuilder.DropIndex(
             name: "IX_Equipos_CompeticionId",
             table: "Equipos");
+
+        migrationBuilder.AlterColumn<string>(
+            name: "Nombre",
+            table: "Equipos",
+            type: "longtext",
+            nullable: false,
+            oldClrType: typeof(string),
+            oldType: "varchar(255)")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.DropColumn(
             name: "RazonSocial",

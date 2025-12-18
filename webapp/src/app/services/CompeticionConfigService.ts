@@ -14,6 +14,8 @@ export type CompeticionCategoriaConfig = {
   inscripcionDesde?: string | null;
   inscripcionHasta?: string | null;
   cuota?: number | null;
+  horarioLocalDesde?: string | null;
+  horarioLocalHasta?: string | null;
 };
 
 export type CompeticionReglas = {
@@ -45,6 +47,8 @@ const setCategoriasConfig = async (competicionId: string, items: CompeticionCate
       inscripcionDesde: x.inscripcionDesde ? new Date(x.inscripcionDesde).toISOString() : null,
       inscripcionHasta: x.inscripcionHasta ? new Date(x.inscripcionHasta).toISOString() : null,
       cuota: x.cuota ?? null,
+      horarioLocalDesde: x.horarioLocalDesde ? new Date(x.horarioLocalDesde).toISOString() : null,
+      horarioLocalHasta: x.horarioLocalHasta ? new Date(x.horarioLocalHasta).toISOString() : null,
     })) },
     getAuthHeaders()
   );

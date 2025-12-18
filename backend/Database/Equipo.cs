@@ -9,7 +9,7 @@ public class Equipo
     public Guid? ClubId { get; set; }
     public Guid? CompeticionId { get; set; }
     public Guid? CategoriaId { get; set; }
-    public string Nombre { get; set; }
+    public string Nombre { get; set; } = string.Empty;
     
 
     public virtual Club Club { get; set; }

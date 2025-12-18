@@ -11,6 +11,10 @@ public class CompeticionCategoria
     public DateTime? InscripcionDesde { get; set; }
     public DateTime? InscripcionHasta { get; set; }
     public decimal? Cuota { get; set; } // € por inscripción/equipo (primera versión)
+
+    // 5.4: ventana para que el equipo local fije fecha/hora/lugar
+    public DateTime? HorarioLocalDesde { get; set; }
+    public DateTime? HorarioLocalHasta { get; set; }
     public bool Activa { get; set; } = true;
 
     public Competicion Competicion { get; set; } = null!;

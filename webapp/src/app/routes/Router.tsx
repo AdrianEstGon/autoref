@@ -23,6 +23,8 @@ import TemporadasView from '../components/federacion/TemporadasView';
 import ModalidadesView from '../components/federacion/ModalidadesView';
 import PersonasView from '../components/federacion/PersonasView';
 import ClubsView from '../components/federacion/ClubsView';
+import PartidosClubView from '../components/club/PartidosClubView';
+import CambiosPartidosView from '../components/federacion/CambiosPartidosView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -148,6 +150,11 @@ const Router = () => {
                 } />
 
                 {/* Rutas Club */}
+                <Route path="/club/partidos" element={
+                  <RequireRole allowedRoles={['Club']}>
+                    <WithLayout><PartidosClubView /></WithLayout>
+                  </RequireRole>
+                } />
                 <Route path="/club/inscripciones" element={
                   <RequireRole allowedRoles={['Club']}>
                     <WithLayout><ClubInscripcionesView /></WithLayout>
@@ -193,6 +200,11 @@ const Router = () => {
                 <Route path="/federacion/categorias" element={
                   <RequireRole allowedRoles={['Federacion']}>
                     <WithLayout><CategoriasView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/federacion/cambios-partidos" element={
+                  <RequireRole allowedRoles={['Federacion']}>
+                    <WithLayout><CambiosPartidosView /></WithLayout>
                   </RequireRole>
                 } />
             </Routes>

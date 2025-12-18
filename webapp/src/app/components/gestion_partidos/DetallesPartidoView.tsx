@@ -10,12 +10,19 @@ import {
   CardContent,
   Chip,
   Avatar,
+  Divider,
+  TextField,
+  Stack,
+  Autocomplete,
 } from "@mui/material";
 import partidosService from "../../services/PartidoService";
+import cambiosPartidoService, { CambioPartido } from "../../services/CambioPartidoService";
+import polideportivoService from "../../services/PolideportivoService";
 import moment from "moment";
 import "moment/locale/es";
 import { Person, Event, ArrowBack, SportsSoccer, CalendarToday, AccessTime, LocationOn, Category } from "@mui/icons-material";
 import { GoogleMap, Marker } from "@react-google-maps/api";
+import { toast } from "react-toastify";
 
 moment.locale("es");
 
@@ -23,14 +30,22 @@ const DetallesPartidoView = React.memo(() => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [partido, setPartido] = useState<{
+    id?: string;
     numeroPartido: string;
     equipoLocal: string;
+    equipoLocalId?: string;
     equipoVisitante: string;
+    equipoVisitanteId?: string;
     fecha: string;
     hora: string;
     lugar: { nombre: string; latitud: number; longitud: number } | null;
+    lugarId?: string | null;
     categoria: string;
+    categoriaId?: string | null;
     jornada: string;
+    competicionId?: string | null;
+    clubLocalId?: string | null;
+    clubVisitanteId?: string | null;
     arbitro1?: string | null;
     arbitro1Licencia: string;
     arbitro2?: string | null;
@@ -39,6 +54,21 @@ const DetallesPartidoView = React.memo(() => {
     anotadorLicencia: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [polideportivos, setPolideportivos] = useState<{ id: string; nombre: string }[]>([]);
+  const [cambios, setCambios] = useState<CambioPartido[]>([]);
+  const [loadingCambios, setLoadingCambios] = useState(false);
+
+  const [horarioFecha, setHorarioFecha] = useState<string>("");
+  const [horarioHora, setHorarioHora] = useState<string>("10:00");
+  const [horarioLugar, setHorarioLugar] = useState<{ id: string; nombre: string } | null>(null);
+
+  const [cambioFecha, setCambioFecha] = useState<string>("");
+  const [cambioHora, setCambioHora] = useState<string>("10:00");
+  const [cambioLugar, setCambioLugar] = useState<{ id: string; nombre: string } | null>(null);
+  const [cambioMotivo, setCambioMotivo] = useState<string>("");
+
+  const userRole = window.localStorage.getItem("userRole") || "";
+  const myClubId = window.localStorage.getItem("clubVinculadoId") || "";
 
   const center = useMemo(
     () =>
@@ -61,6 +91,12 @@ const DetallesPartidoView = React.memo(() => {
         setPartido({
           ...partidoData,
         });
+
+        // Defaults para formularios Club
+        setHorarioFecha(String(partidoData?.fecha || "").slice(0, 10));
+        setHorarioHora(String(partidoData?.hora || "").slice(0, 5) || "10:00");
+        setCambioFecha(String(partidoData?.fecha || "").slice(0, 10));
+        setCambioHora(String(partidoData?.hora || "").slice(0, 5) || "10:00");
       } catch (error) {
         console.error("Error al cargar los detalles del partido:", error);
       } finally {
@@ -70,6 +106,28 @@ const DetallesPartidoView = React.memo(() => {
 
     cargarDetallesPartido();
   }, [id]);
+
+  const loadCambiosAndPolis = async (partidoId: string) => {
+    setLoadingCambios(true);
+    try {
+      const [camb, polis] = await Promise.all([
+        cambiosPartidoService.getByPartido(partidoId),
+        polideportivoService.getPolideportivos(),
+      ]);
+      setCambios(camb || []);
+      setPolideportivos((polis || []).map((p: any) => ({ id: p.id, nombre: p.nombre })));
+    } catch (e: any) {
+      // silencioso para árbitros/público
+    } finally {
+      setLoadingCambios(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!id) return;
+    if (userRole !== "Club" && userRole !== "Federacion" && userRole !== "Admin") return;
+    loadCambiosAndPolis(id);
+  }, [id, userRole]);
 
   if (loading) {
     return (
@@ -88,6 +146,79 @@ const DetallesPartidoView = React.memo(() => {
       </Box>
     );
   }
+
+  const esClub = userRole === "Club";
+  const esFederacionAdmin = userRole === "Federacion" || userRole === "Admin";
+  const clubLocal = String(partido.clubLocalId || "");
+  const clubVisit = String(partido.clubVisitanteId || "");
+  const esMiPartidoClub = esClub && !!myClubId && (myClubId === clubLocal || myClubId === clubVisit);
+  const soyClubLocal = esClub && !!myClubId && myClubId === clubLocal;
+
+  const estadoCambioLabel = (estado: number) => {
+    switch (estado) {
+      case 0:
+        return "Pendiente (club)";
+      case 1:
+        return "Rechazado (club)";
+      case 2:
+        return "Aceptado (club)";
+      case 3:
+        return "Rechazado (federación)";
+      case 4:
+        return "Validado (federación)";
+      case 5:
+        return "Cancelado";
+      default:
+        return `Estado ${estado}`;
+    }
+  };
+
+  const handleGuardarHorarioLocal = async () => {
+    if (!id) return;
+    if (!horarioFecha) return toast.error("Selecciona una fecha");
+    if (!horarioHora) return toast.error("Selecciona una hora");
+    try {
+      const res = await partidosService.fijarHorarioLocal(id, {
+        fecha: horarioFecha,
+        hora: horarioHora,
+        lugarId: horarioLugar?.id || null,
+      });
+      toast.success(res?.message || "Horario actualizado");
+      const partidoData = await partidosService.getPartidoById(id);
+      setPartido({ ...partidoData });
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo guardar el horario");
+    }
+  };
+
+  const handleSolicitarCambio = async () => {
+    if (!id) return;
+    if (!cambioFecha) return toast.error("Selecciona una fecha");
+    if (!cambioHora) return toast.error("Selecciona una hora");
+    try {
+      const res = await cambiosPartidoService.crear(id, {
+        fechaPropuesta: cambioFecha,
+        horaPropuesta: cambioHora,
+        lugarPropuestoId: cambioLugar?.id || null,
+        motivo: cambioMotivo || null,
+      });
+      toast.success(res?.message || "Solicitud creada");
+      setCambioMotivo("");
+      await loadCambiosAndPolis(id);
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo crear la solicitud");
+    }
+  };
+
+  const responderClub = async (cambioId: string, aceptar: boolean) => {
+    try {
+      const res = await cambiosPartidoService.responderClub(cambioId, aceptar);
+      toast.success(res?.message || (aceptar ? "Aceptada" : "Rechazada"));
+      if (id) await loadCambiosAndPolis(id);
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo responder");
+    }
+  };
 
   return (
     <Box>
@@ -205,6 +336,153 @@ const DetallesPartidoView = React.memo(() => {
           </Grid>
         </CardContent>
       </Card>
+
+      {/* 5.4 Horarios / Cambios (Club/Federación) */}
+      {(esMiPartidoClub || esFederacionAdmin) && (
+        <Card sx={{ mb: 3, borderRadius: "16px", overflow: "hidden" }}>
+          <Box
+            sx={{
+              background: "linear-gradient(135deg, #4A90E2 0%, #2C5F8D 100%)",
+              p: 2,
+              color: "white",
+            }}
+          >
+            <Typography variant="h6" fontWeight={600}>
+              Gestión de horario y cambios
+            </Typography>
+          </Box>
+          <CardContent sx={{ p: 3 }}>
+            {soyClubLocal && (
+              <Box sx={{ mb: 3 }}>
+                <Typography fontWeight={700} sx={{ mb: 1 }}>
+                  Fijar horario (club local)
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+                  <TextField
+                    label="Fecha"
+                    type="date"
+                    value={horarioFecha}
+                    onChange={(e) => setHorarioFecha(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    size="small"
+                  />
+                  <TextField
+                    label="Hora"
+                    type="time"
+                    value={horarioHora}
+                    onChange={(e) => setHorarioHora(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    size="small"
+                  />
+                  <Autocomplete
+                    options={polideportivos}
+                    getOptionLabel={(o) => o.nombre}
+                    value={horarioLugar}
+                    onChange={(_, v) => setHorarioLugar(v)}
+                    renderInput={(params) => <TextField {...params} label="Lugar" size="small" />}
+                    sx={{ minWidth: 260 }}
+                  />
+                  <Button variant="contained" onClick={handleGuardarHorarioLocal} disabled={loadingCambios}>
+                    Guardar
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            {esMiPartidoClub && (
+              <Box sx={{ mb: 3 }}>
+                <Divider sx={{ mb: 2 }} />
+                <Typography fontWeight={700} sx={{ mb: 1 }}>
+                  Solicitar cambio (fecha/hora/lugar)
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
+                  <TextField
+                    label="Fecha propuesta"
+                    type="date"
+                    value={cambioFecha}
+                    onChange={(e) => setCambioFecha(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    size="small"
+                  />
+                  <TextField
+                    label="Hora propuesta"
+                    type="time"
+                    value={cambioHora}
+                    onChange={(e) => setCambioHora(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    size="small"
+                  />
+                  <Autocomplete
+                    options={polideportivos}
+                    getOptionLabel={(o) => o.nombre}
+                    value={cambioLugar}
+                    onChange={(_, v) => setCambioLugar(v)}
+                    renderInput={(params) => <TextField {...params} label="Lugar propuesto" size="small" />}
+                    sx={{ minWidth: 260 }}
+                  />
+                  <TextField
+                    label="Motivo"
+                    value={cambioMotivo}
+                    onChange={(e) => setCambioMotivo(e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 260 }}
+                  />
+                  <Button variant="outlined" onClick={handleSolicitarCambio} disabled={loadingCambios}>
+                    Enviar solicitud
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            <Divider sx={{ mb: 2 }} />
+            <Typography fontWeight={700} sx={{ mb: 1 }}>
+              Historial de solicitudes
+            </Typography>
+            {cambios.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                No hay solicitudes de cambio para este partido.
+              </Typography>
+            ) : (
+              <Stack spacing={1}>
+                {cambios.map((c) => {
+                  const pendienteClub = c.estado === 0;
+                  const soyReceptor = esClub && myClubId && c.clubReceptorId === myClubId;
+                  return (
+                    <Card key={c.id} variant="outlined" sx={{ borderRadius: "12px" }}>
+                      <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+                          <Box>
+                            <Typography fontWeight={700} variant="body2">
+                              {c.fechaOriginal} {c.horaOriginal} → {c.fechaPropuesta} {c.horaPropuesta}
+                              {c.lugarPropuesto?.nombre ? ` — ${c.lugarPropuesto.nombre}` : ""}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {c.motivo || "Sin motivo"}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                            <Chip size="small" label={estadoCambioLabel(c.estado)} />
+                            {pendienteClub && soyReceptor && (
+                              <>
+                                <Button size="small" variant="contained" onClick={() => responderClub(c.id, true)}>
+                                  Aceptar
+                                </Button>
+                                <Button size="small" variant="outlined" color="error" onClick={() => responderClub(c.id, false)}>
+                                  Rechazar
+                                </Button>
+                              </>
+                            )}
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Árbitros y Anotador */}
       <Grid container spacing={3} sx={{ mb: 3 }}>

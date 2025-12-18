@@ -87,4 +87,42 @@ const eliminarPartido = async (id: number) => {
   }
 };
 
-export default { getPartidos, getPartidoById, crearPartido, actualizarPartido, actualizarEstadoDesignacion, eliminarPartido, getPartidosByUserId };
+const getPartidosMiClub = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/Partidos/club/mis`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener los partidos de mi club:', error);
+    throw error;
+  }
+};
+
+const fijarHorarioLocal = async (partidoId: string, payload: { fecha: string; hora: string; lugarId: string | null }) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/Partidos/${partidoId}/horario-local`,
+      {
+        fecha: payload.fecha,
+        hora: payload.hora,
+        lugarId: payload.lugarId,
+      },
+      getAuthHeaders()
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Error al fijar horario local:', error);
+    throw new Error(error.response?.data?.message || 'No se pudo fijar el horario.');
+  }
+};
+
+export default {
+  getPartidos,
+  getPartidoById,
+  crearPartido,
+  actualizarPartido,
+  actualizarEstadoDesignacion,
+  eliminarPartido,
+  getPartidosByUserId,
+  getPartidosMiClub,
+  fijarHorarioLocal,
+};

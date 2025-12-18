@@ -7,6 +7,10 @@ public class CompeticionCategoriaConfigDto
     public DateTime? InscripcionDesde { get; set; }
     public DateTime? InscripcionHasta { get; set; }
     public decimal? Cuota { get; set; }
+
+    // 5.4: ventana para fijación de horario por el local
+    public DateTime? HorarioLocalDesde { get; set; }
+    public DateTime? HorarioLocalHasta { get; set; }
 }
 
 public class CompeticionCategoriasSetModel

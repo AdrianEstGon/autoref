@@ -41,6 +41,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -159,6 +160,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     window.localStorage.removeItem('userLogged');
     window.localStorage.removeItem('userRole');
     window.localStorage.removeItem('fotoPerfil');
+    window.localStorage.removeItem('clubVinculadoId');
     window.location.href = '/';
   };
 
@@ -170,7 +172,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const menuItems = (() => {
     if (isClub) {
-      return [{ text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' }];
+      return [
+        { text: 'Partidos', icon: <SportsVolleyballIcon />, path: '/club/partidos' },
+        { text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' },
+      ];
     }
 
     if (isPublico) {
@@ -200,6 +205,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { text: 'Modalidades', icon: <SportsVolleyballIcon />, path: '/federacion/modalidades' },
         { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
         { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
+        { text: 'Cambios Partidos', icon: <SwapHorizIcon />, path: '/federacion/cambios-partidos' },
       ];
     }
 
@@ -214,6 +220,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { text: 'Modalidades', icon: <SportsVolleyballIcon />, path: '/federacion/modalidades' },
         { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
         { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
+        { text: 'Cambios Partidos', icon: <SwapHorizIcon />, path: '/federacion/cambios-partidos' },
       ];
     }
 
