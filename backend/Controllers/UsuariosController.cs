@@ -109,15 +109,20 @@ public class UsuariosController : ControllerBase
             var mailService = new MailService();  // Crear instancia del servicio de correo
             await mailService.SendEmailAsync(model.Email, "Tu nueva contrase�a", $"Hola {model.Nombre},\n\nTu nueva contrase�a es: {contrasenaGenerada}\n\nSaludos!");
 
-            // Asigna "Admin" si EsAdmin es true
-            if (model.EsAdmin)
+            // Asignación de rol:
+            // - Si EsAdmin => Admin (compatibilidad con UI actual)
+            // - Si no => usa model.Rol si viene, y si no, asigna Arbitro por defecto
+            var roleToAssign = model.EsAdmin ? "Admin" : (string.IsNullOrWhiteSpace(model.Rol) ? "Arbitro" : model.Rol!.Trim());
+
+            // Crear rol si no existe (por seguridad)
+            if (!await _roleManager.RoleExistsAsync(roleToAssign))
             {
-                var role = "Admin";
-                await _userManager.AddToRoleAsync(user, role);
-                return Ok(new { message = "Usuario registrado con �xito", role });
+                await _roleManager.CreateAsync(new ApplicationRole { Name = roleToAssign });
             }
 
-            return Ok(new { message = "Usuario registrado con �xito" });
+            await _userManager.AddToRoleAsync(user, roleToAssign);
+
+            return Ok(new { message = "Usuario registrado con �xito", role = roleToAssign });
         }
 
         return BadRequest(result.Errors);
@@ -192,10 +197,12 @@ public class UsuariosController : ControllerBase
         {
             message = "Inicio de sesi�n exitoso",
             token,   // Agrega el token en la respuesta
-            role = roles.FirstOrDefault(),// Devuelve el rol del usuario
+            role = roles.FirstOrDefault() ?? "Arbitro",// Asegura rol para frontend
+            roles = roles.ToList(),
             id = user.Id,
             fotoPerfil = user.FotoPerfil,
-            licencia = user.Licencia
+            licencia = user.Licencia,
+            clubVinculadoId = user.ClubVinculadoId
         });
     }
 
@@ -408,16 +415,57 @@ public class UsuariosController : ControllerBase
         user.Latitud = coordenadas.Latitud;
         user.Longitud = coordenadas.Longitud;
 
-        // Verificar si el usuario ya tiene el rol de administrador
-        var esAdminActual = await _userManager.IsInRoleAsync(user, "Admin");
+        // Roles:
+        // - Si llegan Roles explícitos => sincronizar roles del usuario
+        // - Si no llegan => mantener el comportamiento antiguo (solo Admin mediante EsAdmin)
+        if (model.Roles != null && model.Roles.Count > 0)
+        {
+            var desiredRoles = model.Roles
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Select(r => r.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        if (model.EsAdmin && !esAdminActual)
-        {
-            await _userManager.AddToRoleAsync(user, "Admin");
+            if (model.EsAdmin && !desiredRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
+            {
+                desiredRoles.Add("Admin");
+            }
+
+            // Crear roles que falten
+            foreach (var roleName in desiredRoles)
+            {
+                if (!await _roleManager.RoleExistsAsync(roleName))
+                {
+                    await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+                }
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            var rolesToRemove = currentRoles.Where(cr => !desiredRoles.Contains(cr, StringComparer.OrdinalIgnoreCase)).ToList();
+            var rolesToAdd = desiredRoles.Where(dr => !currentRoles.Contains(dr, StringComparer.OrdinalIgnoreCase)).ToList();
+
+            foreach (var role in rolesToRemove)
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+            foreach (var role in rolesToAdd)
+            {
+                await _userManager.AddToRoleAsync(user, role);
+            }
         }
-        else if (!model.EsAdmin && esAdminActual)
+        else
         {
-            await _userManager.RemoveFromRoleAsync(user, "Admin");
+            // Comportamiento antiguo: solo Admin
+            var esAdminActual = await _userManager.IsInRoleAsync(user, "Admin");
+            if (model.EsAdmin && !esAdminActual)
+            {
+                await _userManager.AddToRoleAsync(user, "Admin");
+            }
+            else if (!model.EsAdmin && esAdminActual)
+            {
+                await _userManager.RemoveFromRoleAsync(user, "Admin");
+            }
         }
 
         var result = await _userManager.UpdateAsync(user);

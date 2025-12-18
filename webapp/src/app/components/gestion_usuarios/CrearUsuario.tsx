@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, FormControlLabel, Checkbox, Autocomplete, Popper } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, FormControl, Autocomplete, Popper, Select, MenuItem, InputLabel } from '@mui/material';
 import authService from '../../services/UserService';
 import clubsService from '../../services/ClubService';
 import { toast } from 'react-toastify';
@@ -17,7 +17,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     segundoApellido: '',
     fechaNacimiento: '',
     nivel: '',
-    clubVinculadoId: null,
+    clubVinculadoId: null as string | null,
     licencia: '',
     username: '',
     email: '',
@@ -27,7 +27,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     region: '',
     ciudad: '',
     codigoPostal: '',
-    esAdmin: false 
+    esAdmin: false,
+    rol: 'Arbitro'
   });
 
   const [errores, setErrores] = useState({
@@ -78,10 +79,11 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
     }));
   }, []);
 
-  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNuevoUsuario(prevState => ({
-      ...prevState,
-      esAdmin: e.target.checked
+  const handleRolChange = useCallback((rol: string) => {
+    setNuevoUsuario(prev => ({
+      ...prev,
+      rol,
+      esAdmin: rol === 'Admin'
     }));
   }, []);
 
@@ -100,6 +102,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           ...nuevoUsuario,
           username: nuevoUsuario.email,
           password: '',
+          rol: nuevoUsuario.rol,
+          esAdmin: nuevoUsuario.rol === 'Admin'
         };
 
         await authService.register(usuarioConContraseña);
@@ -176,7 +180,20 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         <TextField label="Provincia" fullWidth margin="normal" name="region" value={nuevoUsuario.region} onChange={handleChange} error={!!errores.region} helperText={errores.region} />
         <TextField label="Municipio" fullWidth margin="normal" name="ciudad" value={nuevoUsuario.ciudad} onChange={handleChange} error={!!errores.ciudad} helperText={errores.ciudad} />
 
-        <FormControlLabel control={<Checkbox checked={nuevoUsuario.esAdmin} onChange={handleCheckboxChange} />} label="Asignar rol de Administrador" />
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="rol-label">Rol</InputLabel>
+          <Select
+            labelId="rol-label"
+            label="Rol"
+            value={nuevoUsuario.rol}
+            onChange={(e) => handleRolChange(String(e.target.value))}
+          >
+            <MenuItem value="Arbitro">Árbitro</MenuItem>
+            <MenuItem value="Club">Club</MenuItem>
+            <MenuItem value="Federacion">Federación</MenuItem>
+            <MenuItem value="Admin">Administrador</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCancel} color="error">Cancelar</Button>

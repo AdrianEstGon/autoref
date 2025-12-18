@@ -101,7 +101,14 @@ function LoginView() {
     let isAllOk = await checkEmailOrUsername();
     setIsChecking(false);
     if (isAllOk) {
-      navigate('/misDesignaciones');
+      const role = window.localStorage.getItem('userRole');
+      if (role === 'Club') {
+        navigate('/club/inscripciones');
+      } else if (role === 'Federacion' || role === 'Admin') {
+        navigate('/federacion/mutua');
+      } else {
+        navigate('/misDesignaciones');
+      }
     }
   };
 

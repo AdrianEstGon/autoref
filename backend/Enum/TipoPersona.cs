@@ -1,0 +1,9 @@
+namespace AutoRef_API.Enum;
+
+public enum TipoPersona
+{
+    Jugador = 1,
+    StaffTecnico = 2
+}
+
+

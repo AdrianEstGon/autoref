@@ -14,6 +14,11 @@ import PanelDesignacionesView from '../components/gestion_designaciones/PanelDes
 import DetallePartido from "../components/gestion_partidos/DetallesPartidoView";
 import HistorialDesignacionesView from '../components/designaciones/HistorialDesignacionesView';
 import MainLayout from '../components/layout/MainLayout';
+import ClubInscripcionesView from '../components/mutua/ClubInscripcionesView';
+import FederacionMutuaView from '../components/mutua/FederacionMutuaView';
+import CompeticionesView from '../components/federacion/CompeticionesView';
+import EquiposView from '../components/federacion/EquiposView';
+import CategoriasView from '../components/federacion/CategoriasView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -83,6 +88,15 @@ const Router = () => {
                 
                 <Route path="/detallesPartido/:id" element={<WithLayout><DetallePartido /></WithLayout>} />
                 <Route path="/gestionDesignaciones/panelDesignaciones" element={<WithLayout><PanelDesignacionesView /></WithLayout>} />
+
+                {/* Rutas Club */}
+                <Route path="/club/inscripciones" element={<WithLayout><ClubInscripcionesView /></WithLayout>} />
+
+                {/* Rutas Federación */}
+                <Route path="/federacion/mutua" element={<WithLayout><FederacionMutuaView /></WithLayout>} />
+                <Route path="/federacion/competiciones" element={<WithLayout><CompeticionesView /></WithLayout>} />
+                <Route path="/federacion/equipos" element={<WithLayout><EquiposView /></WithLayout>} />
+                <Route path="/federacion/categorias" element={<WithLayout><CategoriasView /></WithLayout>} />
             </Routes>
         </HashRouter>
     );

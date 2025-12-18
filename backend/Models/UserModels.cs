@@ -16,6 +16,8 @@
     public string? Ciudad { get; set; }
     public string? CodigoPostal { get; set; }
     public bool EsAdmin { get; set; } 
+    // Nuevo: rol explícito (por defecto se asignará "Arbitro" si no se indica)
+    public string? Rol { get; set; }
 }
 
 public class UpdateModel

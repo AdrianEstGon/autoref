@@ -21,6 +21,11 @@ namespace AutoRef_API.Database
         public DbSet<Club> Clubs { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Notificacion> Notificaciones { get; set; }
+        public DbSet<Competicion> Competiciones { get; set; }
+        public DbSet<Persona> Personas { get; set; }
+        public DbSet<Inscripcion> Inscripciones { get; set; }
+        public DbSet<EnvioMutua> EnviosMutua { get; set; }
+        public DbSet<EnvioMutuaItem> EnviosMutuaItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -119,10 +124,65 @@ namespace AutoRef_API.Database
             modelBuilder.Entity<Partido>().Property(p => p.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Polideportivo>().Property(p => p.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Disponibilidad>().Property(d => d.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Equipo>().Property(e => e.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Club>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Categoria>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Competicion>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Persona>().Property(p => p.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Inscripcion>().Property(i => i.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<EnvioMutua>().Property(e => e.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<EnvioMutuaItem>().Property(e => e.Id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Licencia)
             .IsUnique();
+
+            // Persona: documento único
+            modelBuilder.Entity<Persona>()
+                .HasIndex(p => p.Documento)
+                .IsUnique();
+
+            // Inscripción: evitar duplicados exactos (misma persona en mismo equipo+competición)
+            modelBuilder.Entity<Inscripcion>()
+                .HasIndex(i => new { i.PersonaId, i.EquipoId, i.CompeticionId })
+                .IsUnique();
+
+            modelBuilder.Entity<Inscripcion>()
+                .HasOne(i => i.Persona)
+                .WithMany()
+                .HasForeignKey(i => i.PersonaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inscripcion>()
+                .HasOne(i => i.Equipo)
+                .WithMany()
+                .HasForeignKey(i => i.EquipoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inscripcion>()
+                .HasOne(i => i.Competicion)
+                .WithMany()
+                .HasForeignKey(i => i.CompeticionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Envíos a mutua
+            modelBuilder.Entity<EnvioMutua>()
+                .HasMany(e => e.Items)
+                .WithOne(i => i.EnvioMutua)
+                .HasForeignKey(i => i.EnvioMutuaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EnvioMutuaItem>()
+                .HasOne(i => i.Inscripcion)
+                .WithMany()
+                .HasForeignKey(i => i.InscripcionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Persona>()
+                .HasOne(p => p.UltimoEnvioMutua)
+                .WithMany()
+                .HasForeignKey(p => p.UltimoEnvioMutuaId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
 

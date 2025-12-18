@@ -8,6 +8,8 @@
     using System.Threading.Tasks;
     using AutoRef_API.Database;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using System.Security.Claims;
 
     [Authorize]
     [Route("api/[controller]")]
@@ -15,13 +17,15 @@
     public class EquiposController : ControllerBase
     {
         private readonly AppDataBase _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public EquiposController(AppDataBase context)
+        public EquiposController(AppDataBase context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Federacion")]
         [HttpGet]
         public async Task<IActionResult> GetEquipos()
         {
@@ -38,6 +42,51 @@
                     equipo.CategoriaId
                 });
             }
+
+            return Ok(equiposList);
+        }
+
+        [Authorize(Roles = "Club,Admin,Federacion")]
+        [HttpGet("mis")]
+        public async Task<IActionResult> GetMisEquipos()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Unauthorized();
+            if (user.ClubVinculadoId == null) return BadRequest(new { message = "El usuario no tiene un club vinculado" });
+
+            var equipos = await _context.Equipos
+                .Where(e => e.ClubId == user.ClubVinculadoId)
+                .ToListAsync();
+
+            var equiposList = equipos.Select(e => new
+            {
+                e.Id,
+                e.Nombre,
+                e.ClubId,
+                e.CategoriaId
+            }).ToList();
+
+            return Ok(equiposList);
+        }
+
+        [Authorize(Roles = "Admin,Federacion")]
+        [HttpGet("club/{clubId:guid}")]
+        public async Task<IActionResult> GetEquiposByClub(Guid clubId)
+        {
+            var equipos = await _context.Equipos
+                .Where(e => e.ClubId == clubId)
+                .ToListAsync();
+
+            var equiposList = equipos.Select(e => new
+            {
+                e.Id,
+                e.Nombre,
+                e.ClubId,
+                e.CategoriaId
+            }).ToList();
 
             return Ok(equiposList);
         }

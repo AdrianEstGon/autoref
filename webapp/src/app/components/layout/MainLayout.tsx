@@ -40,6 +40,10 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CategoryIcon from '@mui/icons-material/Category';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import notificacionesService from '../../services/NotificacionService';
@@ -156,17 +160,39 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     window.location.href = '/';
   };
 
-  const menuItems = [
-    { text: 'Mis Designaciones', icon: <DashboardIcon />, path: '/misDesignaciones' },
-    { text: 'Disponibilidad', icon: <CalendarMonthIcon />, path: '/miDisponibilidad' },
-    { text: 'Mi Historial', icon: <HistoryIcon />, path: '/miHistorial' },
-  ];
+  const isAdminLike = userRole === 'Admin' || userRole === 'Federacion';
+  const isClub = userRole === 'Club';
+
+  const menuItems = isClub
+    ? [{ text: 'Inscripciones', icon: <HowToRegIcon />, path: '/club/inscripciones' }]
+    : [
+        { text: 'Mis Designaciones', icon: <DashboardIcon />, path: '/misDesignaciones' },
+        { text: 'Disponibilidad', icon: <CalendarMonthIcon />, path: '/miDisponibilidad' },
+        { text: 'Mi Historial', icon: <HistoryIcon />, path: '/miHistorial' },
+      ];
 
   const adminMenuItems = [
     { text: 'Gestión de Usuarios', icon: <PeopleAltIcon />, path: '/gestionUsuarios/usuariosView' },
     { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
     { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
+    { text: 'Mutua', icon: <HealthAndSafetyIcon />, path: '/federacion/mutua' },
+    { text: 'Competiciones', icon: <EmojiEventsIcon />, path: '/federacion/competiciones' },
+    { text: 'Equipos', icon: <SportsVolleyballIcon />, path: '/federacion/equipos' },
+    { text: 'Categorías', icon: <CategoryIcon />, path: '/federacion/categorias' },
   ];
+
+  const getRoleLabel = () => {
+    if (userRole === 'Admin') return 'Administrador';
+    if (userRole === 'Federacion') return 'Federación';
+    if (userRole === 'Club') return 'Club';
+    return 'Árbitro';
+  };
+
+  const getRoleChipColor = () => {
+    if (userRole === 'Admin' || userRole === 'Federacion') return '#4A90E2';
+    if (userRole === 'Club') return '#5B7C99';
+    return '#7BA7D9';
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -249,13 +275,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     {userName}
                   </Typography>
                   <Chip
-                    label={userRole === 'Admin' ? 'Administrador' : 'Árbitro'}
+                    label={getRoleLabel()}
                     size="small"
                     sx={{
                       mt: 0.5,
                       height: 20,
                       fontSize: '0.65rem',
-                      bgcolor: userRole === 'Admin' ? '#4A90E2' : '#7BA7D9',
+                      bgcolor: getRoleChipColor(),
                       color: 'white',
                     }}
                   />
@@ -328,7 +354,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </List>
 
         {/* Admin Section */}
-        {userRole === 'Admin' && (
+        {isAdminLike && (
           <>
             <Divider sx={{ my: 2, borderColor: alpha(theme.palette.common.white, 0.1) }} />
             {!collapsed && (

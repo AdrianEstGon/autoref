@@ -150,6 +150,16 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<Usuario>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 
+        // Seed de roles básicos para la aplicación
+        var rolesToEnsure = new[] { "Admin", "Arbitro", "Club", "Federacion" };
+        foreach (var roleName in rolesToEnsure)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+            }
+        }
+
     }
     catch (Exception ex)
     {

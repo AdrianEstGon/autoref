@@ -60,4 +60,26 @@ const getEquipoById = async (id: string) => {
     }
 };
 
-export default { getEquipos, getEquiposPorCategoria, getEquipoById, getEquipoByNameAndCategory };
+// Obtener mis equipos (rol Club)
+const getMisEquipos = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/Equipos/mis`, getAuthHeaders());
+        return response.data;
+    } catch (error) {
+        console.error('Error obteniendo mis equipos:', error);
+        throw error;
+    }
+};
+
+// Crear equipo (admin/federación)
+const createEquipo = async (equipo: { nombre: string; clubId: string; categoriaId: string }) => {
+    try {
+        const response = await axios.post(`${API_URL}/Equipos`, equipo, getAuthHeaders());
+        return response.data;
+    } catch (error) {
+        console.error('Error creando equipo:', error);
+        throw error;
+    }
+};
+
+export default { getEquipos, getMisEquipos, createEquipo, getEquiposPorCategoria, getEquipoById, getEquipoByNameAndCategory };

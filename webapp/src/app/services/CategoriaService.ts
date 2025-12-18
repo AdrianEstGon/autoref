@@ -47,4 +47,22 @@ const getCategoriaById = async (id: string) => {
     }
 };
 
-export default { getCategorias, getCategoriaByName, getCategoriaById };
+// Crear categoría (admin/federación)
+const createCategoria = async (categoria: { nombre: string; primerArbitro?: string; segundoArbitro?: string; anotador?: string; minArbitros?: number; prioridad?: number; }) => {
+    const response = await axios.post(`${API_URL}/Categorias`, categoria, getAuthHeaders());
+    return response.data;
+};
+
+// Actualizar categoría (admin/federación)
+const updateCategoria = async (id: string, categoria: any) => {
+    const response = await axios.put(`${API_URL}/Categorias/${id}`, categoria, getAuthHeaders());
+    return response.data;
+};
+
+// Eliminar categoría (admin/federación)
+const deleteCategoria = async (id: string) => {
+    const response = await axios.delete(`${API_URL}/Categorias/${id}`, getAuthHeaders());
+    return response.data;
+};
+
+export default { getCategorias, getCategoriaByName, getCategoriaById, createCategoria, updateCategoria, deleteCategoria };
