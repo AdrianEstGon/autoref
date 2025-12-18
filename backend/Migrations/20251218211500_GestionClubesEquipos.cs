@@ -15,103 +15,26 @@ public class GestionClubesEquipos : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         // Clubs: datos fiscales + responsables
-        migrationBuilder.AddColumn<string>(
-            name: "RazonSocial",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "CIF",
-            table: "Clubs",
-            type: "varchar(255)",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "DireccionFiscal",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "CodigoPostalFiscal",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "ProvinciaFiscal",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "CiudadFiscal",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "EmailFacturacion",
-            table: "Clubs",
-            type: "varchar(255)",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "Telefono",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "ResponsableNombre",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "ResponsableEmail",
-            table: "Clubs",
-            type: "varchar(255)",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
-
-        migrationBuilder.AddColumn<string>(
-            name: "ResponsableTelefono",
-            table: "Clubs",
-            type: "longtext",
-            nullable: true)
-            .Annotation("MySql:CharSet", "utf8mb4");
+        // NOTA: esta migración pudo quedar a medias en producción (falló creando un índice). Para permitir reintentos,
+        // añadimos columnas con "IF NOT EXISTS" y así evitamos el error "Duplicate column name ...".
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `RazonSocial` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CIF` varchar(255) CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `DireccionFiscal` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CodigoPostalFiscal` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ProvinciaFiscal` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `CiudadFiscal` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `EmailFacturacion` varchar(255) CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `Telefono` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableNombre` longtext CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableEmail` varchar(255) CHARACTER SET utf8mb4 NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Clubs` ADD COLUMN IF NOT EXISTS `ResponsableTelefono` longtext CHARACTER SET utf8mb4 NULL;");
 
         // Categorias: cupos
-        migrationBuilder.AddColumn<int>(
-            name: "MinJugadores",
-            table: "Categorias",
-            type: "int",
-            nullable: true);
-
-        migrationBuilder.AddColumn<int>(
-            name: "MaxJugadores",
-            table: "Categorias",
-            type: "int",
-            nullable: true);
+        migrationBuilder.Sql("ALTER TABLE `Categorias` ADD COLUMN IF NOT EXISTS `MinJugadores` int NULL;");
+        migrationBuilder.Sql("ALTER TABLE `Categorias` ADD COLUMN IF NOT EXISTS `MaxJugadores` int NULL;");
 
         // Equipos: competición
-        migrationBuilder.AddColumn<Guid>(
-            name: "CompeticionId",
-            table: "Equipos",
-            type: "char(36)",
-            nullable: true,
-            collation: "ascii_general_ci");
+        migrationBuilder.Sql("ALTER TABLE `Equipos` ADD COLUMN IF NOT EXISTS `CompeticionId` char(36) NULL COLLATE ascii_general_ci;");
 
         // MySQL: el campo Nombre de Equipos debe ser VARCHAR para poder indexarlo (no TEXT/LONGTEXT)
         migrationBuilder.AlterColumn<string>(
