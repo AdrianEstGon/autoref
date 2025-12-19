@@ -50,6 +50,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CategoryIcon from '@mui/icons-material/Category';
 import BusinessIcon from '@mui/icons-material/Business';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import notificacionesService from '../../services/NotificacionService';
@@ -202,6 +203,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { text: 'Gestión de Usuarios', icon: <PeopleAltIcon />, path: '/gestionUsuarios/usuariosView' },
         { text: 'Gestión de Partidos', icon: <SportsVolleyballIcon />, path: '/gestionPartidos/partidosView' },
         { text: 'Gestión de Designaciones', icon: <AssignmentIndIcon />, path: '/gestionDesignaciones/panelDesignaciones' },
+        { text: 'Noticias', icon: <NewspaperIcon />, path: '/admin/noticias' },
         { text: 'Clubes', icon: <BusinessIcon />, path: '/federacion/clubs' },
         { text: 'Personas', icon: <BadgeIcon />, path: '/federacion/personas' },
         { text: 'Licencias', icon: <BadgeIcon />, path: '/federacion/licencias' },

@@ -24,7 +24,7 @@ import {
 import Autocomplete from '@mui/material/Autocomplete';
 import publicoService from '../../services/PublicoService';
 import PublicoTopBar from './PublicoTopBar';
-import { noticias } from './noticiasData';
+import { getNoticias, Noticia } from './noticiasData';
 import { useNavigate } from 'react-router-dom';
 
 const PublicoPortalView: React.FC = () => {
@@ -38,6 +38,12 @@ const PublicoPortalView: React.FC = () => {
   const [clasificacion, setClasificacion] = useState<any | null>(null);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
+
+  // Cargar noticias al montar el componente
+  useEffect(() => {
+    setNoticias(getNoticias());
+  }, []);
 
   const filteredCompeticiones = useMemo(() => {
     const q = search.trim().toLowerCase();

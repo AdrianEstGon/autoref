@@ -35,6 +35,7 @@ import MisLiquidacionesView from '../components/liquidaciones/MisLiquidacionesVi
 import ComiteLiquidacionesView from '../components/liquidaciones/ComiteLiquidacionesView';
 import OrdenesPagoView from '../components/liquidaciones/OrdenesPagoView';
 import FacturacionView from '../components/federacion/FacturacionView';
+import NoticiasAdminView from '../components/federacion/NoticiasAdminView';
 
 // Componente wrapper para páginas con layout
 const WithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -260,6 +261,11 @@ const Router = () => {
                 <Route path="/federacion/facturacion" element={
                   <RequireRole allowedRoles={['Federacion']}>
                     <WithLayout><FacturacionView /></WithLayout>
+                  </RequireRole>
+                } />
+                <Route path="/admin/noticias" element={
+                  <RequireRole allowedRoles={['Admin']}>
+                    <WithLayout><NoticiasAdminView /></WithLayout>
                   </RequireRole>
                 } />
             </Routes>

@@ -7,7 +7,11 @@ export type Noticia = {
   contenido: string; // simple text/markdown-like
 };
 
-export const noticias: Noticia[] = [
+// Storage key para localStorage
+const NOTICIAS_STORAGE_KEY = 'autoref_noticias';
+
+// Noticias por defecto (se usan si no hay datos en localStorage)
+const defaultNoticias: Noticia[] = [
   {
     slug: 'bienvenida-a-autoref',
     titulo: 'Bienvenida a AutoRef: resultados, clasificaciones y gestión en un solo sitio',
@@ -39,5 +43,24 @@ export const noticias: Noticia[] = [
       'Los árbitros pueden crear y enviar liquidaciones. El comité aprueba/rechaza. Se generan órdenes de pago por periodo y se exporta SEPA. La federación puede emitir facturas e imprimirlas.',
   },
 ];
+
+// Función para obtener noticias (lee desde localStorage o usa las por defecto)
+export const getNoticias = (): Noticia[] => {
+  try {
+    const stored = localStorage.getItem(NOTICIAS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    // Primera vez: guardar las noticias por defecto
+    localStorage.setItem(NOTICIAS_STORAGE_KEY, JSON.stringify(defaultNoticias));
+    return defaultNoticias;
+  } catch {
+    return defaultNoticias;
+  }
+};
+
+// Variable reactiva para compatibilidad con código existente
+// (se recarga al inicio, pero para cambios dinámicos usar getNoticias())
+export const noticias: Noticia[] = getNoticias();
 
 

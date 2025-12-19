@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Card, CardActionArea, CardContent, CardMedia, Container, Typography, Stack, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PublicoTopBar from './PublicoTopBar';
-import { noticias } from './noticiasData';
+import { getNoticias, Noticia } from './noticiasData';
 
 const PublicoNoticiasView: React.FC = () => {
   const navigate = useNavigate();
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
+
+  useEffect(() => {
+    setNoticias(getNoticias());
+  }, []);
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>

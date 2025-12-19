@@ -1,14 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Container, Typography, Chip, Stack, Button } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import PublicoTopBar from './PublicoTopBar';
-import { noticias } from './noticiasData';
+import { getNoticias, Noticia } from './noticiasData';
 
 const PublicoNoticiaDetalleView: React.FC = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
 
-  const noticia = useMemo(() => noticias.find((n) => n.slug === slug), [slug]);
+  useEffect(() => {
+    setNoticias(getNoticias());
+  }, []);
+
+  const noticia = useMemo(() => noticias.find((n) => n.slug === slug), [slug, noticias]);
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)' }}>
