@@ -7,6 +7,11 @@ public class Temporada
     public DateTime FechaInicio { get; set; }
     public DateTime FechaFin { get; set; }
     public bool Activa { get; set; } = true;
+
+    // Importación
+    public long? ImportId { get; set; }
+    public DateTime? FechaCreacion { get; set; }
+    public DateTime? FechaDestruccion { get; set; }
 }
 
 
