@@ -136,8 +136,8 @@ public class ActasPartidoController : ControllerBase
                 partido.CompeticionId,
                 categoria = partido.Categoria?.Nombre,
                 partido.CategoriaId,
-                fecha = partido.Fecha.ToString("yyyy-MM-dd"),
-                hora = partido.Hora.ToString(@"hh\:mm"),
+                fecha = partido.Fecha?.ToString("yyyy-MM-dd"),
+                hora = partido.Hora?.ToString(@"hh\:mm"),
                 lugar = partido.Lugar?.Nombre,
                 partido.LugarId
             },

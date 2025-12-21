@@ -96,7 +96,7 @@ public class DocumentosController : ControllerBase
         ws.Cell(11, 1).Value = "Documento";
         ws.Cell(11, 2).Value = persona.Documento;
         ws.Cell(12, 1).Value = "Fecha nacimiento";
-        ws.Cell(12, 2).Value = persona.FechaNacimiento.ToString("yyyy-MM-dd");
+        ws.Cell(12, 2).Value = persona.FechaNacimiento?.ToString("yyyy-MM-dd") ?? "";
         ws.Cell(13, 1).Value = "Tipo";
         ws.Cell(13, 2).Value = persona.Tipo.ToString();
         ws.Range(10, 1, 13, 1).Style.Font.Bold = true;
@@ -181,7 +181,7 @@ public class DocumentosController : ControllerBase
         ws.Cell(9, 1).Value = "Documento";
         ws.Cell(9, 2).Value = lic.Persona.Documento;
         ws.Cell(10, 1).Value = "Fecha nacimiento";
-        ws.Cell(10, 2).Value = lic.Persona.FechaNacimiento.ToString("yyyy-MM-dd");
+        ws.Cell(10, 2).Value = lic.Persona.FechaNacimiento?.ToString("yyyy-MM-dd") ?? "";
         ws.Cell(11, 1).Value = "Tipo";
         ws.Cell(11, 2).Value = lic.Persona.Tipo.ToString();
         ws.Range(8, 1, 11, 1).Style.Font.Bold = true;

@@ -65,8 +65,8 @@ public class LiquidacionesController : ControllerBase
                 {
                     local = l.Partido!.EquipoLocal != null ? l.Partido!.EquipoLocal.Nombre : "Sin definir",
                     visitante = l.Partido!.EquipoVisitante != null ? l.Partido!.EquipoVisitante.Nombre : "Sin definir",
-                    fecha = l.Partido!.Fecha.ToString("yyyy-MM-dd"),
-                    hora = l.Partido!.Hora.ToString(@"hh\:mm")
+                    fecha = l.Partido!.Fecha.HasValue ? l.Partido!.Fecha.Value.ToString("yyyy-MM-dd") : null,
+                    hora = l.Partido!.Hora.HasValue ? l.Partido!.Hora.Value.ToString(@"hh\\:mm") : null
                 },
                 fecha = l.Fecha.ToString("yyyy-MM-dd"),
                 estado = l.Estado.ToString(),

@@ -204,7 +204,7 @@ public class MutuaController : ControllerBase
             ws.Cell(r + 2, 1).Value = i.Persona.Nombre;
             ws.Cell(r + 2, 2).Value = i.Persona.Apellidos;
             ws.Cell(r + 2, 3).Value = i.Persona.Documento;
-            ws.Cell(r + 2, 4).Value = i.Persona.FechaNacimiento.ToString("yyyy-MM-dd");
+            ws.Cell(r + 2, 4).Value = i.Persona.FechaNacimiento?.ToString("yyyy-MM-dd") ?? "";
             ws.Cell(r + 2, 5).Value = i.Persona.Tipo.ToString();
             ws.Cell(r + 2, 6).Value = i.Equipo.Categoria.Nombre;
             ws.Cell(r + 2, 7).Value = i.Equipo.Nombre;

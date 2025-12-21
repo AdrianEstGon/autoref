@@ -57,8 +57,8 @@ public class PublicoController : ControllerBase
             .Select(p => new
             {
                 p.Id,
-                fecha = p.Fecha.ToString("yyyy-MM-dd"),
-                hora = p.Hora.ToString(@"hh\:mm"),
+                fecha = p.Fecha.HasValue ? p.Fecha.Value.ToString("yyyy-MM-dd") : null,
+                hora = p.Hora.HasValue ? p.Hora.Value.ToString(@"hh\:mm") : null,
                 equipoLocal = p.EquipoLocal != null ? p.EquipoLocal.Nombre : "Sin definir",
                 equipoVisitante = p.EquipoVisitante != null ? p.EquipoVisitante.Nombre : "Sin definir",
                 lugar = p.Lugar != null ? p.Lugar.Nombre : null,

@@ -42,6 +42,15 @@ namespace AutoRef_API.Database
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<FacturaLinea> FacturaLineas { get; set; }
 
+        // Nuevas entidades para importación de datos
+        public DbSet<Curso> Cursos { get; set; }
+        public DbSet<Designacion> Designaciones { get; set; }
+        public DbSet<FaseTorneo> FasesTorneo { get; set; }
+        public DbSet<GrupoEdicion> GruposEdicion { get; set; }
+        public DbSet<Jugador> Jugadores { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
+        public DbSet<FechaEntrenamiento> FechasEntrenamiento { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder); 
@@ -320,10 +329,10 @@ namespace AutoRef_API.Database
             .HasIndex(u => u.Licencia)
             .IsUnique();
 
-            // Persona: documento único
-            modelBuilder.Entity<Persona>()
-                .HasIndex(p => p.Documento)
-                .IsUnique();
+            // Persona: documento único (comentado para permitir importación con datos incompletos)
+            // modelBuilder.Entity<Persona>()
+            //     .HasIndex(p => p.Documento)
+            //     .IsUnique();
 
             // Temporada: nombre único
             modelBuilder.Entity<Temporada>()
@@ -335,10 +344,10 @@ namespace AutoRef_API.Database
                 .HasIndex(m => m.Nombre)
                 .IsUnique();
 
-            // Licencia: una por persona+temporada+modalidad
-            modelBuilder.Entity<LicenciaPersona>()
-                .HasIndex(l => new { l.PersonaId, l.TemporadaId, l.ModalidadId })
-                .IsUnique();
+            // Licencia: una por persona+temporada+modalidad (comentado para importación)
+            // modelBuilder.Entity<LicenciaPersona>()
+            //     .HasIndex(l => new { l.PersonaId, l.TemporadaId, l.ModalidadId })
+            //     .IsUnique();
 
             // Categorías habilitadas: evitar duplicados por licencia
             modelBuilder.Entity<LicenciaCategoriaHabilitada>()
@@ -493,6 +502,181 @@ namespace AutoRef_API.Database
                 .WithMany()
                 .HasForeignKey(x => x.CategoriaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // =====================================================
+            // NUEVAS ENTIDADES PARA IMPORTACIÓN
+            // =====================================================
+
+            // Curso
+            modelBuilder.Entity<Curso>().Property(c => c.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Curso>()
+                .HasOne(c => c.Federacion)
+                .WithMany()
+                .HasForeignKey(c => c.FederacionId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Designacion
+            modelBuilder.Entity<Designacion>().Property(d => d.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Designacion>()
+                .HasOne(d => d.Arbitro)
+                .WithMany()
+                .HasForeignKey(d => d.ArbitroId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Designacion>()
+                .HasOne(d => d.Partido)
+                .WithMany()
+                .HasForeignKey(d => d.PartidoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Designacion>()
+                .HasOne(d => d.Pista)
+                .WithMany()
+                .HasForeignKey(d => d.PistaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // FaseTorneo
+            modelBuilder.Entity<FaseTorneo>().Property(f => f.Id).ValueGeneratedOnAdd();
+
+            // GrupoEdicion
+            modelBuilder.Entity<GrupoEdicion>().Property(g => g.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<GrupoEdicion>()
+                .HasOne(g => g.CampoJuego)
+                .WithMany()
+                .HasForeignKey(g => g.CampoJuegoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // Jugador
+            modelBuilder.Entity<Jugador>().Property(j => j.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Jugador>()
+                .HasOne(j => j.Persona)
+                .WithMany()
+                .HasForeignKey(j => j.PersonaId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Jugador>()
+                .HasOne(j => j.Equipo)
+                .WithMany()
+                .HasForeignKey(j => j.EquipoId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(false);
+
+            // Pago
+            modelBuilder.Entity<Pago>().Property(p => p.Id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Club)
+                .WithMany()
+                .HasForeignKey(p => p.ClubId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Persona)
+                .WithMany()
+                .HasForeignKey(p => p.PersonaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Equipo)
+                .WithMany()
+                .HasForeignKey(p => p.EquipoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Jugador)
+                .WithMany()
+                .HasForeignKey(p => p.JugadorId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Partido)
+                .WithMany()
+                .HasForeignKey(p => p.PartidoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Factura)
+                .WithMany()
+                .HasForeignKey(p => p.FacturaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Licencia)
+                .WithMany()
+                .HasForeignKey(p => p.LicenciaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // FechaEntrenamiento
+            modelBuilder.Entity<FechaEntrenamiento>().Property(f => f.Id).ValueGeneratedOnAdd();
+
+            // Relación Equipo -> CampoJuego (Polideportivo)
+            modelBuilder.Entity<Equipo>()
+                .HasOne(e => e.CampoJuego)
+                .WithMany()
+                .HasForeignKey(e => e.CampoJuegoId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // Relación Competicion -> Categoria
+            modelBuilder.Entity<Competicion>()
+                .HasOne(c => c.Categoria)
+                .WithMany()
+                .HasForeignKey(c => c.CategoriaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // Relación Partido -> Temporada
+            modelBuilder.Entity<Partido>()
+                .HasOne(p => p.Temporada)
+                .WithMany()
+                .HasForeignKey(p => p.TemporadaId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Relación LicenciaPersona -> Club
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.Club)
+                .WithMany()
+                .HasForeignKey(l => l.ClubId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // Relación LicenciaPersona -> Factura
+            modelBuilder.Entity<LicenciaPersona>()
+                .HasOne(l => l.Factura)
+                .WithMany()
+                .HasForeignKey(l => l.FacturaId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            // Índices para ImportId (búsqueda rápida durante importación)
+            modelBuilder.Entity<Categoria>().HasIndex(c => c.ImportId);
+            modelBuilder.Entity<Club>().HasIndex(c => c.ImportId);
+            modelBuilder.Entity<Competicion>().HasIndex(c => c.ImportId);
+            modelBuilder.Entity<Equipo>().HasIndex(e => e.ImportId);
+            modelBuilder.Entity<Persona>().HasIndex(p => p.ImportId);
+            modelBuilder.Entity<Polideportivo>().HasIndex(p => p.ImportId);
+            modelBuilder.Entity<Partido>().HasIndex(p => p.ImportId);
+            modelBuilder.Entity<LicenciaPersona>().HasIndex(l => l.ImportId);
+            modelBuilder.Entity<Curso>().HasIndex(c => c.ImportId);
+            modelBuilder.Entity<Designacion>().HasIndex(d => d.ImportId);
+            modelBuilder.Entity<FaseTorneo>().HasIndex(f => f.ImportId);
+            modelBuilder.Entity<GrupoEdicion>().HasIndex(g => g.ImportId);
+            modelBuilder.Entity<Jugador>().HasIndex(j => j.ImportId);
+            modelBuilder.Entity<Pago>().HasIndex(p => p.ImportId);
+            modelBuilder.Entity<FechaEntrenamiento>().HasIndex(f => f.ImportId);
 
             // Seed Temporada/Modalidad por defecto
             modelBuilder.Entity<Temporada>().HasData(new Temporada

@@ -21,7 +21,7 @@ public class InscripcionCreateModel
     public string Nombre { get; set; } = string.Empty;
     public string Apellidos { get; set; } = string.Empty;
     public string Documento { get; set; } = string.Empty;
-    public DateTime FechaNacimiento { get; set; }
+    public DateTime? FechaNacimiento { get; set; }
     public TipoPersona Tipo { get; set; }
 
     // Contacto (opcional)
@@ -51,7 +51,7 @@ public class MutuaPendienteDto
     public string Nombre { get; set; } = string.Empty;
     public string Apellidos { get; set; } = string.Empty;
     public string Documento { get; set; } = string.Empty;
-    public DateTime FechaNacimiento { get; set; }
+    public DateTime? FechaNacimiento { get; set; }
     public TipoPersona Tipo { get; set; }
 
     public string Categoria { get; set; } = string.Empty;

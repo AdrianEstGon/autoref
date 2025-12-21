@@ -4,18 +4,36 @@ using Microsoft.SqlServer.Types;
 
 public class Polideportivo
 {
-    public Guid Id { get; private set; }    
-    public string Nombre { get; set; }
-    public double Latitud { get; set; }
-    public double Longitud { get; set; }
+    public Guid Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    
+    // Ubicaci贸n
+    public double? Latitud { get; set; }
+    public double? Longitud { get; set; }
+    public string? Direccion { get; set; }
+    public string? Poblacion { get; set; }
+    public string? Zona { get; set; }
 
-    // Propiedad para la ubicaci髇 (tipo GEOGRAPHY)
-    public SqlGeography Ubicacion
+    // Servicios (JSON o texto)
+    public string? Servicios { get; set; }
+
+    // Clubs asociados (relaci贸n muchos a muchos, por ahora JSON de IDs)
+    public string? ClubesIds { get; set; }
+
+    // Propiedad para la ubicaci贸n (tipo GEOGRAPHY)
+    public SqlGeography? Ubicacion
     {
         get
         {
-            return SqlGeography.Point(Latitud, Longitud, 4326); // SRID 4326 es el sistema de coordenadas geogr醘icas WGS 84
+            if (Latitud.HasValue && Longitud.HasValue)
+                return SqlGeography.Point(Latitud.Value, Longitud.Value, 4326);
+            return null;
         }
     }
+
+    // Importaci贸n
+    public long? ImportId { get; set; }
+    public DateTime? FechaCreacion { get; set; }
+    public DateTime? FechaDestruccion { get; set; }
 }
 

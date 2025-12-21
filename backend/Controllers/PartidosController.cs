@@ -112,7 +112,7 @@ namespace AutoRef_API.Controllers
                 partido.EquipoLocalId,
                 EquipoVisitante = partido.EquipoVisitante?.Nombre,
                 partido.EquipoVisitanteId,
-                Fecha = partido.Fecha.ToString("yyyy-MM-dd"),
+                Fecha = partido.Fecha?.ToString("yyyy-MM-dd"),
                 Hora = partido.Hora,
                 Lugar = partido.Lugar != null ? new
                 {
@@ -179,8 +179,8 @@ namespace AutoRef_API.Controllers
                     equipoVisitante = p.EquipoVisitante.Nombre,
                     clubLocalId = p.EquipoLocal.ClubId,
                     clubVisitanteId = p.EquipoVisitante.ClubId,
-                    fecha = p.Fecha.ToString("yyyy-MM-dd"),
-                    hora = p.Hora.ToString(@"hh\:mm"),
+                    fecha = p.Fecha.HasValue ? p.Fecha.Value.ToString("yyyy-MM-dd") : null,
+                    hora = p.Hora.HasValue ? p.Hora.Value.ToString(@"hh\\:mm") : null,
                     lugar = p.Lugar != null ? p.Lugar.Nombre : null,
                     lugarId = p.LugarId,
                     categoria = p.Categoria != null ? p.Categoria.Nombre : null,
@@ -437,8 +437,8 @@ namespace AutoRef_API.Controllers
                 {
                     if (usuario == null) return;
 
-                    var fecha = partidoFull!.Fecha.ToString("yyyy-MM-dd");
-                    var hora = partidoFull!.Hora.ToString(@"hh\:mm");
+                    var fecha = partidoFull!.Fecha?.ToString("yyyy-MM-dd") ?? "Sin definir";
+                    var hora = partidoFull!.Hora?.ToString(@"hh\\:mm") ?? "Sin definir";
                     var lugar = partidoFull!.Lugar?.Nombre ?? "Sin definir";
                     var categoria = partidoFull!.Categoria?.Nombre ?? "Sin definir";
                     var equipos = $"{partidoFull!.EquipoLocal?.Nombre ?? "Sin definir"} vs {partidoFull!.EquipoVisitante?.Nombre ?? "Sin definir"}";
@@ -451,7 +451,7 @@ namespace AutoRef_API.Controllers
                             await mailService.SendEmailAsync(
                                 usuario.Email,
                                 "Nueva designación",
-                                $"Hola {usuario.Nombre},\n\nHas sido designado como {rol} para el partido:\n\n- Partido: {equipos}\n- Categoría: {categoria}\n- Fecha/Hora: {fecha} {hora}\n- Lugar: {lugar}\n\nEntra en la app para aceptar o rechazar la designación.\n\nGracias."
+                                $"Hola {usuario.Nombre},\\n\\nHas sido designado como {rol} para el partido:\\n\\n- Partido: {equipos}\\n- Categoría: {categoria}\\n- Fecha/Hora: {fecha} {hora}\\n- Lugar: {lugar}\\n\\nEntra en la app para aceptar o rechazar la designación.\\n\\nGracias."
                             );
                         }
                     }
@@ -464,7 +464,7 @@ namespace AutoRef_API.Controllers
                     {
                         UsuarioId = usuario.Id,
                         Mensaje = $"Nueva designación como {rol}: {equipos} — {fecha} {hora} — {lugar}.",
-                        Fecha = partidoFull!.Fecha,
+                        Fecha = partidoFull!.Fecha ?? DateTime.UtcNow,
                         Leida = false
                     });
                     await _context.SaveChangesAsync();
@@ -494,35 +494,38 @@ namespace AutoRef_API.Controllers
                         string GetNombreCompleto(Usuario? u) =>
                             u == null ? "Sin definir" : $"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}";
 
+                        var fechaStr = partido.Fecha?.ToString("yyyy-MM-dd") ?? "Sin definir";
+                        var horaStr = partido.Hora?.ToString(@"hh\\:mm") ?? "Sin definir";
+
                         string mensajeCorreo =
-                            "El siguiente partido que tienes designado ha sido modificado:\n\n" +
-                            $"- Fecha: {partido.Fecha:yyyy-MM-dd}\n" +
-                            $"- Hora: {partido.Hora}\n" +
-                            $"- Lugar: {partido.Lugar?.Nombre ?? "Sin definir"}\n" +
-                            $"- Categoría: {partido.Categoria?.Nombre ?? "Sin definir"}\n" +
-                            $"- Jornada: {partido.Jornada}\n" +
-                            $"- Nº de Partido: {partido.NumeroPartido}\n" +
-                            $"- Equipo Local: {partido.EquipoLocal?.Nombre ?? "Sin definir"}\n" +
-                            $"- Equipo Visitante: {partido.EquipoVisitante?.Nombre ?? "Sin definir"}\n" +
-                            $"- Árbitro 1: {GetNombreCompleto(partido.Arbitro1)}\n" +
-                            $"- Árbitro 2: {GetNombreCompleto(partido.Arbitro2)}\n" +
-                            $"- Anotador: {GetNombreCompleto(partido.Anotador)}\n\n" +
+                            "El siguiente partido que tienes designado ha sido modificado:\\n\\n" +
+                            $"- Fecha: {fechaStr}\\n" +
+                            $"- Hora: {horaStr}\\n" +
+                            $"- Lugar: {partido.Lugar?.Nombre ?? "Sin definir"}\\n" +
+                            $"- Categoría: {partido.Categoria?.Nombre ?? "Sin definir"}\\n" +
+                            $"- Jornada: {partido.Jornada}\\n" +
+                            $"- Nº de Partido: {partido.NumeroPartido}\\n" +
+                            $"- Equipo Local: {partido.EquipoLocal?.Nombre ?? "Sin definir"}\\n" +
+                            $"- Equipo Visitante: {partido.EquipoVisitante?.Nombre ?? "Sin definir"}\\n" +
+                            $"- Árbitro 1: {GetNombreCompleto(partido.Arbitro1)}\\n" +
+                            $"- Árbitro 2: {GetNombreCompleto(partido.Arbitro2)}\\n" +
+                            $"- Anotador: {GetNombreCompleto(partido.Anotador)}\\n\\n" +
                             "Revisa tus designaciones para más información.";
 
                         var mailService = new MailService();
                         await mailService.SendEmailAsync(
                             usuario.Email,
                             "Modificación en un partido asignado",
-                            $"Hola {usuario.Nombre},\n\n{mensajeCorreo}\n\nGracias."
+                            $"Hola {usuario.Nombre},\\n\\n{mensajeCorreo}\\n\\nGracias."
                         );
 
-                        string mensajeNotificacion = $"El partido que se disputa en la fecha {partido.Fecha:yyyy-MM-dd} a las {partido.Hora} entre los equipos {partido.EquipoLocal?.Nombre ?? "Sin definir"} y {partido.EquipoVisitante?.Nombre ?? "Sin definir"} de la categoría {partido.Categoria?.Nombre ?? "Sin definir"} ha sido modificado. Revisa tus designaciones para más información.";
+                        string mensajeNotificacion = $"El partido que se disputa en la fecha {fechaStr} a las {horaStr} entre los equipos {partido.EquipoLocal?.Nombre ?? "Sin definir"} y {partido.EquipoVisitante?.Nombre ?? "Sin definir"} de la categoría {partido.Categoria?.Nombre ?? "Sin definir"} ha sido modificado. Revisa tus designaciones para más información.";
 
                         var notificacion = new Notificacion
                         {
                             UsuarioId = usuario.Id,
                             Mensaje = mensajeNotificacion,
-                            Fecha = partido.Fecha,
+                            Fecha = partido.Fecha ?? DateTime.UtcNow,
                             Leida = false
                         };
 
@@ -626,10 +629,13 @@ namespace AutoRef_API.Controllers
         {
             if (usuario?.Email != null)
             {
+                var fechaStr = partido.Fecha?.ToString("yyyy-MM-dd") ?? "Sin definir";
+                var horaStr = partido.Hora?.ToString(@"hh\\:mm") ?? "Sin definir";
+                
                 string mensajeCorreo = $@"Te informamos que el siguiente partido al que estabas asignado ha sido cancelado:
 
-- Fecha: {partido.Fecha:yyyy-MM-dd}
-- Hora: {partido.Hora}
+- Fecha: {fechaStr}
+- Hora: {horaStr}
 - Lugar: {partido.Lugar?.Nombre ?? "Sin definir"}
 - Categoría: {partido.Categoria?.Nombre ?? "Sin definir"}
 - Equipo Local: {partido.EquipoLocal?.Nombre ?? "Sin definir"}
@@ -646,13 +652,13 @@ Lamentamos las molestias.";
                 );
 
                 // Crear notificación en la base de datos
-                string mensajeNotificacion = $"El partido que se disputaba en la fecha {partido.Fecha:yyyy-MM-dd} a las {partido.Hora} entre los equipos {partido.EquipoLocal?.Nombre ?? "Sin definir"} y {partido.EquipoVisitante?.Nombre ?? "Sin definir"} de la categoría {partido.Categoria?.Nombre ?? "Sin definir"} ha sido cancelado. Revisa tus designaciones.";
+                string mensajeNotificacion = $"El partido que se disputaba en la fecha {fechaStr} a las {horaStr} entre los equipos {partido.EquipoLocal?.Nombre ?? "Sin definir"} y {partido.EquipoVisitante?.Nombre ?? "Sin definir"} de la categoría {partido.Categoria?.Nombre ?? "Sin definir"} ha sido cancelado. Revisa tus designaciones.";
 
                 var notificacion = new Notificacion
                 {
                     UsuarioId = usuario.Id,
                     Mensaje = mensajeNotificacion,
-                    Fecha = partido.Fecha,
+                    Fecha = partido.Fecha ?? DateTime.UtcNow,
                     Leida = false
                 };
 
