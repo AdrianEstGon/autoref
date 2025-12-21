@@ -39,10 +39,5 @@
         // Control de plantilla (jugadores)
         public int? MinJugadores { get; set; }
         public int? MaxJugadores { get; set; }
-
-        // Importación
-        public long? ImportId { get; set; }
-        public DateTime? FechaCreacion { get; set; }
-        public DateTime? FechaDestruccion { get; set; }
     }
 }

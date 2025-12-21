@@ -660,23 +660,8 @@ namespace AutoRef_API.Database
                 .HasForeignKey(l => l.FacturaId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .IsRequired(false);
-
-            // Índices para ImportId (búsqueda rápida durante importación)
-            modelBuilder.Entity<Categoria>().HasIndex(c => c.ImportId);
-            modelBuilder.Entity<Club>().HasIndex(c => c.ImportId);
-            modelBuilder.Entity<Competicion>().HasIndex(c => c.ImportId);
-            modelBuilder.Entity<Equipo>().HasIndex(e => e.ImportId);
-            modelBuilder.Entity<Persona>().HasIndex(p => p.ImportId);
-            modelBuilder.Entity<Polideportivo>().HasIndex(p => p.ImportId);
-            modelBuilder.Entity<Partido>().HasIndex(p => p.ImportId);
-            modelBuilder.Entity<LicenciaPersona>().HasIndex(l => l.ImportId);
-            modelBuilder.Entity<Curso>().HasIndex(c => c.ImportId);
-            modelBuilder.Entity<Designacion>().HasIndex(d => d.ImportId);
-            modelBuilder.Entity<FaseTorneo>().HasIndex(f => f.ImportId);
-            modelBuilder.Entity<GrupoEdicion>().HasIndex(g => g.ImportId);
-            modelBuilder.Entity<Jugador>().HasIndex(j => j.ImportId);
-            modelBuilder.Entity<Pago>().HasIndex(p => p.ImportId);
-            modelBuilder.Entity<FechaEntrenamiento>().HasIndex(f => f.ImportId);
+        }
+    }
 
             // Seed Temporada/Modalidad por defecto
             modelBuilder.Entity<Temporada>().HasData(new Temporada
