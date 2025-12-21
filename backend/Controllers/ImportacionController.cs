@@ -8,7 +8,6 @@ namespace AutoRef_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
 public class ImportacionController : ControllerBase
 {
     private readonly AppDataBase _db;
@@ -20,6 +19,34 @@ public class ImportacionController : ControllerBase
         _db = db;
         _logger = logger;
         _serviceProvider = serviceProvider;
+    }
+    
+    /// <summary>
+    /// Crear la federación por defecto si no existe
+    /// </summary>
+    [HttpPost("crear-federacion")]
+    public async Task<ActionResult<object>> CrearFederacion()
+    {
+        var fedId = SeedIds.FederacionAsturianaId;
+        var existe = await _db.Federaciones.AnyAsync(f => f.Id == fedId);
+        
+        if (existe)
+        {
+            return Ok(new { mensaje = "La federación ya existe", federacionId = fedId });
+        }
+        
+        var federacion = new Federacion
+        {
+            Id = fedId,
+            Nombre = "Federación Asturiana de Balonmano"
+        };
+        
+        _db.Federaciones.Add(federacion);
+        await _db.SaveChangesAsync();
+        
+        _logger.LogInformation("Federación creada: {Id} - {Nombre}", federacion.Id, federacion.Nombre);
+        
+        return Ok(new { mensaje = "Federación creada correctamente", federacionId = fedId });
     }
     
     /// <summary>
