@@ -12,14 +12,17 @@ export type Persona = {
   nombre: string;
   apellidos: string;
   documento: string;
-  fechaNacimiento: string;
+  fechaNacimiento?: string | null;
   tipo: number;
+  sexo?: string | null;
   email?: string | null;
   telefono?: string | null;
   direccion?: string | null;
   codigoPostal?: string | null;
   provincia?: string | null;
   ciudad?: string | null;
+  poblacion?: string | null;
+  nacionalidad?: string | null;
   mutuaEnviada?: boolean;
   fechaEnvioMutua?: string | null;
 };
