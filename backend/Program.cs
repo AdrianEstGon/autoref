@@ -161,6 +161,30 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = services.GetRequiredService<AppDataBase>();
+        
+        // Arreglar índices problemáticos antes de migrar
+        // Esto es necesario porque EF Core no puede eliminar un índice que tiene una FK asociada
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync(@"
+                SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                    WHERE table_schema = DATABASE() 
+                    AND table_name = 'LicenciasPersonas' 
+                    AND index_name = 'IX_LicenciasPersonas_PersonaId_TemporadaId_ModalidadId');
+                SET @sqlstmt := IF(@exist > 0, 
+                    'ALTER TABLE LicenciasPersonas DROP INDEX IX_LicenciasPersonas_PersonaId_TemporadaId_ModalidadId', 
+                    'SELECT 1');
+                PREPARE stmt FROM @sqlstmt;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+            ");
+            Console.WriteLine("Index fix ejecutado correctamente.");
+        }
+        catch (Exception indexEx)
+        {
+            Console.WriteLine($"Nota: No se pudo ejecutar fix de índice (puede que ya esté corregido): {indexEx.Message}");
+        }
+        
         await db.Database.MigrateAsync();
 
         var userManager = services.GetRequiredService<UserManager<Usuario>>();
