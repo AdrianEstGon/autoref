@@ -31,6 +31,11 @@ public class Designacion
     public DateTime? FechaRespuesta { get; set; }
     public DateTime? FechaCancelacion { get; set; }
 
+    // Aceptación/Rechazo por árbitro (5.5)
+    public bool? Aceptada { get; set; } // null = pendiente, true = aceptada, false = rechazada
+    public DateTime? FechaNotificacionUtc { get; set; }
+    public bool NotificacionEnviada { get; set; } = false;
+
     // Coordenadas
     public double? CourtLat { get; set; }
     public double? CourtLng { get; set; }

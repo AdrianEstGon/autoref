@@ -115,17 +115,8 @@ namespace AutoRef_API.Migrations
                     b.Property<int?>("EdadInicio")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaDestruccion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<bool>("Federado")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<long?>("ImportId")
-                        .HasColumnType("bigint");
 
                     b.Property<int?>("MaxJugadores")
                         .HasColumnType("int");
@@ -162,8 +153,6 @@ namespace AutoRef_API.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImportId");
 
                     b.ToTable("Categorias");
                 });
@@ -242,8 +231,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("FederacionId", "CIF")
                         .IsUnique();
 
@@ -280,6 +267,15 @@ namespace AutoRef_API.Migrations
                     b.Property<string>("CriteriosClasificacion")
                         .HasColumnType("longtext");
 
+                    b.Property<decimal?>("CuotaInscripcionEquipo")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal?>("CuotaInscripcionJugador")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int?>("DiasAntelacionFijarHorario")
+                        .HasColumnType("int");
+
                     b.Property<bool>("EsFederada")
                         .HasColumnType("tinyint(1)");
 
@@ -292,6 +288,12 @@ namespace AutoRef_API.Migrations
                     b.Property<DateTime?>("FechaDestruccion")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("FechaFinInscripciones")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaInicioInscripciones")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<Guid>("FederacionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
@@ -300,8 +302,17 @@ namespace AutoRef_API.Migrations
                     b.Property<bool?>("HayLibero")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<TimeSpan?>("HoraMaxPartidos")
+                        .HasColumnType("time(6)");
+
+                    b.Property<TimeSpan?>("HoraMinPartidos")
+                        .HasColumnType("time(6)");
+
                     b.Property<long?>("ImportId")
                         .HasColumnType("bigint");
+
+                    b.Property<bool>("InscripcionesAbiertas")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int?>("MaxJugadoresPorEquipo")
                         .HasColumnType("int");
@@ -365,8 +376,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasIndex("CategoriaId");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("ModalidadId");
 
                     b.HasIndex("TemporadaId");
@@ -383,6 +392,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS BENJAMIN FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -394,6 +404,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS BENJAMIN MIXTO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -405,6 +416,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS ALEVIN MASCULINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -416,6 +428,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS ALEVIN FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -427,6 +440,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS ALEVIN MIXTO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -438,6 +452,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS INFANTIL MASCULINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -449,6 +464,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS 1ª DIVISIÓN INFANTIL FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -460,6 +476,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS 2ª DIVISIÓN INFANTIL MIXTO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -471,6 +488,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS CADETE MASCULINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -482,6 +500,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS 1ª DIVISIÓN CADETE FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -493,6 +512,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS 2ª DIVISIÓN CADETE FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -504,6 +524,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS JUVENIL MASCULINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -515,6 +536,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS JUVENIL FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -526,6 +548,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS SEGUNDA DIV. MASCULINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -537,6 +560,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "PRIMERA DIVISION SENIOR MASCULINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -548,6 +572,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "SUPERLIGA 2 SENIOR MASCULINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -559,6 +584,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS SEGUNDA DIV. FEMENINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -570,6 +596,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "PRIMERA DIVISIÓN SENIOR FEMENINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -581,6 +608,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "SUPERLIGA 2 SENIOR FEMENINA",
                             Posicion = 0,
                             VisibleClub = false,
@@ -592,6 +620,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "JUEGOS DEPORTIVOS MINIBENJAMIN MIXTO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -603,6 +632,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CIRCUITO REGIONAL VOLEY PLAYA SENIOR FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -614,6 +644,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS JUNIOR MASCULINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -625,6 +656,7 @@ namespace AutoRef_API.Migrations
                             Activa = true,
                             EsFederada = true,
                             FederacionId = new Guid("6f5a71bb-7f19-4f2d-8f8c-580eec7a9375"),
+                            InscripcionesAbiertas = false,
                             Nombre = "CAMPEONATO DE ASTURIAS JUNIOR FEMENINO",
                             Posicion = 0,
                             VisibleClub = false,
@@ -757,8 +789,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasIndex("FederacionId");
 
-                    b.HasIndex("ImportId");
-
                     b.ToTable("Cursos");
                 });
 
@@ -767,6 +797,9 @@ namespace AutoRef_API.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<bool?>("Aceptada")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("ArbitroId")
                         .HasColumnType("char(36)");
@@ -807,6 +840,9 @@ namespace AutoRef_API.Migrations
                     b.Property<DateTime?>("FechaDestruccion")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("FechaNotificacionUtc")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime?>("FechaRespuesta")
                         .HasColumnType("datetime(6)");
 
@@ -818,6 +854,9 @@ namespace AutoRef_API.Migrations
 
                     b.Property<string>("MotivoRechazo")
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("NotificacionEnviada")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<Guid?>("PartidoId")
                         .HasColumnType("char(36)");
@@ -837,8 +876,6 @@ namespace AutoRef_API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ArbitroId");
-
-                    b.HasIndex("ImportId");
 
                     b.HasIndex("PartidoId");
 
@@ -998,8 +1035,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasIndex("CompeticionId");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("ClubId", "CompeticionId", "CategoriaId", "Nombre")
                         .IsUnique();
 
@@ -1141,8 +1176,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImportId");
-
                     b.ToTable("FasesTorneo");
                 });
 
@@ -1171,8 +1204,6 @@ namespace AutoRef_API.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImportId");
 
                     b.ToTable("FechasEntrenamiento");
                 });
@@ -1263,8 +1294,6 @@ namespace AutoRef_API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CampoJuegoId");
-
-                    b.HasIndex("ImportId");
 
                     b.ToTable("GruposEdicion");
                 });
@@ -1365,8 +1394,6 @@ namespace AutoRef_API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EquipoId");
-
-                    b.HasIndex("ImportId");
 
                     b.HasIndex("PersonaId");
 
@@ -1520,8 +1547,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasIndex("FacturaId");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("ModalidadId");
 
                     b.HasIndex("PersonaId");
@@ -1648,6 +1673,59 @@ namespace AutoRef_API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AutoRef_API.Database.Noticia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("AutorUsuarioId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Contenido")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("Destacada")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("FechaCreacionUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaModificacionUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaPublicacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("FederacionId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ImagenUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<long?>("ImportId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("Publicada")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Resumen")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AutorUsuarioId");
+
+                    b.HasIndex("FederacionId");
+
+                    b.ToTable("Noticias");
+                });
+
             modelBuilder.Entity("AutoRef_API.Database.Notificacion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1662,6 +1740,15 @@ namespace AutoRef_API.Migrations
 
                     b.Property<string>("Mensaje")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("ReferenciaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Tipo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Url")
                         .HasColumnType("longtext");
 
                     b.Property<Guid?>("UsuarioId")
@@ -1804,8 +1891,6 @@ namespace AutoRef_API.Migrations
                     b.HasIndex("EquipoId");
 
                     b.HasIndex("FacturaId");
-
-                    b.HasIndex("ImportId");
 
                     b.HasIndex("JugadorId");
 
@@ -2047,8 +2132,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasIndex("EquipoVisitanteId");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("LugarId");
 
                     b.HasIndex("TemporadaId");
@@ -2236,8 +2319,6 @@ namespace AutoRef_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImportId");
-
                     b.HasIndex("UltimoEnvioMutuaId");
 
                     b.ToTable("Personas");
@@ -2284,8 +2365,6 @@ namespace AutoRef_API.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImportId");
 
                     b.ToTable("Polideportivos");
                 });
@@ -2918,6 +2997,23 @@ namespace AutoRef_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Liquidacion");
+                });
+
+            modelBuilder.Entity("AutoRef_API.Database.Noticia", b =>
+                {
+                    b.HasOne("AutoRef_API.Database.Usuario", "AutorUsuario")
+                        .WithMany()
+                        .HasForeignKey("AutorUsuarioId");
+
+                    b.HasOne("AutoRef_API.Database.Federacion", "Federacion")
+                        .WithMany()
+                        .HasForeignKey("FederacionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AutorUsuario");
+
+                    b.Navigation("Federacion");
                 });
 
             modelBuilder.Entity("AutoRef_API.Database.Notificacion", b =>

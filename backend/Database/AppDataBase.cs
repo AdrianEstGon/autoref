@@ -50,6 +50,9 @@ namespace AutoRef_API.Database
         public DbSet<Jugador> Jugadores { get; set; }
         public DbSet<Pago> Pagos { get; set; }
         public DbSet<FechaEntrenamiento> FechasEntrenamiento { get; set; }
+        
+        // Portal público (5.9)
+        public DbSet<Noticia> Noticias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -660,8 +663,6 @@ namespace AutoRef_API.Database
                 .HasForeignKey(l => l.FacturaId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .IsRequired(false);
-        }
-    }
 
             // Seed Temporada/Modalidad por defecto
             modelBuilder.Entity<Temporada>().HasData(new Temporada
@@ -714,7 +715,5 @@ namespace AutoRef_API.Database
                 new Competicion { Id = Guid.Parse("e5f7f38a-6261-4e9d-a0d5-5d90f2e4e5a1"), FederacionId = federacionAsturianaId, Nombre = "CAMPEONATO DE ASTURIAS JUNIOR FEMENINO", EsFederada = true, Activa = true }
             );
         }
-
-
     }
 }

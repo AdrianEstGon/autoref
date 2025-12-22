@@ -42,6 +42,59 @@ public class PublicoController : ControllerBase
         return Ok(items);
     }
 
+    /// <summary>
+    /// Búsqueda de partidos entre fechas y por categorías (5.9).
+    /// </summary>
+    [HttpGet("partidos/buscar")]
+    public async Task<IActionResult> BuscarPartidos(
+        [FromQuery] DateTime? fechaDesde,
+        [FromQuery] DateTime? fechaHasta,
+        [FromQuery] Guid? competicionId,
+        [FromQuery] Guid? categoriaId)
+    {
+        var q = _context.Partidos
+            .Include(p => p.EquipoLocal).ThenInclude(e => e!.Club)
+            .Include(p => p.EquipoVisitante).ThenInclude(e => e!.Club)
+            .Include(p => p.Lugar)
+            .Include(p => p.Categoria)
+            .Include(p => p.Competicion)
+            .AsQueryable();
+
+        if (fechaDesde.HasValue)
+            q = q.Where(p => p.Fecha >= fechaDesde.Value.Date);
+        if (fechaHasta.HasValue)
+            q = q.Where(p => p.Fecha <= fechaHasta.Value.Date);
+        if (competicionId.HasValue && competicionId.Value != Guid.Empty)
+            q = q.Where(p => p.CompeticionId == competicionId.Value);
+        if (categoriaId.HasValue && categoriaId.Value != Guid.Empty)
+            q = q.Where(p => p.CategoriaId == categoriaId.Value);
+
+        var partidos = await q
+            .OrderBy(p => p.Fecha)
+            .ThenBy(p => p.Hora)
+            .Take(100) // Limitar resultados
+            .Select(p => new
+            {
+                p.Id,
+                fecha = p.Fecha.HasValue ? p.Fecha.Value.ToString("yyyy-MM-dd") : null,
+                hora = p.Hora.HasValue ? p.Hora.Value.ToString(@"hh\:mm") : null,
+                equipoLocal = p.EquipoLocal != null ? p.EquipoLocal.Nombre : "Sin definir",
+                clubLocal = p.EquipoLocal != null && p.EquipoLocal.Club != null ? p.EquipoLocal.Club.Nombre : null,
+                equipoVisitante = p.EquipoVisitante != null ? p.EquipoVisitante.Nombre : "Sin definir",
+                clubVisitante = p.EquipoVisitante != null && p.EquipoVisitante.Club != null ? p.EquipoVisitante.Club.Nombre : null,
+                lugar = p.Lugar != null ? p.Lugar.Nombre : null,
+                categoria = p.Categoria != null ? p.Categoria.Nombre : null,
+                competicion = p.Competicion != null ? p.Competicion.Nombre : null,
+                p.Cerrado,
+                p.ResultadoLocal,
+                p.ResultadoVisitante,
+                p.Jornada
+            })
+            .ToListAsync();
+
+        return Ok(partidos);
+    }
+
     [HttpGet("calendario")]
     public async Task<IActionResult> GetCalendario([FromQuery] Guid competicionId, [FromQuery] Guid categoriaId)
     {

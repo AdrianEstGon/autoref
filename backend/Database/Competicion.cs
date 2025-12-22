@@ -54,6 +54,18 @@ public class Competicion
     // Precios
     public string? Precios { get; set; }
 
+    // Inscripciones (5.3)
+    public DateTime? FechaInicioInscripciones { get; set; }
+    public DateTime? FechaFinInscripciones { get; set; }
+    public decimal? CuotaInscripcionEquipo { get; set; }
+    public decimal? CuotaInscripcionJugador { get; set; }
+    public bool InscripcionesAbiertas { get; set; } = false;
+
+    // Ventana horaria para que clubes fijen horarios (5.4)
+    public TimeSpan? HoraMinPartidos { get; set; } // Ej: 09:00
+    public TimeSpan? HoraMaxPartidos { get; set; } // Ej: 21:00
+    public int? DiasAntelacionFijarHorario { get; set; } // Días mínimos antes del partido
+
     // Visibilidad
     public bool VisibleClub { get; set; }
     public bool VisibleWeb { get; set; }
