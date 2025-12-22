@@ -201,6 +201,15 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
+        // Crear usuarios de prueba (solo en desarrollo)
+        // Comentar o eliminar en producción
+        var createTestUsers = Environment.GetEnvironmentVariable("CREATE_TEST_USERS");
+        if (createTestUsers == "true")
+        {
+            Console.WriteLine("");
+            await AutoRef_API.Tools.CrearUsuariosTest.CrearUsuariosPrueba(userManager, roleManager);
+        }
+
     }
     catch (Exception ex)
     {

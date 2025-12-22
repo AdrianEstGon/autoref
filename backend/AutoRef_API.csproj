@@ -32,9 +32,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Tools\**" />
-    <EmbeddedResource Remove="Tools\**" />
-    <None Remove="Tools\**" />
+    <Compile Remove="Tools\AjustarTipos\**" />
+    <Compile Remove="Tools\CrearEstructuraBD\**" />
+    <Compile Remove="Tools\ImportarDatos\**" />
+    <Compile Remove="Tools\ImportarExcel\**" />
+    <Compile Remove="Tools\LimpiarDatos\**" />
+    <Compile Remove="Tools\SeedData\**" />
+    <Compile Remove="Tools\SqlExecutor\**" />
+    <EmbeddedResource Remove="Tools\AjustarTipos\**" />
+    <EmbeddedResource Remove="Tools\CrearEstructuraBD\**" />
+    <EmbeddedResource Remove="Tools\ImportarDatos\**" />
+    <EmbeddedResource Remove="Tools\ImportarExcel\**" />
+    <EmbeddedResource Remove="Tools\LimpiarDatos\**" />
+    <EmbeddedResource Remove="Tools\SeedData\**" />
+    <EmbeddedResource Remove="Tools\SqlExecutor\**" />
+    <None Remove="Tools\AjustarTipos\**" />
+    <None Remove="Tools\CrearEstructuraBD\**" />
+    <None Remove="Tools\ImportarDatos\**" />
+    <None Remove="Tools\ImportarExcel\**" />
+    <None Remove="Tools\LimpiarDatos\**" />
+    <None Remove="Tools\SeedData\**" />
+    <None Remove="Tools\SqlExecutor\**" />
   </ItemGroup>
 
 </Project>
