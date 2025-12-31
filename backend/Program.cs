@@ -173,6 +173,8 @@ app.MapControllers();
 
 // Crear usuarios de prueba (solo si se especifica la variable de entorno)
 var createTestUsers = Environment.GetEnvironmentVariable("CREATE_TEST_USERS");
+// NOTA: Los usuarios se crean desde Excel, no en el código
+/*
 if (createTestUsers == "true")
 {
     using (var scope = app.Services.CreateScope())
@@ -192,6 +194,7 @@ if (createTestUsers == "true")
         }
     }
 }
+*/
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Urls.Add($"http://0.0.0.0:{port}");
