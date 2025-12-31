@@ -22,7 +22,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Solo redirigir a login si es un 401 de una ruta protegida, no del login mismo
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
