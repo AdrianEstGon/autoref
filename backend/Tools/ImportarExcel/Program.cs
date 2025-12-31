@@ -39,7 +39,7 @@ if (File.Exists(categoriaFile))
         
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO Categorias (Id, Nombre, Color, Posicion, Prioridad, Federado, MinArbitros)
+            INSERT INTO categorias (Id, Nombre, Color, Posicion, Prioridad, Federado, MinArbitros)
             VALUES (@id, @nombre, @color, @pos, @prio, @fed, @minArb)";
         cmd.Parameters.AddWithValue("@id", Guid.NewGuid().ToString());
         cmd.Parameters.AddWithValue("@nombre", nombre);
@@ -96,7 +96,7 @@ if (File.Exists(clubFile))
         var clubId = Guid.NewGuid().ToString();
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO Clubs (Id, FederacionId, Nombre, Telefono, Email)
+            INSERT INTO clubs (Id, FederacionId, Nombre, Telefono, Email)
             VALUES (@id, @fedId, @nombre, @tel, @email)";
         cmd.Parameters.AddWithValue("@id", clubId);
         cmd.Parameters.AddWithValue("@fedId", federacionId);
@@ -124,12 +124,12 @@ else
 // Obtener IDs de categorías
 var categoriasMap = new Dictionary<string, string>();
 var catQueryCmd = conn.CreateCommand();
-catQueryCmd.CommandText = "SELECT Id, Nombre FROM Categorias";
+catQueryCmd.CommandText = "SELECT Id, Nombre FROM categorias";
 using (var reader = await catQueryCmd.ExecuteReaderAsync())
 {
     while (await reader.ReadAsync())
     {
-        categoriasMap[reader.GetString(1)] = reader.GetGuid(0).ToString();
+        categoriasMap[reader.GetString(1)] = reader.GetString(0);
     }
 }
 
@@ -177,7 +177,7 @@ if (File.Exists(equipoFile))
         
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO Equipos (Id, ClubId, CategoriaId, Nombre, Sexo)
+            INSERT INTO equipos (Id, ClubId, CategoriaId, Nombre, Sexo)
             VALUES (@id, @clubId, @catId, @nombre, @sexo)";
         cmd.Parameters.AddWithValue("@id", Guid.NewGuid().ToString());
         cmd.Parameters.AddWithValue("@clubId", clubId != null ? (object)clubId : DBNull.Value);
@@ -232,7 +232,7 @@ if (File.Exists(usuarioFile))
         
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO Usuarios (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, 
+            INSERT INTO usuarios (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, 
                                  PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount,
                                  Nombre, PrimerApellido, SegundoApellido)
             VALUES (@id, @username, @normalizedUsername, @email, @normalizedEmail, @emailConfirmed,

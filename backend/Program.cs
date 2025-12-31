@@ -154,66 +154,25 @@ app.UseAuthorization();   // Añadir autorización
 
 app.MapControllers();
 
-// Configuración de Identity y la base de datos
-using (var scope = app.Services.CreateScope())
+// Crear usuarios de prueba (solo si se especifica la variable de entorno)
+var createTestUsers = Environment.GetEnvironmentVariable("CREATE_TEST_USERS");
+if (createTestUsers == "true")
 {
-    var services = scope.ServiceProvider;
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        var db = services.GetRequiredService<AppDataBase>();
-        
-        // Arreglar índices problemáticos antes de migrar
-        // Esto es necesario porque EF Core no puede eliminar un índice que tiene una FK asociada
+        var services = scope.ServiceProvider;
         try
         {
-            await db.Database.ExecuteSqlRawAsync(@"
-                SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
-                    WHERE table_schema = DATABASE() 
-                    AND table_name = 'LicenciasPersonas' 
-                    AND index_name = 'IX_LicenciasPersonas_PersonaId_TemporadaId_ModalidadId');
-                SET @sqlstmt := IF(@exist > 0, 
-                    'ALTER TABLE LicenciasPersonas DROP INDEX IX_LicenciasPersonas_PersonaId_TemporadaId_ModalidadId', 
-                    'SELECT 1');
-                PREPARE stmt FROM @sqlstmt;
-                EXECUTE stmt;
-                DEALLOCATE PREPARE stmt;
-            ");
-            Console.WriteLine("Index fix ejecutado correctamente.");
-        }
-        catch (Exception indexEx)
-        {
-            Console.WriteLine($"Nota: No se pudo ejecutar fix de índice (puede que ya esté corregido): {indexEx.Message}");
-        }
-        
-        await db.Database.MigrateAsync();
-
-        var userManager = services.GetRequiredService<UserManager<Usuario>>();
-        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-
-        // Seed de roles básicos para la aplicación
-        // Nota: los nombres de rol son IDs internos (sin espacios/acentos)
-        var rolesToEnsure = new[] { "Admin", "Arbitro", "Club", "Federacion", "ComiteArbitros", "Publico" };
-        foreach (var roleName in rolesToEnsure)
-        {
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
-            }
-        }
-
-        // Crear usuarios de prueba (solo en desarrollo)
-        // Comentar o eliminar en producción
-        var createTestUsers = Environment.GetEnvironmentVariable("CREATE_TEST_USERS");
-        if (createTestUsers == "true")
-        {
+            var userManager = services.GetRequiredService<UserManager<Usuario>>();
+            var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+            
             Console.WriteLine("");
             await AutoRef_API.Tools.CrearUsuariosTest.CrearUsuariosPrueba(userManager, roleManager);
         }
-
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al inicializar datos: {ex.Message}");
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al crear usuarios de prueba: {ex.Message}");
+        }
     }
 }
 

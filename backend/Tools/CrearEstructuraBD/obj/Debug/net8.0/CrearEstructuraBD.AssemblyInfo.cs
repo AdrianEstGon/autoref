@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CrearEstructuraBD")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a6f1fde8a13515d4d87065edf53cb82f601e91be")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6624151b1a390309804072afd47a089df3f884ae")]
 [assembly: System.Reflection.AssemblyProductAttribute("CrearEstructuraBD")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CrearEstructuraBD")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
