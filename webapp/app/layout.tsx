@@ -6,8 +6,8 @@ import { AuthProvider } from '@/contexts/AuthContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AutoRef - Federación Española de Volleyball',
-  description: 'Sistema integral de gestión para la Federación Española de Volleyball',
+  title: 'AutoRef',
+  description: 'Sistema integral de gestión deportiva',
   icons: {
     icon: '/favicon.ico',
   },

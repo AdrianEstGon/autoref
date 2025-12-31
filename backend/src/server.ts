@@ -3,6 +3,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import personasRoutes from './routes/personas.routes';
+import temporadasRoutes from './routes/temporadas.routes';
+import modalidadesRoutes from './routes/modalidades.routes';
+import categoriasRoutes from './routes/categorias.routes';
+import licenciasRoutes from './routes/licencias.routes';
+import habilitacionesRoutes from './routes/habilitaciones.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -25,6 +30,11 @@ app.get('/health', (req, res) => {
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/personas', personasRoutes);
+app.use('/api/temporadas', temporadasRoutes);
+app.use('/api/modalidades', modalidadesRoutes);
+app.use('/api/categorias', categoriasRoutes);
+app.use('/api/licencias', licenciasRoutes);
+app.use('/api/habilitaciones', habilitacionesRoutes);
 
 // Manejo de errores
 app.use(errorHandler);
