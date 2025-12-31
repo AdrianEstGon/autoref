@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+enum RolUsuario {
+  FEDERACION
+  COMITE_ARBITROS
+  CLUB
+  ARBITRO
+}
+
+enum EstadoLicencia {
+  PENDIENTE
+  VALIDADA
+  RECHAZADA
+  VENCIDA
+}
+
+enum TipoPersona {
+  JUGADOR
+  TECNICO
+  ARBITRO
+  DIRECTIVO
+}
+
+// MODELOS
+
+model Usuario {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  rol       RolUsuario
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  persona   Persona? @relation(fields: [personaId], references: [id])
+  personaId String?  @unique
+
+  @@map("usuarios")
+}
+
+model Persona {
+  id                String   @id @default(uuid())
+  nombre            String
+  apellidos         String
+  dni               String   @unique
+  fechaNacimiento   DateTime
+  telefono          String?
+  email             String?
+  direccion         String?
+  ciudad            String?
+  codigoPostal      String?
+  tipo              TipoPersona
+  activo            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  usuario           Usuario?
+  licencias         Licencia[]
+  habilitaciones    Habilitacion[]
+
+  @@map("personas")
+}
+
+model Temporada {
+  id          String   @id @default(uuid())
+  nombre      String   // Ej: "2025/2026"
+  fechaInicio DateTime
+  fechaFin    DateTime
+  activa      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  licencias   Licencia[]
+
+  @@map("temporadas")
+}
+
+model Modalidad {
+  id          String   @id @default(uuid())
+  nombre      String   // Ej: "Fútbol Sala", "Baloncesto"
+  descripcion String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  categorias  Categoria[]
+  licencias   Licencia[]
+
+  @@map("modalidades")
+}
+
+model Categoria {
+  id          String   @id @default(uuid())
+  nombre      String   // Ej: "Infantil", "Cadete", "Senior"
+  edadMinima  Int?
+  edadMaxima  Int?
+  orden       Int      @default(0)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  modalidad   Modalidad @relation(fields: [modalidadId], references: [id])
+  modalidadId String
+  licencias   Licencia[]
+  habilitaciones Habilitacion[]
+
+  @@map("categorias")
+}
+
+model Licencia {
+  id          String   @id @default(uuid())
+  numero      String?  @unique
+  estado      EstadoLicencia @default(PENDIENTE)
+  fechaEmision DateTime?
+  fechaVencimiento DateTime?
+  observaciones String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  persona     Persona  @relation(fields: [personaId], references: [id])
+  personaId   String
+  temporada   Temporada @relation(fields: [temporadaId], references: [id])
+  temporadaId String
+  modalidad   Modalidad @relation(fields: [modalidadId], references: [id])
+  modalidadId String
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  categoriaId String
+
+  @@unique([personaId, temporadaId, modalidadId, categoriaId])
+  @@map("licencias")
+}
+
+model Habilitacion {
+  id          String   @id @default(uuid())
+  motivo      String   // Razón de la habilitación
+  fechaInicio DateTime
+  fechaFin    DateTime?
+  aprobado    Boolean  @default(false)
+  observaciones String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  persona     Persona  @relation(fields: [personaId], references: [id])
+  personaId   String
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  categoriaId String   // Categoría superior a la que está habilitado
+
+  @@map("habilitaciones")
+}
