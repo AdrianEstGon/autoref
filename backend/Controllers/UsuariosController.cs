@@ -202,13 +202,19 @@ public class UsuariosController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
+        // Buscar por username primero, si no existe, buscar por email
         var user = await _userManager.FindByNameAsync(model.Email);
         if (user == null)
-            return Unauthorized(new { message = "Usuario o contrase�a incorrectos" });
+        {
+            user = await _userManager.FindByEmailAsync(model.Email);
+        }
+        
+        if (user == null)
+            return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
 
         var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
         if (!result.Succeeded)
-            return Unauthorized(new { message = "Usuario o contrase�a incorrectos" });
+            return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
 
         var roles = await _userManager.GetRolesAsync(user);
 
