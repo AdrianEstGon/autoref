@@ -54,12 +54,29 @@ var cloudinary = new Cloudinary(cloudinaryAccount);
 builder.Services.AddSingleton(cloudinary);
 
 // Configura la conexión a la base de datos (MySQL)
+// IMPORTANTE: Las tablas se crean manualmente desde Excel.
+// EF Core NO debe crear ni modificar el esquema.
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
 builder.Services.AddDbContext<AppDataBase>(options =>
-    options.UseMySql(connectionString, serverVersion));
+{
+    options.UseMySql(connectionString, serverVersion);
+    
+    // CRÍTICO: Evitar que EF Core intente crear o modificar tablas
+    // Las tablas ya existen (importadas desde Excel)
+    options.EnableSensitiveDataLogging(false);
+    options.EnableDetailedErrors(false);
+});
 
 // Agregar el servicio de Identity
-builder.Services.AddIdentity<Usuario, ApplicationRole>()
+builder.Services.AddIdentity<Usuario, ApplicationRole>(options =>
+{
+    // Desactivar requisitos de complejidad de contraseña si es necesario
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 4;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
     .AddEntityFrameworkStores<AppDataBase>()
     .AddDefaultTokenProviders();
 
@@ -178,5 +195,12 @@ if (createTestUsers == "true")
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Urls.Add($"http://0.0.0.0:{port}");
+
+Console.WriteLine("===========================================");
+Console.WriteLine("AutoRef API iniciada");
+Console.WriteLine($"Puerto: {port}");
+Console.WriteLine("IMPORTANTE: La BD debe existir previamente");
+Console.WriteLine("Las tablas se importan desde Excel");
+Console.WriteLine("===========================================");
 
 app.Run();

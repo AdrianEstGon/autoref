@@ -664,6 +664,12 @@ namespace AutoRef_API.Database
                 .OnDelete(DeleteBehavior.SetNull)
                 .IsRequired(false);
 
+            // =======================================================
+            // SEED DATA DESACTIVADO
+            // Los datos se importan desde Excel, no desde código
+            // =======================================================
+            
+            /*
             // Seed Temporada/Modalidad por defecto
             modelBuilder.Entity<Temporada>().HasData(new Temporada
             {
@@ -714,6 +720,7 @@ namespace AutoRef_API.Database
                 new Competicion { Id = Guid.Parse("c2d56f5b-62ab-4b7f-9b3b-04f06c9f8a87"), FederacionId = federacionAsturianaId, Nombre = "CAMPEONATO DE ASTURIAS JUNIOR MASCULINO", EsFederada = true, Activa = true },
                 new Competicion { Id = Guid.Parse("e5f7f38a-6261-4e9d-a0d5-5d90f2e4e5a1"), FederacionId = federacionAsturianaId, Nombre = "CAMPEONATO DE ASTURIAS JUNIOR FEMENINO", EsFederada = true, Activa = true }
             );
+            */
         }
     }
 }
