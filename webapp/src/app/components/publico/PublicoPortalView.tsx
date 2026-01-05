@@ -193,19 +193,6 @@ const PublicoPortalView: React.FC = () => {
                 disabled={!competicion}
               />
             </Box>
-
-            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-              <Typography variant="body2" color="text.secondary">
-                Selecciona una competición y categoría para ver datos. Si eres club/federación/árbitro, entra en el acceso privado.
-              </Typography>
-              <Button
-                variant="outlined"
-                onClick={() => navigate('/login')}
-                sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 999 }}
-              >
-                Iniciar sesión
-              </Button>
-            </Box>
           </CardContent>
         </Card>
 
