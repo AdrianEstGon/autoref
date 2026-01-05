@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using AutoRef_API.Database;
 
-Console.WriteLine("=== Actualizando usuario administrador ===\n");
+Console.WriteLine("=== Configurando usuarios de prueba ===\n");
 
 // Leer SQL
-var sqlFile = "../../create-admin.sql";
+var sqlFile = "../../setup-test-users.sql";
 if (!File.Exists(sqlFile))
 {
     Console.WriteLine($"❌ Error: No se encuentra {sqlFile}");
@@ -47,56 +47,27 @@ try
     await reader.CloseAsync();
     Console.WriteLine($"Total: {tableCount} tablas\n");
 
-    // Verificar si el usuario ya existe
-    Console.WriteLine("\nVerificando usuario en base de datos...");
-    await using var checkCommand = connection.CreateCommand();
-    checkCommand.CommandText = "SELECT UserName, Email, Nombre, PasswordHash FROM Usuarios WHERE Email = 'adrian.estrada2001@gmail.com' LIMIT 1;";
-    await using var checkReader = await checkCommand.ExecuteReaderAsync();
+    // Ejecutar SQL para crear usuarios de prueba
+    Console.WriteLine("Eliminando tabla 'usuarios' (minúscula)...");
+    Console.WriteLine("Creando usuarios de prueba para cada rol...\n");
     
-    if (await checkReader.ReadAsync())
-    {
-        Console.WriteLine("✓ Usuario encontrado:");
-        Console.WriteLine($"  UserName: {checkReader.GetString(0)}");
-        Console.WriteLine($"  Email: {checkReader.GetString(1)}");
-        Console.WriteLine($"  Nombre: {checkReader.GetString(2)}");
-        var oldHash = checkReader.GetString(3);
-        Console.WriteLine($"  PasswordHash actual: {oldHash.Substring(0, 50)}...");
-        
-        await checkReader.CloseAsync();
-        
-        // Generar nuevo hash correcto
-        Console.WriteLine("\nGenerando nuevo hash de contraseña...");
-        var hasher = new PasswordHasher<Usuario>();
-        var tempUser = new Usuario { UserName = "adrian.estrada2001@gmail.com" };
-        var newHash = hasher.HashPassword(tempUser, "Admin123");
-        Console.WriteLine($"Nuevo hash: {newHash.Substring(0, 50)}...");
-        
-        // Actualizar contraseña
-        Console.WriteLine("\nActualizando contraseña en base de datos...");
-        await using var updateCommand = connection.CreateCommand();
-        updateCommand.CommandText = "UPDATE Usuarios SET PasswordHash = @newHash WHERE Email = 'adrian.estrada2001@gmail.com';";
-        updateCommand.Parameters.AddWithValue("@newHash", newHash);
-        var rows = await updateCommand.ExecuteNonQueryAsync();
-        Console.WriteLine($"✓ Contraseña actualizada ({rows} filas afectadas)");
-    }
-    else
-    {
-        Console.WriteLine("⚠️ Usuario NO encontrado - ejecutando SQL...");
-        await checkReader.CloseAsync();
-        
-        await using var command = connection.CreateCommand();
-        command.CommandText = sql;
-        await command.ExecuteNonQueryAsync();
-        Console.WriteLine("✓ SQL ejecutado exitosamente");
-    }
+    await using var command = connection.CreateCommand();
+    command.CommandText = sql;
+    await command.ExecuteNonQueryAsync();
     
     Console.WriteLine("========================================");
-    Console.WriteLine("✅ Usuario administrador creado");
+    Console.WriteLine("✅ Usuarios de prueba creados");
     Console.WriteLine("========================================\n");
-    Console.WriteLine("Credenciales:");
-    Console.WriteLine("  📧 Email: adrian.estrada2001@gmail.com");
-    Console.WriteLine("  🔐 Contraseña: Admin123");
-    Console.WriteLine("  👤 Rol: Admin");
+    Console.WriteLine("╔══════════════════════════════════════════════╗");
+    Console.WriteLine("║        CREDENCIALES DE PRUEBA                ║");
+    Console.WriteLine("╠══════════════════════════════════════════════╣");
+    Console.WriteLine("║ admin@test.com      | Test123! | Admin       ║");
+    Console.WriteLine("║ arbitro@test.com    | Test123! | Arbitro     ║");
+    Console.WriteLine("║ club@test.com       | Test123! | Club        ║");
+    Console.WriteLine("║ federacion@test.com | Test123! | Federacion  ║");
+    Console.WriteLine("║ comite@test.com     | Test123! | ComiteArb.. ║");
+    Console.WriteLine("║ publico@test.com    | Test123! | Publico     ║");
+    Console.WriteLine("╚══════════════════════════════════════════════╝");
     Console.WriteLine("\n🌐 Prueba en: http://localhost:3000\n");
     
     return 0;

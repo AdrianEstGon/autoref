@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SqlExecutor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ef258125622da28aa84bce629819d5ec63e45140")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+056dca31b0a43a51132dd9b33f2f05a1f386753d")]
 [assembly: System.Reflection.AssemblyProductAttribute("SqlExecutor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SqlExecutor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
