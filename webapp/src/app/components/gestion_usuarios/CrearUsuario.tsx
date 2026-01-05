@@ -101,8 +101,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         const usuarioConContraseña = {
           ...nuevoUsuario,
           username: nuevoUsuario.email,
-          // Si se deja vacío, el backend genera contraseña y (si hay SMTP) intenta enviarla por email
-          password: nuevoUsuario.password || '',
+          password: nuevoUsuario.password, // Contraseña obligatoria
           rol: nuevoUsuario.rol,
           esAdmin: nuevoUsuario.rol === 'Admin'
         };
@@ -135,23 +134,25 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         <TextField label="Segundo Apellido" fullWidth margin="normal" name="segundoApellido" value={nuevoUsuario.segundoApellido} onChange={handleChange} error={!!errores.segundoApellido} helperText={errores.segundoApellido} />
         <TextField label="Fecha de Nacimiento" type="date" fullWidth margin="normal" name="fechaNacimiento" value={nuevoUsuario.fechaNacimiento} onChange={handleChange} error={!!errores.fechaNacimiento} helperText={errores.fechaNacimiento} InputLabelProps={{ shrink: true }} />
 
-        {/* Nivel Select as Autocomplete */}
-        <FormControl fullWidth margin="normal" error={!!errores.nivel}>
-          <Autocomplete
-            options={niveles}
-            value={nuevoUsuario.nivel}
-            onChange={(_, newValue) => {
-              setNuevoUsuario(prevState => ({ ...prevState, nivel: newValue ?? '' }));
-            }}
-            renderInput={(params) => (
-              <TextField {...params} label="Nivel" error={!!errores.nivel} helperText={errores.nivel} />
-            )}
-            disablePortal
-            PopperComponent={(props) => {
-              return <Popper {...props} placement="bottom-start" />;
-            }}
-          />
-        </FormControl>
+        {/* Nivel solo para árbitros */}
+        {nuevoUsuario.rol === 'Arbitro' && (
+          <FormControl fullWidth margin="normal" error={!!errores.nivel}>
+            <Autocomplete
+              options={niveles}
+              value={nuevoUsuario.nivel}
+              onChange={(_, newValue) => {
+                setNuevoUsuario(prevState => ({ ...prevState, nivel: newValue ?? '' }));
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Nivel" error={!!errores.nivel} helperText={errores.nivel} />
+              )}
+              disablePortal
+              PopperComponent={(props) => {
+                return <Popper {...props} placement="bottom-start" />;
+              }}
+            />
+          </FormControl>
+        )}
 
         {/* Club Vinculado Select as Autocomplete */}
         <FormControl fullWidth margin="normal">
@@ -175,25 +176,21 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
         </FormControl>
         <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={nuevoUsuario.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
 
-        {/* Contraseña opcional: recomendada para Club/Federación si no hay SMTP */}
-        {nuevoUsuario.rol !== 'Arbitro' && (
-          <>
-            <TextField
-              label="Contraseña (opcional)"
-              fullWidth
-              margin="normal"
-              name="password"
-              type="password"
-              value={nuevoUsuario.password}
-              onChange={handleChange}
-            />
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5 }}>
-              Si la dejas vacía, el sistema intentará generar una y enviarla por email (requiere SMTP configurado).
-            </Typography>
-          </>
-        )}
+        {/* Contraseña obligatoria */}
+        <TextField
+          label="Contraseña *"
+          fullWidth
+          margin="normal"
+          name="password"
+          type="password"
+          value={nuevoUsuario.password}
+          onChange={handleChange}
+          error={!!errores.password}
+          helperText={errores.password || 'Mínimo 6 caracteres'}
+          required
+        />
 
-        <TextField label="Licencia" fullWidth margin="normal" name="licencia" value={nuevoUsuario.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
+        <TextField label="Licencia (opcional)" fullWidth margin="normal" name="licencia" value={nuevoUsuario.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
         <TextField label="Código Postal" fullWidth margin="normal" name="codigoPostal" value={nuevoUsuario.codigoPostal} onChange={handleChange} error={!!errores.codigoPostal} helperText={errores.codigoPostal} />
         <TextField label="Dirección" fullWidth margin="normal" name="direccion" value={nuevoUsuario.direccion} onChange={handleChange} error={!!errores.direccion} helperText={errores.direccion} />
         <TextField label="País" fullWidth margin="normal" name="pais" value={nuevoUsuario.pais} onChange={handleChange} error={!!errores.pais} helperText={errores.pais} />

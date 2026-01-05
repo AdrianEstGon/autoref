@@ -2,7 +2,7 @@
 export function validaciones(nuevoUsuario: { nombre: string; primerApellido: string; 
   segundoApellido: string; fechaNacimiento: string; nivel: string; clubVinculadoId: string | null; 
   licencia: string; username: string; email: string; password: string; direccion: string; pais: string; 
-  region: string; ciudad: string; codigoPostal: string; esAdmin: boolean; }, 
+  region: string; ciudad: string; codigoPostal: string; esAdmin: boolean; rol: string; }, 
   erroresTemp: { nombre: string; primerApellido: string; segundoApellido: string; fechaNacimiento: string; 
     nivel: string; clubVinculadoId: string | null; licencia: string; username: string; email: string; password: string; 
     direccion: string; pais: string; region: string; ciudad: string; codigoPostal: string; esAdmin: string; }, isValid: boolean) {
@@ -35,11 +35,23 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.email = '';
   }
 
-  if (!validarNumeroLicencia(nuevoUsuario.licencia)) {
+  // Licencia es opcional
+  if (nuevoUsuario.licencia && !validarNumeroLicencia(nuevoUsuario.licencia)) {
     erroresTemp.licencia = 'Número de licencia no válido. Debe ser un número positivo.';
     isValid = false;
   } else {
     erroresTemp.licencia = '';
+  }
+
+  // Contraseña es obligatoria
+  if (!nuevoUsuario.password || nuevoUsuario.password.trim() === '') {
+    erroresTemp.password = 'La contraseña es obligatoria.';
+    isValid = false;
+  } else if (nuevoUsuario.password.length < 6) {
+    erroresTemp.password = 'La contraseña debe tener al menos 6 caracteres.';
+    isValid = false;
+  } else {
+    erroresTemp.password = '';
   }
 
   if (!validarCodigoPostal(nuevoUsuario.codigoPostal)) {
@@ -49,7 +61,8 @@ export function validaciones(nuevoUsuario: { nombre: string; primerApellido: str
     erroresTemp.codigoPostal = '';
   }
 
-  if (!nuevoUsuario.nivel) {
+  // Nivel solo obligatorio para árbitros
+  if (nuevoUsuario.rol === 'Arbitro' && !nuevoUsuario.nivel) {
     erroresTemp.nivel = 'Debe seleccionar un nivel.';
     isValid = false;
   } else {
