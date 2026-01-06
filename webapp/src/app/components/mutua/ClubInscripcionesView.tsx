@@ -51,7 +51,7 @@ const ClubInscripcionesView: React.FC = () => {
     mutuaSolicitada: true,
   });
 
-  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico', 3: 'Árbitro', 4: 'Staff' } as Record<number, string>), []);
+  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico (Entrenadores)', 3: 'Árbitro', 4: 'Staff' } as Record<number, string>), []);
 
   const loadData = async () => {
     setLoading(true);
@@ -199,7 +199,7 @@ const ClubInscripcionesView: React.FC = () => {
                 <InputLabel>Tipo</InputLabel>
                 <Select value={form.tipo} label="Tipo" onChange={(e) => setForm((p) => ({ ...p, tipo: Number(e.target.value) }))}>
                   <MenuItem value={1}>Jugador</MenuItem>
-                  <MenuItem value={2}>Staff técnico</MenuItem>
+                  <MenuItem value={2}>Staff técnico (Entrenadores)</MenuItem>
                   <MenuItem value={3}>Árbitro</MenuItem>
                   <MenuItem value={4}>Staff</MenuItem>
                 </Select>

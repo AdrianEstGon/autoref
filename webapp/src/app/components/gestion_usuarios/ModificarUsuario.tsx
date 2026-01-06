@@ -20,7 +20,6 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
     if (roles.includes('Federacion')) return 'Federacion';
     if (roles.includes('ComiteArbitros')) return 'ComiteArbitros';
     if (roles.includes('Club')) return 'Club';
-    if (roles.includes('Publico')) return 'Publico';
     return 'Arbitro';
   });
   const [errores, setErrores] = useState({
@@ -161,6 +160,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
           )}
         />
 
+        {rol !== 'Federacion' && (
         <Autocomplete
           options={clubes}
           getOptionLabel={(option) => option.nombre || ''}
@@ -184,6 +184,7 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <TextField {...params} label="Club Vinculado" margin="normal" fullWidth />
           )}
         />
+        )}
 
         <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={usuarioEditado.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
         <TextField label="Licencia" fullWidth margin="normal" name="licencia" value={usuarioEditado.licencia} onChange={handleChange} error={!!errores.licencia} helperText={errores.licencia} />
@@ -213,7 +214,6 @@ const ModificarUsuario: React.FC<ModificarUsuarioProps> = ({ open, onClose, onUp
             <MenuItem value="Club">Club</MenuItem>
             <MenuItem value="Federacion">Federación</MenuItem>
             <MenuItem value="ComiteArbitros">Comité de Árbitros</MenuItem>
-            <MenuItem value="Publico">Público</MenuItem>
             <MenuItem value="Admin">Administrador</MenuItem>
           </Select>
         </FormControl>

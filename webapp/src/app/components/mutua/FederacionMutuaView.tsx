@@ -48,7 +48,7 @@ const FederacionMutuaView: React.FC = () => {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
 
-  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico' } as Record<number, string>), []);
+  const tipoLabel = useMemo(() => ({ 1: 'Jugador', 2: 'Staff técnico (Entrenadores)' } as Record<number, string>), []);
 
   const load = async () => {
     setLoading(true);

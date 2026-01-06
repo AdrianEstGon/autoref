@@ -43,7 +43,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 
 const TIPO_PERSONA = [
   { value: 1, label: 'Jugador' },
-  { value: 2, label: 'Staff técnico' },
+  { value: 2, label: 'Staff técnico (Entrenadores)' },
   { value: 3, label: 'Árbitro' },
   { value: 4, label: 'Staff' },
 ];

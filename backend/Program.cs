@@ -168,7 +168,7 @@ using (var scope = app.Services.CreateScope())
 
         // Seed de roles básicos para la aplicación
         // Nota: los nombres de rol son IDs internos (sin espacios/acentos)
-        var rolesToEnsure = new[] { "Admin", "Arbitro", "Club", "Federacion", "ComiteArbitros", "Publico" };
+        var rolesToEnsure = new[] { "Admin", "Arbitro", "Club", "Federacion", "ComiteArbitros" };
         foreach (var roleName in rolesToEnsure)
         {
             if (!await roleManager.RoleExistsAsync(roleName))

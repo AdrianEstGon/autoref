@@ -154,7 +154,8 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           </FormControl>
         )}
 
-        {/* Club Vinculado Select as Autocomplete */}
+        {/* Club Vinculado - obligatorio excepto para Federacion */}
+        {nuevoUsuario.rol !== 'Federacion' && (
         <FormControl fullWidth margin="normal">
         <Autocomplete
           options={clubes}
@@ -174,6 +175,7 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
           PopperComponent={(props) => <Popper {...props} placement="bottom-start" />}
         />
         </FormControl>
+        )}
         <TextField label="Correo Electrónico" fullWidth margin="normal" name="email" value={nuevoUsuario.email} onChange={handleChange} error={!!errores.email} helperText={errores.email} />
 
         {/* Contraseña obligatoria */}
@@ -209,7 +211,6 @@ const CrearUsuario: React.FC<CrearUsuarioProps> = ({ open, onClose, onSave }) =>
             <MenuItem value="Club">Club</MenuItem>
             <MenuItem value="Federacion">Federación</MenuItem>
             <MenuItem value="ComiteArbitros">Comité de Árbitros</MenuItem>
-            <MenuItem value="Publico">Público</MenuItem>
             <MenuItem value="Admin">Administrador</MenuItem>
           </Select>
         </FormControl>

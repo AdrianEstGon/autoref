@@ -80,7 +80,7 @@ const Router = () => {
                   </RequireRole>
                 } />
                 <Route path="/miPerfil" element={
-                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club', 'Publico']}>
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club']}>
                     <WithLayout><PerfilView /></WithLayout>
                   </RequireRole>
                 } />
@@ -165,7 +165,7 @@ const Router = () => {
                 } />
                 
                 <Route path="/detallesPartido/:id" element={
-                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club', 'Publico']}>
+                  <RequireRole allowedRoles={['Arbitro', 'ComiteArbitros', 'Federacion', 'Club']}>
                     <WithLayout><DetallePartido /></WithLayout>
                   </RequireRole>
                 } />

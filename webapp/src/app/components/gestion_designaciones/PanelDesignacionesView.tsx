@@ -64,6 +64,15 @@ const DesignacionesView = () => {
   const [popoverAnchorEl, setPopoverAnchorEl] = useState<null | HTMLElement>(null);
   const [comentario, setComentario] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  
+  // Estados para designación masiva
+  const [openMassivaDialog, setOpenMassivaDialog] = useState(false);
+  const [fechaInicioMasiva, setFechaInicioMasiva] = useState<Moment | null>(moment());
+  const [fechaFinMasiva, setFechaFinMasiva] = useState<Moment | null>(moment().add(7, "days"));
+  const [diasSemanaSeleccionados, setDiasSemanaSeleccionados] = useState<number[]>([]);
+  const [arbitro1Masivo, setArbitro1Masivo] = useState<any>(null);
+  const [arbitro2Masivo, setArbitro2Masivo] = useState<any>(null);
+  const [anotadorMasivo, setAnotadorMasivo] = useState<any>(null);
 
   type Designacion = {
     arbitro1?: { nombre: string; icono: JSX.Element };
@@ -527,6 +536,91 @@ const DesignacionesView = () => {
     setOpenDialog(true); // Abrir el diálogo de confirmación
   };
 
+  const abrirDesignacionMasiva = () => {
+    setOpenMassivaDialog(true);
+  };
+
+  const cerrarDesignacionMasiva = () => {
+    setOpenMassivaDialog(false);
+    setDiasSemanaSeleccionados([]);
+    setArbitro1Masivo(null);
+    setArbitro2Masivo(null);
+    setAnotadorMasivo(null);
+  };
+
+  const toggleDiaSemana = (dia: number) => {
+    setDiasSemanaSeleccionados(prev => 
+      prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
+    );
+  };
+
+  const aplicarDesignacionMasiva = () => {
+    if (!fechaInicioMasiva || !fechaFinMasiva) {
+      toast.error("Selecciona un rango de fechas válido");
+      return;
+    }
+
+    if (!arbitro1Masivo && !arbitro2Masivo && !anotadorMasivo) {
+      toast.error("Selecciona al menos un árbitro o anotador");
+      return;
+    }
+
+    // Filtrar partidos por rango de fechas y días de la semana
+    const partidosFiltradosMasivo = partidosFiltrados.filter(partido => {
+      const fechaPartido = moment(partido.fecha);
+      const dentroRango = fechaPartido.isBetween(fechaInicioMasiva, fechaFinMasiva, "day", "[]");
+      
+      // Si hay días de semana seleccionados, filtrar por ellos
+      if (diasSemanaSeleccionados.length > 0) {
+        const diaSemana = fechaPartido.day(); // 0=domingo, 1=lunes, ..., 6=sábado
+        return dentroRango && diasSemanaSeleccionados.includes(diaSemana);
+      }
+      
+      return dentroRango;
+    });
+
+    if (partidosFiltradosMasivo.length === 0) {
+      toast.warn("No hay partidos que coincidan con los criterios seleccionados");
+      return;
+    }
+
+    // Aplicar designaciones a los partidos filtrados
+    const nuevasDesignaciones = { ...designaciones };
+    partidosFiltradosMasivo.forEach(partido => {
+      if (!nuevasDesignaciones[partido.id]) {
+        nuevasDesignaciones[partido.id] = {};
+      }
+      
+      if (arbitro1Masivo) {
+        nuevasDesignaciones[partido.id].arbitro1 = {
+          nombre: `${arbitro1Masivo.nombre} ${arbitro1Masivo.primerApellido}`,
+          icono: arbitro1Masivo.icono || <PersonIcon />,
+          id: arbitro1Masivo.id
+        };
+      }
+      
+      if (arbitro2Masivo) {
+        nuevasDesignaciones[partido.id].arbitro2 = {
+          nombre: `${arbitro2Masivo.nombre} ${arbitro2Masivo.primerApellido}`,
+          icono: arbitro2Masivo.icono || <PersonIcon />,
+          id: arbitro2Masivo.id
+        };
+      }
+      
+      if (anotadorMasivo) {
+        nuevasDesignaciones[partido.id].anotador = {
+          nombre: `${anotadorMasivo.nombre} ${anotadorMasivo.primerApellido}`,
+          icono: anotadorMasivo.icono || <PersonIcon />,
+          id: anotadorMasivo.id
+        };
+      }
+    });
+
+    setDesignaciones(nuevasDesignaciones);
+    toast.success(`Designación aplicada a ${partidosFiltradosMasivo.length} partido(s)`);
+    cerrarDesignacionMasiva();
+  };
+
   const usuariosPorId = useMemo(() => {
     const map = new Map<string, any>();
     usuarios.forEach((u) => {
@@ -891,6 +985,22 @@ const DesignacionesView = () => {
               </Button>
             </Grid>
 
+            <Grid item xs={12} sm="auto" md={6}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={abrirDesignacionMasiva}
+                sx={{
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  '&:hover': {
+                    background: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
+                  }
+                }}
+              >
+                Designación Masiva
+              </Button>
+            </Grid>
+
 
             <FormControlLabel
               control={
@@ -967,6 +1077,199 @@ const DesignacionesView = () => {
           <DialogActions>
             <Button onClick={handleCancelar} color="error">Cancelar</Button>
             <Button onClick={handleConfirmar} color="primary">Confirmar</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Diálogo de designación masiva */}
+        <Dialog 
+          open={openMassivaDialog} 
+          onClose={cerrarDesignacionMasiva}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '16px',
+              p: 1,
+            },
+          }}
+        >
+          <DialogTitle sx={{ 
+            fontWeight: 700, 
+            fontSize: '1.5rem',
+            color: '#1e293b',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            borderRadius: '12px 12px 0 0',
+          }}>
+            🎯 Designación Masiva de Árbitros
+          </DialogTitle>
+          <DialogContent sx={{ mt: 2 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Asigna los mismos árbitros a múltiples partidos seleccionando el rango de fechas y días de la semana.
+              </Typography>
+            </Box>
+
+            {/* Rango de fechas */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+                📅 Rango de fechas
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="Fecha inicio"
+                    value={fechaInicioMasiva}
+                    onChange={(newValue) => setFechaInicioMasiva(newValue)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small"
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <DatePicker
+                    label="Fecha fin"
+                    value={fechaFinMasiva}
+                    onChange={(newValue) => setFechaFinMasiva(newValue)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small"
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Selector de días de la semana */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+                📆 Días de la semana (opcional - deja vacío para todos los días)
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {[
+                  { label: 'Lun', value: 1 },
+                  { label: 'Mar', value: 2 },
+                  { label: 'Mié', value: 3 },
+                  { label: 'Jue', value: 4 },
+                  { label: 'Vie', value: 5 },
+                  { label: 'Sáb', value: 6 },
+                  { label: 'Dom', value: 0 },
+                ].map((dia) => (
+                  <Chip
+                    key={dia.value}
+                    label={dia.label}
+                    onClick={() => toggleDiaSemana(dia.value)}
+                    color={diasSemanaSeleccionados.includes(dia.value) ? 'primary' : 'default'}
+                    variant={diasSemanaSeleccionados.includes(dia.value) ? 'filled' : 'outlined'}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+                      transition: 'all 0.2s',
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            {/* Selectores de árbitros */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+                👥 Selecciona árbitros y anotador
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Autocomplete
+                    options={usuarios.filter(u => u.nivel)}
+                    getOptionLabel={(option) => `${option.nombre} ${option.primerApellido} ${option.segundoApellido} - ${option.nivel || ''}`}
+                    value={arbitro1Masivo}
+                    onChange={(_, newValue) => setArbitro1Masivo(newValue)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Árbitro 1" size="small" />
+                    )}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Autocomplete
+                    options={usuarios.filter(u => u.nivel)}
+                    getOptionLabel={(option) => `${option.nombre} ${option.primerApellido} ${option.segundoApellido} - ${option.nivel || ''}`}
+                    value={arbitro2Masivo}
+                    onChange={(_, newValue) => setArbitro2Masivo(newValue)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Árbitro 2" size="small" />
+                    )}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Autocomplete
+                    options={usuarios}
+                    getOptionLabel={(option) => `${option.nombre} ${option.primerApellido} ${option.segundoApellido}`}
+                    value={anotadorMasivo}
+                    onChange={(_, newValue) => setAnotadorMasivo(newValue)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Anotador" size="small" />
+                    )}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Información de partidos que coinciden */}
+            <Box sx={{ 
+              mt: 3, 
+              p: 2, 
+              bgcolor: '#f8fafc', 
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <Typography variant="body2" color="text.secondary">
+                ℹ️ Esta designación se aplicará a los partidos que coincidan con los criterios seleccionados dentro del rango de fechas actual del filtro.
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+            <Button 
+              onClick={cerrarDesignacionMasiva}
+              variant="outlined"
+              sx={{
+                borderRadius: '10px',
+                px: 3,
+                borderColor: '#e2e8f0',
+                color: '#64748b',
+                '&:hover': {
+                  borderColor: '#cbd5e1',
+                  bgcolor: '#f8fafc',
+                },
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={aplicarDesignacionMasiva}
+              variant="contained"
+              sx={{
+                borderRadius: '10px',
+                px: 3,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                },
+                transition: 'all 0.2s',
+              }}
+            >
+              Aplicar Designación
+            </Button>
           </DialogActions>
         </Dialog>
       </Box>
